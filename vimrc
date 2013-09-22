@@ -114,6 +114,7 @@ set textwidth=79
 set ignorecase
 set smartcase
 set shiftround
+set backup
 " }}}
 
 " tabs {{{
