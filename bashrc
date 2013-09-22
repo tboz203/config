@@ -88,8 +88,10 @@ else
 fi
 
 u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
-PS1="\[$reset\]${debian_chroot:+($debian_chroot)}\[$u_color\]\u\[$white\][\[$WHITE\]\t\[$white\]]\[$BLUE\]\w\[$reset\]:\$ "
-unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN white WHITE reset color_prompt force_color_prompt
+PS1="\[$u_color\]\u\[$WHITE\]@\[$GREEN\]\h\[$WHITE\]:\[$BLUE\]\w\[$reset\]"
+PS1+='$(__git_ps1 ":(%s)")\$ '
+unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
+unset white WHITE reset color_prompt force_color_prompt
 
 # Alias definitions.
 if [ -f ~/.bash_aliases ]; then
@@ -114,3 +116,4 @@ if [ -x /usr/bin/dircolors ]; then
     fi
 fi
 
+source ~/.git-prompt

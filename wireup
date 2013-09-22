@@ -11,3 +11,4 @@ ln -s config/logout         ../.bash_logout
 ln -s config/netrc          ../.netrc
 ln -s config/toprc          ../.toprc
 ln -s config/gitconfig      ../.gitconfig
+ln -s config/git-prompt     ../.git-prompt
