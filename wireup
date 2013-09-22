@@ -1,0 +1,12 @@
+#!/bin/bash
+
+ln -s bashrc    ../.bashrc
+ln -s vimrc     ../.vimrc
+ln -s inputrc   ../.inputrc
+ln -s aliases   ../.bash_aliases
+ln -s bin       ../.bin
+ln -s pymodules ../.pymodules
+ln -s profile   ../.profile
+ln -s logout    ../.bash_logout
+ln -s netrc     ../.netrc
+ln -s toprc     ../.toprc

@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+# 2013-05-15
+# Tommy Bozeman (tboz203)
+# refactor of an earlier script
+# "quick python script written to deal w/ frustrations w/ uniq."
+
+# I'm looking at doing some more complicated stuff with args, atm. I think this
+# might be something to look at using argparse with. we can do like:
+#   -q: quiet (retvals for scripting purposes? idk)
+#   -v: verbose output (what do we do with this?)
+#   -d: print only duplicated items
+#   -u: print only unique items
+#   -c: print count for each item
+#   -n: sort by count
+#   -a: sort alphabetical
+#   -r: reverse order
+
+# do we want to try and do fields? it'd be nice... we'll see, lol
+
+# non-option args are files to be read from. '-' signifies stdin, as does
+# having no files specified.
+
+from __future__ import print_function
+
+import argparse
+from os import path
+from sys import argv, stdin
+from collections import OrderedDict
+
+def get_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-c', '--count', action='store_true',
+            help='prefix each item with its count')
+    parser.add_argument('-r', '--reverse', action='store_true',
+            help='reverse order')
+    parser.add_argument('files', nargs='*', default=['-'],
+            help="the list of files to read in. '-' (stdin) by default")
+
+    vq_group = parser.add_mutually_exclusive_group()
+    vq_group.add_argument('-v', '--verbose', action='store_true',
+            help='turn on verbose output')
+    vq_group.add_argument('-q', '--quiet', action='store_true',
+            help='turn off output')
+
+    sort_group = parser.add_mutually_exclusive_group()
+    sort_group.add_argument('-a', '--alphabetical', action='store_true',
+            help='sort output alphabetically')
+    sort_group.add_argument('-n', '--numeric', action='store_true',
+            help='sort output by number of occurences')
+
+    show_group = parser.add_mutually_exclusive_group()
+    show_group.add_argument('-d', '--duplicated', action='store_true',
+            help='show only duplicated items')
+    show_group.add_argument('-u', '--unique', action='store_true',
+            help='show only unique items')
+
+    return parser.parse_args()
+
+def get_items(args):
+    lines = []
+    for item in args.files:
+        if item == '-':
+            lines += stdin.readlines()
+        else:
+            with open(item) as file:
+                lines += file.readlines()
+
+    # i feel like there's a way to not repeat the setdefault step each time
+    d = OrderedDict()
+    for item in lines:
+        item = item.rstrip()
+        d.setdefault(item, 0)
+        d[item] += 1
+
+    return d.items()
+
+def output(args, items):
+    if args.unique:
+        items = filter((lambda x: x[1] == 1), items)
+    elif args.duplicated:
+        items = filter((lambda x: x[1] != 1), items)
+
+    if items == []:
+        exit()
+
+    if args.alphabetical:
+        items = sorted(items)
+    elif args.numeric:
+        # this part just feels silly
+        items = sorted(zip(*reversed(zip(*items))))
+        items = list(reversed(zip(*reversed(zip(*items)))))
+
+    if args.reverse:
+        items = list(reversed(items))
+
+    if args.count:
+        n = str(1 + len(str(max(map((lambda x: x[1]), items)))))
+        for item in zip(*reversed(zip(*items))):
+            print(('{: ' + n + '}: {}').format(*item))
+    else:
+        for item in items:
+            print(item[0])
+
+
+def main():
+    args = get_args()
+    items = get_items(args)
+    output(args, items)
+
+if __name__ == '__main__':
+    main()

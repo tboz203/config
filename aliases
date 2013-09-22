@@ -1,0 +1,68 @@
+# color aliases
+alias ls='ls --color=auto --hide=*~ --hide=.*~ --group-directories-first'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+alias rgrep='grep -r'
+
+# some aliases based off ls
+alias ll='ls -lhF'
+alias la='ls -A'
+alias lf='ll -S'
+alias lv='ls --sort=v'
+alias l='ls -CF'
+
+# shorten some stuff
+alias h='hostname'
+alias py='python -B'
+alias py3='python3 -B'
+alias tc='truecrypt -t'
+
+# common misspellings
+alias sl=ls
+alias s=ls
+alias fl=lf
+alias f=lf
+alias ivm=vim
+alias vmi=vim
+
+# cd aliases
+alias cd..='cd ..'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# make du and df a bit more readable
+alias df='df -h'
+alias du='du -hc 2>/dev/null'
+
+# make some basic commands default to verbose, interactive, and recursive (if
+# not already)
+alias mv='mv -vi'
+alias cp='cp -vri'
+alias rm='rm -vI'
+alias rmf='rm -rf'
+
+# some aliases for date in a sortable format
+alias day='date +%Y-%m-%d'
+alias full='date "+%Y.%m.%d-%H.%M.%S"'
+
+# default wc to use all options
+alias wc='wc -cmlLw'
+
+# set my own ps format
+alias psf='ps -o pid,user,pcpu,pmem,args'
+
+# make an easy 'open' command
+if [ -x /usr/bin/gnome-open ]; then
+    alias open='gnome-open'
+elif [ -x /usr/bin/xdg-open ]; then
+    alias open='xdg-open'
+fi
+
+# misc
+alias update='sudo apt-get update && sudo apt-get upgrade'
+alias math='python3 -ic "from math import *"'
+alias quit='exit'
+alias mip='hostname -I'
+alias beta='ssh twb015@beta.latech.edu'

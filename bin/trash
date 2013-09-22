@@ -1,0 +1,8 @@
+#!/bin/bash -e
+for i in $@
+do
+    if [ -e $i ]; then
+        mv $i ~/.local/share/Trash/files/
+    fi
+done
+exit 0

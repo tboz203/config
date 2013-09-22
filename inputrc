@@ -1,0 +1,10 @@
+set editing-mode vi
+"\C-l" clear-screen
+"\e[Z" menu-complete
+"\C-a" beginning-of-line
+"\C-e" end-of-line
+
+Tab tab-insert
+$if Bash
+    Tab complete
+$endif
