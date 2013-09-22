@@ -10,3 +10,4 @@ rm ../.pymodules
 rm ../.bash_logout
 rm ../.netrc
 rm ../.toprc
+rm ../.gitconfig
