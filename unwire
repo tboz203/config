@@ -1,0 +1,12 @@
+#!/bin/bash
+
+rm ../.profile
+rm ../.bashrc
+rm ../.vimrc
+rm ../.inputrc
+rm ../.bash_aliases
+rm ../.bin
+rm ../.pymodules
+rm ../.bash_logout
+rm ../.netrc
+rm ../.toprc
