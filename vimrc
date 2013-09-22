@@ -185,12 +185,18 @@ augroup abbrevs
     autocmd!
     autocmd Filetype python     :iabbrev <buffer> iff if:<left>
     autocmd Filetype javascript :iabbrev <buffer> iff if ()<left>
+    autocmd Filetype java       :iabbrev <buffer> iff if (){<left><left>
+    autocmd Filetype c          :iabbrev <buffer> iff if (){<left><left>
+    autocmd Filetype cpp        :iabbrev <buffer> iff if (){<left><left>
 augroup END
 " }}}
 
 " custom movements {{{
+" next/last parentheses movement
+onoremap in( :<c-u>normal! f(vi(<cr>
+onoremap il( :<c-u>normal! F)vi(<cr>
+
 " markdown header movements
-" (speaking of which, need to learn markdown, lol)
 onoremap ih :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rkvg_"<cr>
 onoremap ah :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rg_vk0"<cr>
 

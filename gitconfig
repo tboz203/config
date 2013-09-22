@@ -1,0 +1,9 @@
+[color]
+	ui = auto
+[user]
+	name = tboz203
+	email = tboz203@gmail.com
+[core]
+	editor = vim
+[merge]
+	tool = vimdiff
