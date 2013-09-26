@@ -90,12 +90,9 @@ if !exists(":DiffOrig")
 endif
 
 " Tommy Bozeman
-" 4/8/12
-" my personal additions {{{
+" my personal additions
 
-nohls
-
-" basic options {{{
+" basic options
 set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
@@ -115,60 +112,56 @@ set ignorecase
 set smartcase
 set shiftround
 set backup
-" }}}
+set nohlsearch
 
-" tabs {{{
+" tabs
 set shiftwidth=4
 set softtabstop=4
 set expandtab
 set smarttab
-" }}}
 
-" Messing around in vim
+" messing around with mappings
 let mapleader = '-'
 let maplocalleader = ','
 
-" normal/visual mode mappings {{{
+" normal/visual mode mappings
 noremap <leader>t :%s/\s\+$//<cr>
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
 noremap H 0
 noremap L $
-" }}}
+noremap K H
+noremap J L
+noremap <leader>j J
+noremap <leader>k K
 
-" visual mode mappings {{{
+" visual mode mappings
 vnoremap <leader>" di""<esc>hp
-" }}}
 
-" insert mode mappings {{{
+" insert mode mappings
+" still not sure if i want the jk trick :/
 inoremap <c-u> <esc>vbUea
 inoremap jk <esc>
 inoremap JK <esc>
-inoremap kj <esc>
-inoremap KJ <esc>
 inoremap <esc> jk
-" }}}
 
-" abbreviations {{{
+" abbreviations
 iabbrev teh the
 iabbrev tboz tboz203
-" }}}
 
-" example autocmd {{{
+" example autocmd
 augroup example
     autocmd!
     autocmd BufNewFile,BufRead *.html setlocal nowrap
 augroup END
-" }}}
 
-" Vimscript file settings {{{
+" Vimscript file settings
 augroup filetype_vim
     autocmd!
     autocmd Filetype vim setlocal foldmethod=marker
 augroup END
-" }}}
 
-" comment command {{{
+" comment command
 augroup comment
     autocmd!
     autocmd Filetype python nnoremap <buffer> <localleader>c 0i#<esc>
@@ -178,9 +171,8 @@ augroup comment
     autocmd Filetype c++ nnoremap <buffer> <localleader>c 0i//<esc>
     autocmd Filetype vim nnoremap <buffer> <localleader>c 0i"<esc>
 augroup END
-" }}}
 
-" autocmd abbreviations {{{
+" autocmd abbreviations
 augroup abbrevs
     autocmd!
     autocmd Filetype python     :iabbrev <buffer> iff if:<left>
@@ -189,9 +181,8 @@ augroup abbrevs
     autocmd Filetype c          :iabbrev <buffer> iff if (){<left><left>
     autocmd Filetype cpp        :iabbrev <buffer> iff if (){<left><left>
 augroup END
-" }}}
 
-" custom movements {{{
+" custom movements
 " next/last parentheses movement
 onoremap in( :<c-u>normal! f(vi(<cr>
 onoremap il( :<c-u>normal! F)vi(<cr>
@@ -203,6 +194,3 @@ onoremap ah :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rg_vk0"<cr>
 " next/last email movement
 onoremap in@ :<c-u>execute "normal! /\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
 onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
-" }}}
-
-" }}} personal additions
