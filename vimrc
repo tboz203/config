@@ -10,7 +10,7 @@
 "     for MS-DOS and Win32:   $VIM\_vimrc
 "     for OpenVMS:            sys$login:.vimrc
 
-
+" Standard vimrc {{{
 " When started as "evim", evim.vim will already have done these settings.
 if v:progname =~? "evim"
     finish
@@ -48,6 +48,7 @@ endif
 if &t_Co > 2 || has("gui_running")
   syntax on
   set hlsearch
+  nohlsearch
 endif
 
 " Only do this part when compiled with support for autocommands.
@@ -88,11 +89,12 @@ if !exists(":DiffOrig")
   command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
           \ | wincmd p | diffthis
 endif
+" end standard vimrc }}}
 
 " Tommy Bozeman
 " my personal additions
 
-" basic options
+" basic options {{{
 set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
@@ -111,20 +113,22 @@ set textwidth=79
 set ignorecase
 set smartcase
 set shiftround
-set backup
-set nohlsearch
+"set backup
+" end basic options }}}
 
-" tabs
+" tabs {{{
 set shiftwidth=4
 set softtabstop=4
 set expandtab
 set smarttab
+" end tabs }}}
 
-" messing around with mappings
+" messing around with mappings {{{
 let mapleader = '-'
 let maplocalleader = ','
+" end messing around with mappings }}}
 
-" normal/visual mode mappings
+" normal/visual mode mappings {{{
 noremap <leader>t :%s/\s\+$//<cr>
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
@@ -134,45 +138,67 @@ noremap K H
 noremap J L
 noremap <leader>j J
 noremap <leader>k K
+noremap <leader>n :nohlsearch<cr>
+noremap <c-o> o<esc>
+noremap <c-O> O<esc>
+" end normal/visual mode mappings }}}
 
-" visual mode mappings
+" visual mode mappings {{{
 vnoremap <leader>" di""<esc>hp
+" end visual mode mappings }}}
 
-" insert mode mappings
+" insert mode mappings {{{
 " still not sure if i want the jk trick :/
 inoremap <c-u> <esc>vbUea
 inoremap jk <esc>
-inoremap JK <esc>
 inoremap <esc> jk
+inoremap <c-j> <down>
+inoremap <c-k> <up>
+inoremap <c-h> <left>
+inoremap <c-l> <right>
+" end insert mode mappings }}}
 
-" abbreviations
+" abbreviations {{{
 iabbrev teh the
 iabbrev tboz tboz203
+" end abbreviations }}}
 
-" example autocmd
+" short section of html commands {{{
 augroup example
     autocmd!
     autocmd BufNewFile,BufRead *.html setlocal nowrap
+    autocmd BufNewFile,BufRead *.html setlocal tw=0
 augroup END
+" end short section of html commands }}}
 
-" Vimscript file settings
+" Vimscript file settings {{{
 augroup filetype_vim
     autocmd!
     autocmd Filetype vim setlocal foldmethod=marker
 augroup END
+" end vimscript file settings }}}
 
-" comment command
+" comment command {{{
 augroup comment
     autocmd!
     autocmd Filetype python nnoremap <buffer> <localleader>c 0i#<esc>
+    autocmd Filetype python nnoremap <buffer> <localleader>C 0x
     autocmd Filetype sh nnoremap <buffer> <localleader>c 0i#<esc>
+    autocmd Filetype sh nnoremap <buffer> <localleader>C 0x
     autocmd Filetype java nnoremap <buffer> <localleader>c 0i//<esc>
+    autocmd Filetype java nnoremap <buffer> <localleader>C 0xx
     autocmd Filetype c nnoremap <buffer> <localleader>c 0i//<esc>
+    autocmd Filetype c nnoremap <buffer> <localleader>C 0xx
     autocmd Filetype c++ nnoremap <buffer> <localleader>c 0i//<esc>
+    autocmd Filetype c++ nnoremap <buffer> <localleader>C 0xx
     autocmd Filetype vim nnoremap <buffer> <localleader>c 0i"<esc>
+    autocmd Filetype vim nnoremap <buffer> <localleader>C 0x
+    autocmd Filetype javascript nnoremap <buffer> <localleader>c 0i//<esc>
+    autocmd Filetype javascript nnoremap <buffer> <localleader>C 0xx
 augroup END
+" end comment command }}}
 
-" autocmd abbreviations
+" autocmd abbreviations {{{
 augroup abbrevs
     autocmd!
     autocmd Filetype python     :iabbrev <buffer> iff if:<left>
@@ -181,8 +207,34 @@ augroup abbrevs
     autocmd Filetype c          :iabbrev <buffer> iff if (){<left><left>
     autocmd Filetype cpp        :iabbrev <buffer> iff if (){<left><left>
 augroup END
+" end autocmd abbreviations }}}
 
-" custom movements
+" html abbreviations {{{
+" Not working at present.
+"augroup html_abbrevs
+"    autocmd!
+"    autocmd Filetype html       :iabbrev <buffer> /html \</html\>
+"    autocmd Filetype html       :iabbrev <buffer> html \<html\>
+"    autocmd Filetype html       :iabbrev <buffer> /head \</head\>
+"    autocmd Filetype html       :iabbrev <buffer> head \<head\>
+"    autocmd Filetype html       :iabbrev <buffer> /title \</title\>
+"    autocmd Filetype html       :iabbrev <buffer> title \<title\>
+"    autocmd Filetype html       :iabbrev <buffer> /body \</body\>
+"    autocmd Filetype html       :iabbrev <buffer> body \<body\>
+"    autocmd Filetype html       :iabbrev <buffer> /script \</script\>
+"    autocmd Filetype html       :iabbrev <buffer> script \<script\>
+"    autocmd Filetype html       :iabbrev <buffer> /p \</p\>
+"    autocmd Filetype html       :iabbrev <buffer> p \<p\>
+"    autocmd Filetype html       :iabbrev <buffer> /div \</div\>
+"    autocmd Filetype html       :iabbrev <buffer> div \<div\>
+"    autocmd Filetype html       :iabbrev <buffer> /span \</span\>
+"    autocmd Filetype html       :iabbrev <buffer> span \<span\>
+"    autocmd Filetype html       :iabbrev <buffer> /button \</button\>
+"    autocmd Filetype html       :iabbrev <buffer> button \<button\>
+"augroup END
+" end html abbreviations }}}
+
+" custom movements {{{
 " next/last parentheses movement
 onoremap in( :<c-u>normal! f(vi(<cr>
 onoremap il( :<c-u>normal! F)vi(<cr>
@@ -194,3 +246,4 @@ onoremap ah :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rg_vk0"<cr>
 " next/last email movement
 onoremap in@ :<c-u>execute "normal! /\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
 onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
+" end custon movements }}}

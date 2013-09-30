@@ -116,6 +116,8 @@ if [ -x /usr/bin/dircolors ]; then
     fi
 fi
 
+export GLOBIGNORE=*~:.*
+
 source ~/.git-prompt
 GIT_PS1_SHOWDIRTYSTATE=1
 GIT_PS1_SHOWSTASHSTATE=1
