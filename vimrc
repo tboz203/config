@@ -151,7 +151,6 @@ vnoremap <leader>" di""<esc>hp
 " still not sure if i want the jk trick :/
 inoremap <c-u> <esc>vbUea
 inoremap jk <esc>
-inoremap <esc> jk
 inoremap <c-j> <down>
 inoremap <c-k> <up>
 inoremap <c-h> <left>

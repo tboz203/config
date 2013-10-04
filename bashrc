@@ -5,7 +5,7 @@
 # 2013/2/22 - Tommy Bozeman
 # some slight modifications, mostly to PS1
 
-export HISTCONTROL=ignoreboth
+HISTCONTROL=ignoreboth
 
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
@@ -16,6 +16,8 @@ shopt -s histappend
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=1000
 HISTFILESIZE=2000
+HISTTIMEFORMAT="%h d %H:%M:%S> "
+HISTIGNORE="ls?( *):la?( *):lf?( *):ll?( *):l?( *)"
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -50,7 +52,7 @@ fi
 
 if [ "$color_prompt" = yes ]; then
     # some expansions i made, trying some stuff out for PS1
-    black="$(tput sgr0 && tput setaf 0)"    # I think these are right?
+    black="$(tput sgr0 && tput setaf 0)"
     BLACK="$(tput bold && tput setaf 0)"
     red="$(tput sgr0 && tput setaf 1)"
     RED="$(tput bold && tput setaf 1)"
@@ -108,6 +110,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
+# dircolors
 if [ -x /usr/bin/dircolors ]; then
     if [ -r ~/.dircolors ]; then
         eval "$(dircolors -b ~/.dircolors)"
@@ -116,11 +119,9 @@ if [ -x /usr/bin/dircolors ]; then
     fi
 fi
 
-export GLOBIGNORE=*~:.*
-
 source ~/.git-prompt
-GIT_PS1_SHOWDIRTYSTATE=1
-GIT_PS1_SHOWSTASHSTATE=1
-GIT_PS1_SHOWUNTRACKEDFILES=1
-GIT_PS1_SHOWUPSTREAM="auto"
-GIT_PS1_SHOWCOLORHINTS=1
+export GIT_PS1_SHOWDIRTYSTATE=1
+export GIT_PS1_SHOWSTASHSTATE=1
+export GIT_PS1_SHOWUNTRACKEDFILE=1
+export GIT_PS1_SHOWUPSTREAM="auto"
+export GIT_PS1_SHOWCOLORHINTS=1
