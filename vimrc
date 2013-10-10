@@ -141,6 +141,7 @@ noremap <leader>k K
 noremap <leader>n :nohlsearch<cr>
 noremap <c-o> o<esc>
 noremap <c-O> O<esc>
+noremap : q:a
 " end normal/visual mode mappings }}}
 
 " visual mode mappings {{{
