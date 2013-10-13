@@ -10,6 +10,15 @@ HISTCONTROL=ignoreboth
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
 
+# bug in cygwin's mintty doesn't source .profile: added recursion guard and
+# sourcing .profile
+if [[ "$BASHRC_SOURCED" ]]; then
+    return
+fi
+
+export BASHRC_SOURCED=1
+. ~/.profile
+
 # append to the history file, don't overwrite it
 shopt -s histappend
 
@@ -17,7 +26,7 @@ shopt -s histappend
 HISTSIZE=1000
 HISTFILESIZE=2000
 HISTTIMEFORMAT="%h d %H:%M:%S> "
-HISTIGNORE="ls?( *):la?( *):lf?( *):ll?( *):l?( *)"
+HISTIGNORE="ls:la:lf:ll:l"
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.

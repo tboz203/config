@@ -1,14 +1,14 @@
 #!/bin/bash
 
-ln -s config/profile        ../.profile
-ln -s config/bashrc         ../.bashrc
-ln -s config/vimrc          ../.vimrc
-ln -s config/inputrc        ../.inputrc
-ln -s config/aliases        ../.bash_aliases
-ln -s config/bin/           ../.bin/
-ln -s config/pymodules/     ../.pymodules/
-ln -s config/logout         ../.bash_logout
-ln -s config/netrc          ../.netrc
-ln -s config/toprc          ../.toprc
-ln -s config/gitconfig      ../.gitconfig
-ln -s config/git-prompt     ../.git-prompt
+ln -s "$(pwd)/profile"        ~/.profile
+ln -s "$(pwd)/bashrc"         ~/.bashrc
+ln -s "$(pwd)/vimrc"          ~/.vimrc
+ln -s "$(pwd)/inputrc"        ~/.inputrc
+ln -s "$(pwd)/aliases"        ~/.bash_aliases
+ln -s "$(pwd)/bin"/           ~/.bin/
+ln -s "$(pwd)/pymodules"/     ~/.pymodules/
+ln -s "$(pwd)/logout"         ~/.bash_logout
+ln -s "$(pwd)/netrc"          ~/.netrc
+ln -s "$(pwd)/toprc"          ~/.toprc
+ln -s "$(pwd)/gitconfig"      ~/.gitconfig
+ln -s "$(pwd)/git-prompt"     ~/.git-prompt

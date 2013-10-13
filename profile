@@ -21,6 +21,8 @@ if [ -d "$HOME/.bin" ] ; then
     export PATH="$HOME/.bin:$PATH"
 fi
 
+export PATH+=":/cygdrive/c/Users/Tommy/AppData/Local/GitHub/PortableGit_015aa71ef18c047ce8509ffb2f9e4bb0e3e73f13/cmd"
+
 # add a personal module directory for python
 if [ -d "$HOME/.pymodules" ]; then
     export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
