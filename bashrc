@@ -10,15 +10,6 @@ HISTCONTROL=ignoreboth
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
 
-# bug in cygwin's mintty doesn't source .profile: added recursion guard and
-# sourcing .profile
-if [[ "$BASHRC_SOURCED" ]]; then
-    return
-fi
-
-export BASHRC_SOURCED=1
-. ~/.profile
-
 # append to the history file, don't overwrite it
 shopt -s histappend
 
@@ -99,7 +90,8 @@ else
 fi
 
 u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
-PS1="\[$u_color\]\u\[$WHITE\]@\[$GREEN\]\h\[$WHITE\]:\[$BLUE\]\w\[$reset\]"
+PS1="\[$reset\]$debian_chroot\[$u_color\]\u\[$WHITE\]@\[$GREEN\]\h\[$WHITE\]:"
+PS1+="\[$BLUE\]\w\[$reset\]"
 PS1+='$(__git_ps1 ":(%s)")\$ '
 unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
 unset white WHITE reset color_prompt force_color_prompt
