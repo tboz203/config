@@ -45,7 +45,7 @@ places = {'img': '/home/tommy/media/pics/',
 # a quick dictionary of file extensions we're interested in
 types = {'img': ('jpg', 'png', 'bmp', 'jpeg', 'tiff', 'gif', 'xcf'),
          'aud': ('aac', 'mp3', 'm4a', 'ogg', 'wma', 'flac'),
-         'vid': ('mp4', 'flv', 'wmv', 'mpg', 'avi', 'mov', 'm4v'),
+         'vid': ('mp4', 'flv', 'wmv', 'mpg', 'avi', 'mov', 'm4v', 'f4v'),
          'gif': ('gif',),
          'tor': ('torrent',)}
 
