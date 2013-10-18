@@ -24,6 +24,8 @@ alias gits='git status'
 alias gitc='git commit'
 alias gitl='git log --oneline --graph'
 
+alias vim='vim -p'
+
 # common misspellings
 alias sl=ls
 alias s=ls
