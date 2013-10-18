@@ -19,6 +19,11 @@ alias py='python -B'
 alias py3='python3 -B'
 alias tc='truecrypt -t'
 
+# some git commands
+alias gits='git status'
+alias gitc='git commit'
+alias gitl='git log --oneline --graph'
+
 # common misspellings
 alias sl=ls
 alias s=ls
