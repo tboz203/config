@@ -17,7 +17,7 @@ shopt -s histappend
 HISTSIZE=1000
 HISTFILESIZE=2000
 HISTTIMEFORMAT="%h d %H:%M:%S> "
-HISTIGNORE="ls?( *):la?( *):lf?( *):ll?( *):l?( *)"
+HISTIGNORE="ls:la:lf:ll:l"
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -90,7 +90,8 @@ else
 fi
 
 u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
-PS1="\[$u_color\]\u\[$WHITE\]@\[$GREEN\]\h\[$WHITE\]:\[$BLUE\]\w\[$reset\]"
+PS1="\[$reset\]$debian_chroot\[$u_color\]\u\[$WHITE\]@\[$GREEN\]\h\[$WHITE\]:"
+PS1+="\[$BLUE\]\w\[$reset\]"
 PS1+='$(__git_ps1 ":(%s)")\$ '
 unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
 unset white WHITE reset color_prompt force_color_prompt

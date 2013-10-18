@@ -129,7 +129,7 @@ let maplocalleader = ','
 " end messing around with mappings }}}
 
 " normal/visual mode mappings {{{
-noremap <leader>t :%s/\s\+$//<cr>
+noremap <leader>t :%s/\s\+$//<cr>:noh<cr>
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
 noremap H 0
