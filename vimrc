@@ -1,15 +1,3 @@
-" An example for a vimrc file.
-" vim: sw=4 sts=4 et filetype=vim
-"
-" Maintainer:   Bram Moolenaar <Bram@vim.org>
-" Last change:  2008 Dec 17
-"
-" To use it, copy it to
-"     for Unix and OS/2:      ~/.vimrc
-"     for Amiga:              s:.vimrc
-"     for MS-DOS and Win32:   $VIM\_vimrc
-"     for OpenVMS:            sys$login:.vimrc
-
 " Standard vimrc {{{
 " When started as "evim", evim.vim will already have done these settings.
 if v:progname =~? "evim"
@@ -98,7 +86,6 @@ endif
 set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
-set listchars=tab:>-,trail:-,precedes:$,extends:$      " set up list mode
 set list
 set background=dark     " make the text easier to read on a dark background
 set modeline            " if a file has a modeline, use it
@@ -113,7 +100,6 @@ set textwidth=79
 set ignorecase
 set smartcase
 set shiftround
-"set backup
 " end basic options }}}
 
 " tabs {{{
@@ -126,113 +112,43 @@ set smarttab
 " messing around with mappings {{{
 let mapleader = '-'
 let maplocalleader = ','
-" end messing around with mappings }}}
 
-" normal/visual mode mappings {{{
-noremap <leader>t :%s/\s\+$//<cr>:noh<cr>
+" normal mode
+noremap <silent> <leader>rs :%s/\s\+$//<cr>:noh<cr>
+" retab the file
+noremap <silent> <leader>rt :retab<cr>
+" do both
+noremap <silent> <leader>rr :retab<cr>:%s/\s\+$//<cr>:noh<cr>
+" easy edit/source of my vimrc (this file)
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
-noremap H 0
-noremap L $
-noremap K H
-noremap J L
-noremap <leader>j J
-noremap <leader>k K
-noremap <leader>n :nohlsearch<cr>
+" quick mapping to get rid of search highlighting
+noremap <silent> <leader>n :nohlsearch<cr>
+" default to using the command window
 noremap : q:a
 noremap / q/a
 noremap ? q?a
-" end normal/visual mode mappings }}}
 
-" visual mode mappings {{{
+" visual mode
 vnoremap <leader>" di""<esc>hp
-" end visual mode mappings }}}
 
-" insert mode mappings {{{
-" still not sure if i want the jk trick :/
+" insert mode
 inoremap <c-u> <esc>vbUea
 inoremap jk <esc>
-inoremap <c-j> <down>
-inoremap <c-k> <up>
-inoremap <c-h> <left>
-inoremap <c-l> <right>
-" end insert mode mappings }}}
-
-" abbreviations {{{
-iabbrev teh the
-iabbrev tboz tboz203
-" end abbreviations }}}
-
-" short section of html commands {{{
-augroup example
-    autocmd!
-    autocmd BufNewFile,BufRead *.html setlocal nowrap
-    autocmd BufNewFile,BufRead *.html setlocal tw=0
-augroup END
-" end short section of html commands }}}
+" end messing around with mappings }}}
 
 " Vimscript file settings {{{
 augroup filetype_vim
     autocmd!
     autocmd Filetype vim setlocal foldmethod=marker
 augroup END
-" end vimscript file settings }}}
+" }}}
 
-" comment command {{{
-augroup comment
+" notes files settings {{{
+augroup filetype_notes
     autocmd!
-    autocmd Filetype python nnoremap <buffer> <localleader>c 0i#<esc>
-    autocmd Filetype python nnoremap <buffer> <localleader>C 0x
-    autocmd Filetype sh nnoremap <buffer> <localleader>c 0i#<esc>
-    autocmd Filetype sh nnoremap <buffer> <localleader>C 0x
-    autocmd Filetype java nnoremap <buffer> <localleader>c 0i//<esc>
-    autocmd Filetype java nnoremap <buffer> <localleader>C 0xx
-    autocmd Filetype c nnoremap <buffer> <localleader>c 0i//<esc>
-    autocmd Filetype c nnoremap <buffer> <localleader>C 0xx
-    autocmd Filetype c++ nnoremap <buffer> <localleader>c 0i//<esc>
-    autocmd Filetype c++ nnoremap <buffer> <localleader>C 0xx
-    autocmd Filetype vim nnoremap <buffer> <localleader>c 0i"<esc>
-    autocmd Filetype vim nnoremap <buffer> <localleader>C 0x
-    autocmd Filetype javascript nnoremap <buffer> <localleader>c 0i//<esc>
-    autocmd Filetype javascript nnoremap <buffer> <localleader>C 0xx
 augroup END
-" end comment command }}}
-
-" autocmd abbreviations {{{
-augroup abbrevs
-    autocmd!
-    autocmd Filetype python     :iabbrev <buffer> iff if:<left>
-    autocmd Filetype javascript :iabbrev <buffer> iff if ()<left>
-    autocmd Filetype java       :iabbrev <buffer> iff if (){<left><left>
-    autocmd Filetype c          :iabbrev <buffer> iff if (){<left><left>
-    autocmd Filetype cpp        :iabbrev <buffer> iff if (){<left><left>
-augroup END
-" end autocmd abbreviations }}}
-
-" html abbreviations {{{
-" Not working at present.
-"augroup html_abbrevs
-"    autocmd!
-"    autocmd Filetype html       :iabbrev <buffer> /html \</html\>
-"    autocmd Filetype html       :iabbrev <buffer> html \<html\>
-"    autocmd Filetype html       :iabbrev <buffer> /head \</head\>
-"    autocmd Filetype html       :iabbrev <buffer> head \<head\>
-"    autocmd Filetype html       :iabbrev <buffer> /title \</title\>
-"    autocmd Filetype html       :iabbrev <buffer> title \<title\>
-"    autocmd Filetype html       :iabbrev <buffer> /body \</body\>
-"    autocmd Filetype html       :iabbrev <buffer> body \<body\>
-"    autocmd Filetype html       :iabbrev <buffer> /script \</script\>
-"    autocmd Filetype html       :iabbrev <buffer> script \<script\>
-"    autocmd Filetype html       :iabbrev <buffer> /p \</p\>
-"    autocmd Filetype html       :iabbrev <buffer> p \<p\>
-"    autocmd Filetype html       :iabbrev <buffer> /div \</div\>
-"    autocmd Filetype html       :iabbrev <buffer> div \<div\>
-"    autocmd Filetype html       :iabbrev <buffer> /span \</span\>
-"    autocmd Filetype html       :iabbrev <buffer> span \<span\>
-"    autocmd Filetype html       :iabbrev <buffer> /button \</button\>
-"    autocmd Filetype html       :iabbrev <buffer> button \<button\>
-"augroup END
-" end html abbreviations }}}
+" }}}
 
 " custom movements {{{
 " next/last parentheses movement
@@ -246,4 +162,69 @@ onoremap ah :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rg_vk0"<cr>
 " next/last email movement
 onoremap in@ :<c-u>execute "normal! /\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
 onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
-" end custon movements }}}
+" }}}
+
+" Vundle {{{
+filetype off
+
+set rtp+=~/.vim/bundle/vundle
+call vundle#rc()
+
+" passive
+" vundle itself
+Bundle 'gmarik/vundle'
+" a vimrc starting point
+Bundle 'tpope/vim-sensible'
+" auto-set indentation variables
+Bundle 'tpope/vim-sleuth'
+
+" active
+" snippet insertion (for boilerplate code)
+Bundle 'SirVer/ultisnips'
+" file-system browser
+Bundle 'scrooloose/nerdtree'
+" tab-support for nerdtree
+Bundle 'jistr/vim-nerdtree-tabs'
+" graphical undo tree
+Bundle 'sjl/gundo.vim'
+" integration w/ git
+Bundle 'tpope/vim-fugitive'
+" powerful file-system searching
+Bundle 'kien/ctrlp.vim'
+" buffer explorer
+Bundle 'corntrace/bufexplorer'
+
+" increment/decrement dates w/ <c-a>/<c-x>
+Bundle 'tpope/vim-speeddating'
+
+" testing (not yet tring to learn, lol)
+Bundle 'majutsushi/tagbar'
+"Bundle 'vim-scripts/TabBar'
+Bundle 'Lokaltog/powerline'
+" both of these do commenting. need to try them out and pick one.
+Bundle 'tpope/vim-commentary'
+Bundle 'tomtom/tcomment_vim'
+" add repeat (.) support to (some) plugins
+Bundle 'tpope/vim-repeat'
+" external syntax checking (?)
+Bundle 'scrooloose/syntastic'
+
+filetype plugin indent on
+" end Vundle }}}
+
+" plugin settings {{{
+" UltiSnips tab-completion conflicts with YCM, new triggers for snippet
+" expansion/jumping
+let g:UltiSnipsExpandTrigger = '<c-l>'
+let g:UltiSnipsJumpForwardTrigger = '<c-j>'
+let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
+
+" gundo setting(s)
+let g:gundo_right = 1
+
+" mappings for plugins that don't have these nice settings
+noremap <leader>u :GundoToggle<cr>
+noremap <leader>t :NERDTreeTabsToggle<cr>
+" }}}
+
+"hevim: sw=4 sts=4 et
