@@ -33,6 +33,7 @@ alias fl=lf
 alias f=lf
 alias ivm=vim
 alias vmi=vim
+alias jbos=jobs
 
 # cd aliases
 alias cd..='cd ..'

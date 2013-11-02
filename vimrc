@@ -109,6 +109,15 @@ set expandtab
 set smarttab
 " end tabs }}}
 
+" abbreviations {{{
+abbreviate teh the
+abbreviate hlep help
+abbreviate ivm vim
+abbreviate functino function
+abbreviate fiel file
+abbreviate thsi this
+" }}}
+
 " messing around with mappings {{{
 let mapleader = '-'
 let maplocalleader = ','
@@ -144,12 +153,6 @@ augroup filetype_vim
 augroup END
 " }}}
 
-" notes files settings {{{
-augroup filetype_notes
-    autocmd!
-augroup END
-" }}}
-
 " custom movements {{{
 " next/last parentheses movement
 onoremap in( :<c-u>normal! f(vi(<cr>
@@ -169,16 +172,14 @@ filetype off
 
 set rtp+=~/.vim/bundle/vundle
 call vundle#rc()
-
-" passive
 " vundle itself
 Bundle 'gmarik/vundle'
+
+" plugins {{{
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
 " auto-set indentation variables
 Bundle 'tpope/vim-sleuth'
-
-" active
 " snippet insertion (for boilerplate code)
 Bundle 'SirVer/ultisnips'
 " file-system browser
@@ -189,25 +190,9 @@ Bundle 'jistr/vim-nerdtree-tabs'
 Bundle 'sjl/gundo.vim'
 " integration w/ git
 Bundle 'tpope/vim-fugitive'
-" powerful file-system searching
-Bundle 'kien/ctrlp.vim'
-" buffer explorer
-Bundle 'corntrace/bufexplorer'
-
-" increment/decrement dates w/ <c-a>/<c-x>
-Bundle 'tpope/vim-speeddating'
-
-" testing (not yet tring to learn, lol)
-Bundle 'majutsushi/tagbar'
-"Bundle 'vim-scripts/TabBar'
-Bundle 'Lokaltog/powerline'
-" both of these do commenting. need to try them out and pick one.
+" easy commenting
 Bundle 'tpope/vim-commentary'
-Bundle 'tomtom/tcomment_vim'
-" add repeat (.) support to (some) plugins
-Bundle 'tpope/vim-repeat'
-" external syntax checking (?)
-Bundle 'scrooloose/syntastic'
+" end plugins }}}
 
 filetype plugin indent on
 " end Vundle }}}
@@ -226,5 +211,3 @@ let g:gundo_right = 1
 noremap <leader>u :GundoToggle<cr>
 noremap <leader>t :NERDTreeTabsToggle<cr>
 " }}}
-
-"hevim: sw=4 sts=4 et
