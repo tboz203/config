@@ -177,6 +177,8 @@ Bundle 'gmarik/vundle'
 Bundle 'tpope/vim-sensible'
 " auto-set indentation variables
 Bundle 'tpope/vim-sleuth'
+" indentation guides
+Bundle 'nathanaelkane/vim-indent-guides'
 
 " active
 " snippet insertion (for boilerplate code)
@@ -189,28 +191,29 @@ Bundle 'jistr/vim-nerdtree-tabs'
 Bundle 'sjl/gundo.vim'
 " integration w/ git
 Bundle 'tpope/vim-fugitive'
-" powerful file-system searching
-Bundle 'kien/ctrlp.vim'
-" buffer explorer
-Bundle 'corntrace/bufexplorer'
+" multi-language block commenting
+Bundle 'tpope/vim-commentary'
 
-" increment/decrement dates w/ <c-a>/<c-x>
-Bundle 'tpope/vim-speeddating'
+" " powerful file-system searching
+" Bundle 'kien/ctrlp.vim'
+" " buffer explorer
+" Bundle 'corntrace/bufexplorer'
+" " increment/decrement dates w/ <c-a>/<c-x>
+" Bundle 'tpope/vim-speeddating'
 
 " a 'fuzzy' code-completion engine
 Bundle 'Valloric/YouCompleteMe'
 
-" testing (not yet tring to learn, lol)
-Bundle 'majutsushi/tagbar'
-"Bundle 'vim-scripts/TabBar'
-Bundle 'Lokaltog/powerline'
-" both of these do commenting. need to try them out and pick one.
-Bundle 'tpope/vim-commentary'
-Bundle 'tomtom/tcomment_vim'
-" add repeat (.) support to (some) plugins
-Bundle 'tpope/vim-repeat'
-" external syntax checking (?)
-Bundle 'scrooloose/syntastic'
+" " testing (not yet tring to learn, lol)
+" Bundle 'majutsushi/tagbar'
+" "Bundle 'vim-scripts/TabBar'
+" Bundle 'Lokaltog/powerline'
+" " both of these do commenting. need to try them out and pick one.
+" Bundle 'tomtom/tcomment_vim'
+" " add repeat (.) support to (some) plugins
+" Bundle 'tpope/vim-repeat'
+" " external syntax checking (?)
+" Bundle 'scrooloose/syntastic'
 
 filetype plugin indent on
 " end Vundle }}}
@@ -221,6 +224,12 @@ filetype plugin indent on
 let g:UltiSnipsExpandTrigger = '<c-l>'
 let g:UltiSnipsJumpForwardTrigger = '<c-j>'
 let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
+
+" indent guide settings
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_auto_colors = 0
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
 
 " gundo setting(s)
 let g:gundo_right = 1
