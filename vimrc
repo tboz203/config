@@ -192,6 +192,8 @@ Bundle 'sjl/gundo.vim'
 Bundle 'tpope/vim-fugitive'
 " easy commenting
 Bundle 'tpope/vim-commentary'
+" powerful file-system searching
+Bundle 'kien/ctrlp.vim'
 " end plugins }}}
 
 filetype plugin indent on
