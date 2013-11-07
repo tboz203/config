@@ -5,8 +5,8 @@ ln -s "$(pwd)/bashrc"         ~/.bashrc
 ln -s "$(pwd)/vimrc"          ~/.vimrc
 ln -s "$(pwd)/inputrc"        ~/.inputrc
 ln -s "$(pwd)/aliases"        ~/.bash_aliases
-ln -s "$(pwd)/bin"/           ~/.bin/
-ln -s "$(pwd)/pymodules"/     ~/.pymodules/
+ln -s "$(pwd)/bin"            ~/.bin
+ln -s "$(pwd)/pymodules"      ~/.pymodules
 ln -s "$(pwd)/logout"         ~/.bash_logout
 ln -s "$(pwd)/toprc"          ~/.toprc
 ln -s "$(pwd)/gitconfig"      ~/.gitconfig
