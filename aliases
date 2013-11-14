@@ -4,8 +4,6 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-alias rgrep='grep -r'
-
 # some aliases based off ls
 alias ll='ls -lhF'
 alias la='ls -A'
@@ -23,6 +21,7 @@ alias tc='truecrypt -t'
 alias gits='git status'
 alias gitc='git commit'
 alias gitl='git log --oneline --graph'
+alias gitb='git branch -vv'
 
 alias vim='vim -p'
 
@@ -49,7 +48,6 @@ alias du='du -hc 2>/dev/null'
 alias mv='mv -vi'
 alias cp='cp -vri'
 alias rm='rm -vI'
-alias rmf='rm -rf'
 
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
@@ -58,20 +56,14 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # default wc to use all options
 alias wc='wc -cmlLw'
 
-# set my own ps format
-alias psf='ps -o pid,user,pcpu,pmem,args'
-
-# make an easy 'open' command
-if [ -x /usr/bin/gnome-open ]; then
-    alias open='gnome-open'
-elif [ -x /usr/bin/xdg-open ]; then
-    alias open='xdg-open'
-fi
-
 # misc
-alias update='sudo apt-get update && sudo apt-get upgrade'
-alias math='python3 -ic "from math import *"'
+alias rmf='rm -rf'
+alias rgrep='grep -r'
 alias quit='exit'
 alias mip='hostname -I'
-alias beta='ssh twb015@beta.latech.edu'
 alias vimrc='vim ~/.vimrc'
+alias psf='ps -o pid,user,pcpu,pmem,args'
+alias ghci='ghc --interactive'
+alias update='sudo apt-get update && sudo apt-get upgrade'
+alias math='python3 -ic "from math import *"'
+alias beta='ssh twb015@beta.latech.edu'

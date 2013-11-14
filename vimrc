@@ -180,6 +180,8 @@ Bundle 'gmarik/vundle'
 Bundle 'tpope/vim-sensible'
 " auto-set indentation variables
 Bundle 'tpope/vim-sleuth'
+" indentation guides
+Bundle 'nathanaelkane/vim-indent-guides'
 " snippet insertion (for boilerplate code)
 Bundle 'SirVer/ultisnips'
 " file-system browser
@@ -190,7 +192,7 @@ Bundle 'jistr/vim-nerdtree-tabs'
 Bundle 'sjl/gundo.vim'
 " integration w/ git
 Bundle 'tpope/vim-fugitive'
-" easy commenting
+" multi-language block commenting
 Bundle 'tpope/vim-commentary'
 " powerful file-system searching
 Bundle 'kien/ctrlp.vim'
@@ -205,6 +207,12 @@ filetype plugin indent on
 let g:UltiSnipsExpandTrigger = '<c-l>'
 let g:UltiSnipsJumpForwardTrigger = '<c-j>'
 let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
+
+" indent guide settings
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_auto_colors = 0
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
 
 " gundo setting(s)
 let g:gundo_right = 1
