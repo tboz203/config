@@ -1,0 +1,17 @@
+#!/bin/bash
+# tboz203 2013-12-2
+# quick little script to grab file extensions in a directory
+
+fext(){
+    if [[ $# == 0 ]]; then
+        fext .
+    else
+        while [[ $# != 0 ]]; do
+            ls "$1" | grep -s '\.' | cut -d. -f2- | sort | uniq
+            shift 1
+        done
+    fi
+}
+
+
+fext $@

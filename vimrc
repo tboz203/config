@@ -178,24 +178,24 @@ Bundle 'gmarik/vundle'
 " plugins {{{
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
-" auto-set indentation variables
-Bundle 'tpope/vim-sleuth'
-" indentation guides
-Bundle 'nathanaelkane/vim-indent-guides'
-" snippet insertion (for boilerplate code)
-Bundle 'SirVer/ultisnips'
-" file-system browser
-Bundle 'scrooloose/nerdtree'
-" tab-support for nerdtree
-Bundle 'jistr/vim-nerdtree-tabs'
+" " auto-set indentation variables
+" Bundle 'tpope/vim-sleuth'
+" " indentation guides
+" Bundle 'nathanaelkane/vim-indent-guides'
+" " snippet insertion (for boilerplate code)
+" Bundle 'SirVer/ultisnips'
+" " file-system browser
+" Bundle 'scrooloose/nerdtree'
+" " tab-support for nerdtree
+" Bundle 'jistr/vim-nerdtree-tabs'
 " graphical undo tree
 Bundle 'sjl/gundo.vim'
 " integration w/ git
 Bundle 'tpope/vim-fugitive'
 " multi-language block commenting
 Bundle 'tpope/vim-commentary'
-" powerful file-system searching
-Bundle 'kien/ctrlp.vim'
+" " powerful file-system searching
+" Bundle 'kien/ctrlp.vim'
 " end plugins }}}
 
 filetype plugin indent on
