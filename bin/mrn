@@ -6,19 +6,14 @@ from sys import argv, stderr
 from shutil import move
 from getfreename import getfreename
 
-# def move_rename(oldname, newname):
-#     if path.isdir(newname):
-#         newname = newname + '/' + oldname
-#     newname = getfreename(newname)
-#     print(oldname, newname)
-
 def move_rename(oldname, newname):
     oldname = oldname.rstrip('/')
     newname = newname.rstrip('/')
     if path.isdir(newname):
         newname = newname + '/' + path.basename(oldname)
     newname = getfreename(newname)
-    print(oldname,', ', newname)
+    print(oldname,' -> ', newname)
+    move(oldname, newname)
 
 def main():
     if len(argv) < 3:

@@ -100,20 +100,17 @@ set textwidth=79
 set ignorecase
 set smartcase
 set shiftround
-" end basic options }}}
 
-" tabs {{{
-set shiftwidth=4
-set softtabstop=4
-set expandtab
-set smarttab
-" end tabs }}}
+set undofile
+set undodir=/tmp
+" end basic options }}}
 
 " messing around with mappings {{{
 let mapleader = '-'
 let maplocalleader = ','
 
 " normal mode
+" remove whitespace at end of line
 noremap <silent> <leader>rs :%s/\s\+$//<cr>:noh<cr>
 " retab the file
 noremap <silent> <leader>rt :retab<cr>
@@ -124,10 +121,17 @@ noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
 " quick mapping to get rid of search highlighting
 noremap <silent> <leader>n :nohlsearch<cr>
+" paste from clipboard
+noremap <silent> <leader>p :set paste<cr>"+p:set nopaste<cr>
+" insert the current date or date and time
+noremap <silent> <leader>d :r !day<cr>kJ
+noremap <silent> <leader>f :r !full<cr>kJ
 " default to using the command window
 noremap : q:a
 noremap / q/a
 noremap ? q?a
+" a quick mapping for JSHint
+noremap <leader>j :JSHint<cr><cr>
 
 " visual mode
 vnoremap <leader>" di""<esc>hp
@@ -135,6 +139,9 @@ vnoremap <leader>" di""<esc>hp
 " insert mode
 inoremap <c-u> <esc>vbUea
 inoremap jk <esc>
+" nerdtree overwrites the digraph binding, so we'll use <c-h> instead.
+inoremap <c-h> <c-k>
+
 " end messing around with mappings }}}
 
 " Vimscript file settings {{{
@@ -204,12 +211,14 @@ Bundle 'tpope/vim-commentary'
 " a 'fuzzy' code-completion engine
 Bundle 'Valloric/YouCompleteMe'
 
+" javascript helpers
+Bundle 'Shutnik/jshint2.vim'
+" Bundle 'walm/jshint.vim'
+
 " " testing (not yet tring to learn, lol)
 " Bundle 'majutsushi/tagbar'
-" "Bundle 'vim-scripts/TabBar'
+" Bundle 'vim-scripts/TabBar'
 " Bundle 'Lokaltog/powerline'
-" " both of these do commenting. need to try them out and pick one.
-" Bundle 'tomtom/tcomment_vim'
 " " add repeat (.) support to (some) plugins
 " Bundle 'tpope/vim-repeat'
 " " external syntax checking (?)
@@ -217,6 +226,13 @@ Bundle 'Valloric/YouCompleteMe'
 
 filetype plugin indent on
 " end Vundle }}}
+
+" tabs {{{
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set smarttab
+" end tabs }}}
 
 " plugin settings {{{
 " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
@@ -226,10 +242,11 @@ let g:UltiSnipsJumpForwardTrigger = '<c-j>'
 let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
 
 " indent guide settings
-let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_enable_on_vim_startup = 0
 let g:indent_guides_auto_colors = 0
 autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
 autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
+autocmd VimEnter,Colorscheme * :hi Normal NONE
 
 " gundo setting(s)
 let g:gundo_right = 1

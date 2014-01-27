@@ -19,9 +19,10 @@ alias tc='truecrypt -t'
 
 # some git commands
 alias gits='git status'
-alias gitc='git commit'
 alias gitl='git log --oneline --graph'
 alias gitb='git branch -vv'
+alias gitr='git remote -vv'
+alias gitd='git diff'
 
 alias vim='vim -p'
 
@@ -59,6 +60,7 @@ alias wc='wc -cmlLw'
 # misc
 alias rmf='rm -rf'
 alias rgrep='grep -r'
+alias pgrep='grep -P'
 alias quit='exit'
 alias mip='hostname -I'
 alias vimrc='vim ~/.vimrc'
@@ -66,3 +68,4 @@ alias psf='ps -o pid,user,pcpu,pmem,args'
 alias update='sudo apt-get update && sudo apt-get upgrade'
 alias math='python3 -ic "from math import *"'
 alias beta='ssh twb015@beta.latech.edu'
+alias open='gnome-open'
