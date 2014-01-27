@@ -254,6 +254,7 @@ let g:gundo_right = 1
 " mappings for plugins that don't have these nice settings
 noremap <leader>u :GundoToggle<cr>
 noremap <leader>t :NERDTreeTabsToggle<cr>
+
 " }}}
 
 " vim: sw=4 sts=4 et
