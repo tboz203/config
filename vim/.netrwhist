@@ -1,0 +1,9 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =7
+let g:netrw_dirhist_1='/home/tommy/workspace/ng-keypad'
+let g:netrw_dirhist_2='/home/tommy/workspace/ng-keyboard'
+let g:netrw_dirhist_3='/home/tommy/workspace/ng-keypad'
+let g:netrw_dirhist_4='/home/tommy/workspace/ng-keyboard/.git'
+let g:netrw_dirhist_5='/home/tommy/workspace/ng-keypad'
+let g:netrw_dirhist_6='/home/tommy/workspace/ng-keypad/.git'
+let g:netrw_dirhist_7='/home/tommy/docs/class/watson_reboot/ng-keyboard/src/ngDraggable'

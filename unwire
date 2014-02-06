@@ -1,13 +1,14 @@
 #!/bin/bash
 
-rm -rf ~/.profile
-rm -rf ~/.bashrc
-rm -rf ~/.vimrc
-rm -rf ~/.inputrc
-rm -rf ~/.bash_aliases
-rm -rf ~/.bin
-rm -rf ~/.pymodules
-rm -rf ~/.bash_logout
-rm -rf ~/.toprc
-rm -rf ~/.gitconfig
-rm -rf ~/.git-prompt
+rm -f ~/.profile
+rm -f ~/.bashrc
+rm -f ~/.vimrc
+rm -f ~/.inputrc
+rm -f ~/.bash_aliases
+rm -f ~/.bin
+rm -f ~/.pymodules
+rm -f ~/.bash_logout
+rm -f ~/.toprc
+rm -f ~/.gitconfig
+rm -f ~/.git-prompt
+rm -f ~/.vim

@@ -183,7 +183,7 @@ Bundle 'gmarik/vundle'
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
 " auto-set indentation variables
-Bundle 'tpope/vim-sleuth'
+" Bundle 'tpope/vim-sleuth'
 " indentation guides
 Bundle 'nathanaelkane/vim-indent-guides'
 
@@ -257,4 +257,5 @@ noremap <leader>t :NERDTreeTabsToggle<cr>
 
 " }}}
 
+filetype indent on
 " vim: sw=4 sts=4 et

@@ -1,0 +1,10 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_1='/home/tommy/pycat'
+let g:netrw_dirhist_2='/home/tommy/backups'
+let g:netrw_dirhist_3='/usr/share/vim/vim73'
+let g:netrw_dirhist_4='/home/tommy/docs/code/update'
+let g:netrw_dirhist_5='/home/tommy/.local/share/FasterThanLight'
+let g:netrw_dirhist_6='/home/tommy/.minecraft'
+let g:netrw_dirhist_7='/home/tommy/dloads/Mandelbrot'
+let g:netrw_dirhist_8='/home/tommy/docs/docs'

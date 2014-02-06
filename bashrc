@@ -120,8 +120,24 @@ if [ -x /usr/bin/dircolors ]; then
     fi
 fi
 
-source ~/.git-prompt
-export GIT_PS1_SHOWDIRTYSTATE=1
-export GIT_PS1_SHOWSTASHSTATE=1
-export GIT_PS1_SHOWUNTRACKEDFILE=1
-export GIT_PS1_SHOWCOLORHINTS=1
+# clear screen and list files after changing directory
+cd(){
+    if [ -n "$1" ]; then
+        builtin cd "$1"
+    else
+        builtin cd "$HOME"
+    fi
+
+    clear
+    ll
+}
+
+if [ -f ~/.git-prompt ]; then
+    . ~/.git-prompt
+    export GIT_PS1_SHOWDIRTYSTATE=1
+    export GIT_PS1_SHOWSTASHSTATE=1
+    export GIT_PS1_SHOWUNTRACKEDFILE=1
+    export GIT_PS1_SHOWCOLORHINTS=1
+fi
+
+ll

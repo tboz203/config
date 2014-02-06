@@ -24,6 +24,7 @@ alias gitb='git branch -vv'
 alias gitr='git remote -vv'
 alias gitd='git diff'
 
+# open each file in its own tab
 alias vim='vim -p'
 
 # common misspellings
@@ -33,7 +34,7 @@ alias fl=lf
 alias f=lf
 alias ivm=vim
 alias vmi=vim
-alias jbos=jobs
+alias oepn=open
 
 # cd aliases
 alias cd..='cd ..'
