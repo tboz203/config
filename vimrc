@@ -120,7 +120,7 @@ noremap <silent> <leader>rr :retab<cr>:%s/\s\+$//<cr>:noh<cr>
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
 " quick mapping to get rid of search highlighting
-noremap <silent> <leader>n :nohlsearch<cr>
+noremap <silent> <leader>h :nohlsearch<cr>
 " paste from clipboard
 noremap <silent> <leader>p :set paste<cr>"+p:set nopaste<cr>
 " insert the current date or date and time
@@ -200,6 +200,8 @@ Bundle 'sjl/gundo.vim'
 Bundle 'tpope/vim-fugitive'
 " multi-language block commenting
 Bundle 'tpope/vim-commentary'
+" quick manipulation of wrapping elements
+Bundle 'tpope/vim-surround'
 
 " " powerful file-system searching
 " Bundle 'kien/ctrlp.vim'
@@ -220,19 +222,12 @@ Bundle 'Shutnik/jshint2.vim'
 " Bundle 'vim-scripts/TabBar'
 " Bundle 'Lokaltog/powerline'
 " " add repeat (.) support to (some) plugins
-" Bundle 'tpope/vim-repeat'
+Bundle 'tpope/vim-repeat'
 " " external syntax checking (?)
 " Bundle 'scrooloose/syntastic'
 
 filetype plugin indent on
 " end Vundle }}}
-
-" tabs {{{
-set shiftwidth=4
-set softtabstop=4
-set expandtab
-set smarttab
-" end tabs }}}
 
 " plugin settings {{{
 " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
@@ -251,11 +246,25 @@ autocmd VimEnter,Colorscheme * :hi Normal NONE
 " gundo setting(s)
 let g:gundo_right = 1
 
+" vim-surround settings
+" instead of surrounding with 'p' use value from prompt
+let g:surround_112 = "\1surround: \1\r\1\1"
+
 " mappings for plugins that don't have these nice settings
 noremap <leader>u :GundoToggle<cr>
-noremap <leader>t :NERDTreeTabsToggle<cr>
+noremap <leader>n :NERDTreeTabsToggle<cr>
+noremap <leader>tt :TlistToggle<cr>
+noremap <leader>to :TlistOpen<cr>
+noremap <leader>tc :TlistClose<cr>
 
 " }}}
+
+" tabs {{{
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set smarttab
+" end tabs }}}
 
 filetype indent on
 " vim: sw=4 sts=4 et
