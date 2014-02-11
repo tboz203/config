@@ -36,11 +36,6 @@ alias ivm=vim
 alias vmi=vim
 alias oepn=open
 
-# cd aliases
-alias cd..='cd ..'
-alias ..='cd ..'
-alias ...='cd ../..'
-
 # make du and df a bit more readable
 alias df='df -h'
 alias du='du -hc 2>/dev/null'

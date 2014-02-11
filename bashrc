@@ -5,6 +5,9 @@
 # 2013/2/22 - Tommy Bozeman
 # some slight modifications, mostly to PS1
 
+# 2014-02-11 - Tommy Bozeman
+# added autocd and ls PROMPT_COMMAND
+
 HISTCONTROL=ignoreboth
 
 # If not running interactively, don't do anything
@@ -96,6 +99,12 @@ PS1+='$(__git_ps1 ":(%s)")\$ '
 unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
 unset white WHITE reset color_prompt force_color_prompt
 
+# list files on directory change
+PROMPT_COMMAND='[[ ${__new_wd:=$PWD} != $PWD ]] && ll; __new_wd=$PWD'
+
+# set autocd: if command is a directory, cd to it
+shopt -s autocd
+
 # Alias definitions.
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -120,24 +129,23 @@ if [ -x /usr/bin/dircolors ]; then
     fi
 fi
 
-# clear screen and list files after changing directory
-cd(){
-    if [ -n "$1" ]; then
-        builtin cd "$1"
-    else
-        builtin cd "$HOME"
-    fi
+# # clear screen and list files after changing directory
+# # this functionality is obsoleted by the PROMPT_COMMAND
+# cd(){
+#     if [ -n "$1" ]; then
+#         builtin cd "$1"
+#     else
+#         builtin cd "$HOME"
+#     fi
 
-    clear
-    ll
-}
+#     clear
+#     ll
+# }
 
 if [ -f ~/.git-prompt ]; then
     . ~/.git-prompt
-    export GIT_PS1_SHOWDIRTYSTATE=1
-    export GIT_PS1_SHOWSTASHSTATE=1
-    export GIT_PS1_SHOWUNTRACKEDFILE=1
-    export GIT_PS1_SHOWCOLORHINTS=1
+    GIT_PS1_SHOWDIRTYSTATE=1
+    GIT_PS1_SHOWSTASHSTATE=1
+    GIT_PS1_SHOWUNTRACKEDFILE=1
+    GIT_PS1_SHOWCOLORHINTS=1
 fi
-
-ll
