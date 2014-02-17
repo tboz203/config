@@ -132,6 +132,8 @@ noremap / q/a
 noremap ? q?a
 " a quick mapping for JSHint
 noremap <leader>j :JSHint<cr><cr>
+" make a mapping for traditional ex binding
+noremap ; :
 
 " visual mode
 vnoremap <leader>" di""<esc>hp
@@ -251,11 +253,11 @@ let g:gundo_right = 1
 let g:surround_112 = "\1surround: \1\r\1\1"
 
 " mappings for plugins that don't have these nice settings
-noremap <leader>u :GundoToggle<cr>
-noremap <leader>n :NERDTreeTabsToggle<cr>
-noremap <leader>tt :TlistToggle<cr>
-noremap <leader>to :TlistOpen<cr>
-noremap <leader>tc :TlistClose<cr>
+noremap <silent> <leader>u :GundoToggle<cr>
+noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
+noremap <silent> <leader>tt :TlistToggle<cr>
+noremap <silent> <leader>to :TlistOpen<cr>
+noremap <silent> <leader>tc :TlistClose<cr>
 
 " }}}
 
