@@ -11,3 +11,4 @@ ln -s "$(pwd)/logout"         ~/.bash_logout
 ln -s "$(pwd)/toprc"          ~/.toprc
 ln -s "$(pwd)/gitconfig"      ~/.gitconfig
 ln -s "$(pwd)/git-prompt"     ~/.git-prompt
+ln -s "$(pwd)/vim"            ~/.vim/
