@@ -120,8 +120,12 @@ if [ -x /usr/bin/dircolors ]; then
     fi
 fi
 
+# add a nice git prompt
 source ~/.git-prompt
 export GIT_PS1_SHOWDIRTYSTATE=1
 export GIT_PS1_SHOWSTASHSTATE=1
 export GIT_PS1_SHOWUNTRACKEDFILE=1
 export GIT_PS1_SHOWCOLORHINTS=1
+
+# set the editor to vim
+export EDITOR=/usr/local/bin/vim
