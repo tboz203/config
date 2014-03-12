@@ -16,11 +16,14 @@ alias h='hostname'
 alias py='python -B'
 alias py3='python3 -B'
 alias tc='truecrypt -t'
+alias ...='../..'
+alias ....='../../..'
+alias .....='../../../..'
 
 # some git commands
 alias gits='git status'
 alias gitl='git log --oneline --graph'
-alias gitb='git branch -vv'
+alias gitb='git branch -vva'
 alias gitr='git remote -vv'
 alias gitd='git diff'
 
