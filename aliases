@@ -59,7 +59,6 @@ alias wc='wc -cmlLw'
 # misc
 alias rmf='rm -rf'
 alias rgrep='grep -r'
-alias pgrep='grep -P'
 alias quit='exit'
 alias mip='hostname -I'
 alias vimrc='vim ~/.vimrc'
