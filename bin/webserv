@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd ~
-node web-server.js &> /dev/null &
+exec node web-server.js &> /dev/null &

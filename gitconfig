@@ -1,16 +1,16 @@
-[color]
-	ui = auto
+; [color]
+; 	ui = auto
 [user]
 	name = tboz203
 	email = tboz203@gmail.com
 [core]
 	editor = vim
-[merge]
-	tool = vimdiff
-[diff]
-	tool = vimdiff
-	prompt = false
-[difftool]
-	prompt = false
-[push]
-	default = matching
+; [merge]
+; 	tool = vimdiff
+; [diff]
+; 	tool = vimdiff
+; 	prompt = false
+; [difftool]
+; 	prompt = false
+; [push]
+; 	default = matching
