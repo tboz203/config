@@ -26,4 +26,4 @@ if [ -d "$HOME/.pymodules" ]; then
     export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
 fi
 
-export EDITOR=/usr/local/bin/vim
+export EDITOR=/usr/bin/vim
