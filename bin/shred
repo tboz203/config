@@ -1,0 +1,18 @@
+#!/bin/bash
+# a little script to overwrite a file with random data, and then remove.
+# not 100% sure this works, but whatever.
+
+for item in "$@"; do
+    if ! [ -f "$item" ]; then
+        continue
+    fi
+
+    echo "$item"
+    let blocks=$(wc --bytes "$item" | cut -d\  -f1)/512+1
+    for i in {1..10}; do
+        echo -n .
+        dd if=/dev/urandom of="$item" count=$blocks >& /dev/null
+    done
+    echo
+    rm "$item"
+done

@@ -192,6 +192,8 @@ Bundle 'nathanaelkane/vim-indent-guides'
 " active
 " snippet insertion (for boilerplate code)
 Bundle 'SirVer/ultisnips'
+" and some default snippets
+Bundle 'honza/vim-snippets'
 " file-system browser
 Bundle 'scrooloose/nerdtree'
 " tab-support for nerdtree
