@@ -15,6 +15,7 @@ emacs
 nodejs
 npm
 tidy
+lighttpd
 
 > for vim:
 	mercurial
