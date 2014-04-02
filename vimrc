@@ -212,8 +212,8 @@ Bundle 'tpope/vim-surround'
 " " increment/decrement dates w/ <c-a>/<c-x>
 " Bundle 'tpope/vim-speeddating'
 
-" a 'fuzzy' code-completion engine
-Bundle 'Valloric/YouCompleteMe'
+" " a 'fuzzy' code-completion engine
+" Bundle 'Valloric/YouCompleteMe'
 
 " javascript helpers
 Bundle 'Shutnik/jshint2.vim'
