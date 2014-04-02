@@ -15,6 +15,13 @@ emacs
 nodejs
 npm
 tidy
+scapy
+wicd
+
+build-essential
+gcc-multilib
+aircrack-ng
+kismet
 
 > for vim:
 	mercurial
