@@ -1,0 +1,18 @@
+#!/bin/sh
+
+dev="SynPS/2 Synaptics TouchPad"
+
+# make sure we have the device
+if ! xinput list | grep -q "$dev"; then
+    echo "[-] Mouse not detected!"
+    exit
+fi
+
+# test it's state
+if xinput list-props "$dev" | grep -q 'Device Enabled.*1$'; then
+    # disable
+    xinput disable "SynPS/2 Synaptics TouchPad"
+else
+    # enable
+    xinput enable "SynPS/2 Synaptics TouchPad"
+fi

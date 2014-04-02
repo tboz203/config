@@ -1,0 +1,39 @@
+[submodule "gmarik/vundle"]
+    path = vim/bundle/vundle
+    url = git@github:/gmarik/vundle
+[submodule "tpope/vim-sensible"]
+    path = vim/bundle/vim-sensible
+    url = git@github:/tpope/vim-sensible
+[submodule "nathanaelkane/vim-indent-guides"]
+    path = vim/bundle/vim-indent-guides
+    url = git@github:/nathanaelkane/vim-indent-guides
+[submodule "SirVer/ultisnips"]
+    path = vim/bundle/ultisnips
+    url = git@github:/SirVer/ultisnips
+[submodule "scrooloose/nerdtree"]
+    path = vim/bundle/nerdtree
+    url = git@github:/scrooloose/nerdtree
+[submodule "jistr/vim-nerdtree-tabs"]
+    path = vim/bundle/vim-nerdtree-tabs
+    url = git@github:/jistr/vim-nerdtree-tabs
+[submodule "sjl/gundo.vim"]
+    path = vim/bundle/gundo.vim
+    url = git@github:/sjl/gundo.vim
+[submodule "tpope/vim-fugitive"]
+    path = vim/bundle/vim-fugitive
+    url = git@github:/tpope/vim-fugitive
+[submodule "tpope/vim-commentary"]
+    path = vim/bundle/vim-commentary
+    url = git@github:/tpope/vim-commentary
+[submodule "tpope/vim-surround"]
+    path = vim/bundle/vim-surround
+    url = git@github:/tpope/vim-surround
+[submodule "Valloric/YouCompleteMe"]
+    path = vim/bundle/YouCompleteMe
+    url = git@github:/Valloric/YouCompleteMe
+[submodule "Shutnik/jshint2.vim"]
+    path = vim/bundle/jshint2.vim
+    url = git@github:/Shutnik/jshint2.vim
+[submodule "tpope/vim-repeat"]
+    path = vim/bundle/vim-repeat
+    url = git@github:/tpope/vim-repeat
