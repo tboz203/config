@@ -184,18 +184,18 @@ call vundle#rc()
 Bundle 'gmarik/vundle'
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
-" auto-set indentation variables
+" " auto-set indentation variables
 " Bundle 'tpope/vim-sleuth'
-" indentation guides
-Bundle 'nathanaelkane/vim-indent-guides'
+" " indentation guides
+" Bundle 'nathanaelkane/vim-indent-guides'
 
-" active
-" snippet insertion (for boilerplate code)
-Bundle 'SirVer/ultisnips'
-" file-system browser
-Bundle 'scrooloose/nerdtree'
-" tab-support for nerdtree
-Bundle 'jistr/vim-nerdtree-tabs'
+" " active
+" " snippet insertion (for boilerplate code)
+" Bundle 'SirVer/ultisnips'
+" " file-system browser
+" Bundle 'scrooloose/nerdtree'
+" " tab-support for nerdtree
+" Bundle 'jistr/vim-nerdtree-tabs'
 " graphical undo tree
 Bundle 'sjl/gundo.vim'
 " integration w/ git
@@ -215,8 +215,8 @@ Bundle 'tpope/vim-surround'
 " " a 'fuzzy' code-completion engine
 " Bundle 'Valloric/YouCompleteMe'
 
-" javascript helpers
-Bundle 'Shutnik/jshint2.vim'
+" " javascript helpers
+" Bundle 'Shutnik/jshint2.vim'
 " Bundle 'walm/jshint.vim'
 
 " " testing (not yet tring to learn, lol)
@@ -224,7 +224,7 @@ Bundle 'Shutnik/jshint2.vim'
 " Bundle 'vim-scripts/TabBar'
 " Bundle 'Lokaltog/powerline'
 " " add repeat (.) support to (some) plugins
-Bundle 'tpope/vim-repeat'
+" Bundle 'tpope/vim-repeat'
 " " external syntax checking (?)
 " Bundle 'scrooloose/syntastic'
 
