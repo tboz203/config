@@ -23,6 +23,11 @@ gcc-multilib
 aircrack-ng
 kismet
 
+> for truecrypt:
+	libwxgtk2.8-dev
+	libfuse-dev
+	libopencryptoki-dev
+
 > for vim:
 	mercurial
 	ruby-dev
