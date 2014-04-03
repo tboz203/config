@@ -16,6 +16,13 @@ nodejs
 npm
 tidy
 lighttpd
+scapy
+wicd
+
+build-essential
+gcc-multilib
+aircrack-ng
+kismet
 
 > for vim:
 	mercurial
