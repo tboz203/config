@@ -18,11 +18,16 @@ tidy
 lighttpd
 scapy
 wicd
+htop
+exuberant-ctags
 
 build-essential
 gcc-multilib
 aircrack-ng
 kismet
+
+for system monitor:
+	gir1.2-gtop-2.0
 
 > for vim:
 	mercurial

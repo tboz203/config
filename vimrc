@@ -179,25 +179,10 @@ filetype off
 set rtp+=~/.vim/bundle/vundle
 call vundle#rc()
 
-" passive
 " vundle itself
 Bundle 'gmarik/vundle'
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
-" auto-set indentation variables
-" Bundle 'tpope/vim-sleuth'
-" indentation guides
-Bundle 'nathanaelkane/vim-indent-guides'
-
-" active
-" snippet insertion (for boilerplate code)
-Bundle 'SirVer/ultisnips'
-" and some default snippets
-Bundle 'honza/vim-snippets'
-" file-system browser
-Bundle 'scrooloose/nerdtree'
-" tab-support for nerdtree
-Bundle 'jistr/vim-nerdtree-tabs'
 " graphical undo tree
 Bundle 'sjl/gundo.vim'
 " integration w/ git
@@ -206,62 +191,69 @@ Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-commentary'
 " quick manipulation of wrapping elements
 Bundle 'tpope/vim-surround'
+" add repeat (.) support to (some) plugins
+Bundle 'tpope/vim-repeat'
 
-" " powerful file-system searching
+" auto-set indentation variables{{{
+" Bundle 'tpope/vim-sleuth'
+" " indentation guides
+" Bundle 'nathanaelkane/vim-indent-guides'
+" " powerful file-system searching"
 " Bundle 'kien/ctrlp.vim'
 " " buffer explorer
 " Bundle 'corntrace/bufexplorer'
 " " increment/decrement dates w/ <c-a>/<c-x>
 " Bundle 'tpope/vim-speeddating'
-
+" " snippet insertion (for boilerplate code)
+" Bundle 'SirVer/ultisnips'
+" " file-system browser
+" Bundle 'scrooloose/nerdtree'
+" " tab-support for nerdtree
+" Bundle 'jistr/vim-nerdtree-tabs'
 " " a 'fuzzy' code-completion engine
 " Bundle 'Valloric/YouCompleteMe'
-
-" javascript helpers
-Bundle 'Shutnik/jshint2.vim'
+" " javascript helpers
+" Bundle 'Shutnik/jshint2.vim'
 " Bundle 'walm/jshint.vim'
-
 " " testing (not yet tring to learn, lol)
 " Bundle 'majutsushi/tagbar'
 " Bundle 'vim-scripts/TabBar'
 " Bundle 'Lokaltog/powerline'
-" " add repeat (.) support to (some) plugins
-Bundle 'tpope/vim-repeat'
 " " external syntax checking (?)
-" Bundle 'scrooloose/syntastic'
+" Bundle 'scrooloose/syntastic'"}}}
 
 filetype plugin indent on
 " end Vundle }}}
 
-" plugin settings {{{
-" UltiSnips tab-completion conflicts with YCM, new triggers for snippet
-" expansion/jumping
-let g:UltiSnipsExpandTrigger = '<c-l>'
-let g:UltiSnipsJumpForwardTrigger = '<c-j>'
-let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
-
-" indent guide settings
-let g:indent_guides_enable_on_vim_startup = 0
-let g:indent_guides_auto_colors = 0
-autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
-autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
-autocmd VimEnter,Colorscheme * :hi Normal NONE
-
-" gundo setting(s)
-let g:gundo_right = 1
-
-" vim-surround settings
-" instead of surrounding with 'p' use value from prompt
-let g:surround_112 = "\1surround: \1\r\1\1"
-
-" mappings for plugins that don't have these nice settings
-noremap <silent> <leader>u :GundoToggle<cr>
-noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
-noremap <silent> <leader>tt :TlistToggle<cr>
-noremap <silent> <leader>to :TlistOpen<cr>
-noremap <silent> <leader>tc :TlistClose<cr>
-
-" }}}
+" " plugin settings {{{
+" " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
+" " expansion/jumping
+" let g:UltiSnipsExpandTrigger = '<c-l>'
+" let g:UltiSnipsJumpForwardTrigger = '<c-j>'
+" let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
+" 
+" " indent guide settings
+" let g:indent_guides_enable_on_vim_startup = 0
+" let g:indent_guides_auto_colors = 0
+" autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
+" autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
+" autocmd VimEnter,Colorscheme * :hi Normal NONE
+" 
+" " gundo setting(s)
+" let g:gundo_right = 1
+" 
+" " vim-surround settings
+" " instead of surrounding with 'p' use value from prompt
+" let g:surround_112 = "\1surround: \1\r\1\1"
+" 
+" " mappings for plugins that don't have these nice settings
+" noremap <silent> <leader>u :GundoToggle<cr>
+" noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
+" noremap <silent> <leader>tt :TlistToggle<cr>
+" noremap <silent> <leader>to :TlistOpen<cr>
+" noremap <silent> <leader>tc :TlistClose<cr>
+" 
+" " }}}
 
 " tabs {{{
 set shiftwidth=4
