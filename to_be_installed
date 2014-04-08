@@ -17,6 +17,8 @@ npm
 tidy
 scapy
 wicd
+htop
+exuberant-ctags
 
 build-essential
 gcc-multilib

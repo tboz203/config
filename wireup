@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./unwire
+
 ln -s "$(pwd)/profile"        ~/.profile
 ln -s "$(pwd)/bashrc"         ~/.bashrc
 ln -s "$(pwd)/vimrc"          ~/.vimrc

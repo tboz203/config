@@ -179,23 +179,10 @@ filetype off
 set rtp+=~/.vim/bundle/vundle
 call vundle#rc()
 
-" passive
 " vundle itself
 Bundle 'gmarik/vundle'
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
-" auto-set indentation variables
-" Bundle 'tpope/vim-sleuth'
-" indentation guides
-Bundle 'nathanaelkane/vim-indent-guides'
-
-" active
-" snippet insertion (for boilerplate code)
-Bundle 'SirVer/ultisnips'
-" file-system browser
-Bundle 'scrooloose/nerdtree'
-" tab-support for nerdtree
-Bundle 'jistr/vim-nerdtree-tabs'
 " graphical undo tree
 Bundle 'sjl/gundo.vim'
 " integration w/ git
@@ -204,29 +191,36 @@ Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-commentary'
 " quick manipulation of wrapping elements
 Bundle 'tpope/vim-surround'
+" add repeat (.) support to (some) plugins
+Bundle 'tpope/vim-repeat'
 
-" " powerful file-system searching
+" auto-set indentation variables{{{
+" Bundle 'tpope/vim-sleuth'
+" " indentation guides
+" Bundle 'nathanaelkane/vim-indent-guides'
+" " powerful file-system searching"
 " Bundle 'kien/ctrlp.vim'
 " " buffer explorer
 " Bundle 'corntrace/bufexplorer'
 " " increment/decrement dates w/ <c-a>/<c-x>
 " Bundle 'tpope/vim-speeddating'
-
+" " snippet insertion (for boilerplate code)
+" Bundle 'SirVer/ultisnips'
+" " file-system browser
+" Bundle 'scrooloose/nerdtree'
+" " tab-support for nerdtree
+" Bundle 'jistr/vim-nerdtree-tabs'
 " " a 'fuzzy' code-completion engine
 " Bundle 'Valloric/YouCompleteMe'
-
-" javascript helpers
-Bundle 'Shutnik/jshint2.vim'
+" " javascript helpers
+" Bundle 'Shutnik/jshint2.vim'
 " Bundle 'walm/jshint.vim'
-
 " " testing (not yet tring to learn, lol)
 " Bundle 'majutsushi/tagbar'
 " Bundle 'vim-scripts/TabBar'
 " Bundle 'Lokaltog/powerline'
-" " add repeat (.) support to (some) plugins
-Bundle 'tpope/vim-repeat'
 " " external syntax checking (?)
-" Bundle 'scrooloose/syntastic'
+" Bundle 'scrooloose/syntastic'"}}}
 
 filetype plugin indent on
 " end Vundle }}}
