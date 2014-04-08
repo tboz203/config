@@ -56,7 +56,7 @@ def say(str):
 def check(filename):
     '''If it's not there, make it (for directories)'''
     if not os.path.isdir(filename):
-        os.mkdir(filename)
+        os.makedirs(filename)
 
 def gettype(filename):
     '''Get the file's type, as per our dictionary'''
