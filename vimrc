@@ -122,7 +122,7 @@ noremap <leader>sv :source $MYVIMRC<cr>
 " quick mapping to get rid of search highlighting
 noremap <silent> <leader>h :nohlsearch<cr>
 " paste from clipboard
-noremap <silent> <leader>p :set paste<cr>"+p:set nopaste<cr>
+noremap <silent> <leader>p o<esc>:set paste<cr>"+p:set nopaste<cr>
 " insert the current date or date and time
 noremap <silent> <leader>d :r !day<cr>kJ
 noremap <silent> <leader>f :r !full<cr>kJ
@@ -193,6 +193,8 @@ Bundle 'tpope/vim-commentary'
 Bundle 'tpope/vim-surround'
 " add repeat (.) support to (some) plugins
 Bundle 'tpope/vim-repeat'
+" adding gpg symmetric support
+Bundle 'vim-scripts/gnupg.vim'
 
 " auto-set indentation variables{{{
 " Bundle 'tpope/vim-sleuth'
@@ -231,29 +233,29 @@ filetype plugin indent on
 " let g:UltiSnipsExpandTrigger = '<c-l>'
 " let g:UltiSnipsJumpForwardTrigger = '<c-j>'
 " let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
-" 
+"
 " " indent guide settings
 " let g:indent_guides_enable_on_vim_startup = 0
 " let g:indent_guides_auto_colors = 0
 " autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
 " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
 " autocmd VimEnter,Colorscheme * :hi Normal NONE
-" 
-" " gundo setting(s)
-" let g:gundo_right = 1
-" 
-" " vim-surround settings
-" " instead of surrounding with 'p' use value from prompt
-" let g:surround_112 = "\1surround: \1\r\1\1"
-" 
-" " mappings for plugins that don't have these nice settings
-" noremap <silent> <leader>u :GundoToggle<cr>
-" noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
-" noremap <silent> <leader>tt :TlistToggle<cr>
-" noremap <silent> <leader>to :TlistOpen<cr>
-" noremap <silent> <leader>tc :TlistClose<cr>
-" 
-" " }}}
+
+" gundo setting(s)
+let g:gundo_right = 1
+
+" vim-surround settings
+" instead of surrounding with 'p' use value from prompt
+let g:surround_112 = "\1surround: \1\r\1\1"
+
+" mappings for plugins that don't have these nice settings
+noremap <silent> <leader>u :GundoToggle<cr>
+noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
+noremap <silent> <leader>tt :TlistToggle<cr>
+noremap <silent> <leader>to :TlistOpen<cr>
+noremap <silent> <leader>tc :TlistClose<cr>
+
+" }}}
 
 " tabs {{{
 set shiftwidth=4

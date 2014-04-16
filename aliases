@@ -48,6 +48,7 @@ alias du='du -hc 2>/dev/null'
 alias mv='mv -vi'
 alias cp='cp -vri'
 alias rm='rm -vI'
+alias rmf='rm -rf'
 
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
@@ -57,15 +58,15 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 alias wc='wc -cmlLw'
 
 # misc
-alias rmf='rm -rf'
 alias rgrep='grep -r'
 alias quit='exit'
-alias mip='hostname -I'
 alias vimrc='vim ~/.vimrc'
-alias psf='ps -o pid,user,pcpu,pmem,args'
+alias aliases='vim ~/.bash_aliases'
+alias bashrc='vim ~/.bashrc'
 alias update='sudo apt-get update && sudo apt-get upgrade'
 alias math='python3 -ic "from math import *"'
 alias beta='ssh twb015@beta.latech.edu'
 alias open='xdg-open'
 alias tidy='tidy -f /dev/null -iqmw'
-alias j='jobs'
+alias server='python -m SimpleHTTPServer'
+
