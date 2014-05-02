@@ -197,10 +197,11 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 " doing things with tags?
 Bundle 'majutsushi/tagbar'
-" javascript analyzer
-Bundle 'marijnh/tern_for_vim'
-" tag generator using tern
-Bundle 'ramitos/jsctags'
+
+" " javascript analyzer
+" Bundle 'marijnh/tern_for_vim'
+" " tag generator using tern
+" Bundle 'ramitos/jsctags'
 
 
 " auto-set indentation variables{{{

@@ -1,25 +1,48 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from os import path
+from os import path, rename
 from sys import argv, stderr
-from shutil import move
+import shutil
 from getfreename import getfreename
 
-def move_rename(oldname, newname):
+
+def move_rename(oldname, newname, copy):
     oldname = oldname.rstrip('/')
     newname = newname.rstrip('/')
     if path.isdir(newname):
         newname = newname + '/' + path.basename(oldname)
     newname = getfreename(newname)
     print(oldname,' -> ', newname)
-    move(oldname, newname)
+    if copy:
+        if path.isdir(oldname):
+            shutil.copytree(oldname, newname)
+        else:
+            shutil.copy(oldname, newname)
+    else:
+        rename(oldname, newname)
+
 
 def main():
-    if len(argv) < 3:
-        print("[-] I'm not sure what to do with this...", file=stderr)
+    copy = False
+    if '-c' in argv:
+        argv.remove('-c')
+        copy = True
+
+    if len(argv) < 3 or '-h' in argv:
+        print('''\
+Usage: {0} [-c] [-h] <src> <dest>
+       move <src> to <dest>, appending a number to <src> if file in <dest> with
+       same name already exists.
+
+       -c:      copy instead of moving.
+       -h:      it's a mystery.'''.format(argv[0]))
+
+        return
+
     for item in argv[1:-1]:
-        move_rename(item, argv[-1])
+        move_rename(item, argv[-1], copy)
+
 
 if __name__ == '__main__':
     main()
