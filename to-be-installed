@@ -7,8 +7,8 @@ doxygen
 ghc
 dropbox
 tree
-7z
-steam
+p7zip
+steam-launcher
 curl
 sublime-text
 emacs
@@ -21,23 +21,18 @@ wicd
 htop
 exuberant-ctags
 
+imagemagick
+python-gnuplot
+python-pyx
+
 build-essential
 gcc-multilib
 aircrack-ng
 kismet
 
-> for vim:
-	mercurial
-	ruby-dev
-	libncurses5-dev
-	python3.3-dev
-	libX11-dev
-	libxtst-dev
-	libxt-dev
-	libsm-dev
-	libxpm-dev
-	libxmu-dev
-	libgtk2.0-dev
+python-pip
+powerline (?)
+ternjs (?)
 
 truecrypt *
 truecrack *

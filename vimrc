@@ -111,18 +111,20 @@ let maplocalleader = ','
 
 " normal mode
 " remove whitespace at end of line
-noremap <silent> <leader>rs :%s/\s\+$//<cr>:noh<cr>
+noremap <silent> <leader>rs :%s/\s\+$//e<cr>:noh<cr>
 " retab the file
 noremap <silent> <leader>rt :retab<cr>
 " do both
-noremap <silent> <leader>rr :retab<cr>:%s/\s\+$//<cr>:noh<cr>
+noremap <silent> <leader>rr :retab<cr>:%s/\s\+$//e<cr>:noh<cr>
 " easy edit/source of my vimrc (this file)
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
 " quick mapping to get rid of search highlighting
 noremap <silent> <leader>h :nohlsearch<cr>
+" copy to clipboard
+noremap <silent> <leader>c "+y
 " paste from clipboard
-noremap <silent> <leader>p :set paste<cr>"+p:set nopaste<cr>
+noremap <silent> <leader>p o<esc>"+p0
 " insert the current date or date and time
 noremap <silent> <leader>d :r !day<cr>kJ
 noremap <silent> <leader>f :r !full<cr>kJ
@@ -193,6 +195,13 @@ Bundle 'tpope/vim-commentary'
 Bundle 'tpope/vim-surround'
 " add repeat (.) support to (some) plugins
 Bundle 'tpope/vim-repeat'
+" doing things with tags?
+Bundle 'majutsushi/tagbar'
+" javascript analyzer
+Bundle 'marijnh/tern_for_vim'
+" tag generator using tern
+Bundle 'ramitos/jsctags'
+
 
 " auto-set indentation variables{{{
 " Bundle 'tpope/vim-sleuth'
@@ -216,7 +225,6 @@ Bundle 'tpope/vim-repeat'
 " Bundle 'Shutnik/jshint2.vim'
 " Bundle 'walm/jshint.vim'
 " " testing (not yet tring to learn, lol)
-" Bundle 'majutsushi/tagbar'
 " Bundle 'vim-scripts/TabBar'
 " Bundle 'Lokaltog/powerline'
 " " external syntax checking (?)
@@ -249,9 +257,9 @@ let g:surround_112 = "\1surround: \1\r\1\1"
 " mappings for plugins that don't have these nice settings
 noremap <silent> <leader>u :GundoToggle<cr>
 noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
-noremap <silent> <leader>tt :TlistToggle<cr>
-noremap <silent> <leader>to :TlistOpen<cr>
-noremap <silent> <leader>tc :TlistClose<cr>
+noremap <silent> <leader>tt :TagbarToggle<cr>
+
+set rtp+=/home/tommy/.local/lib/python2.7/site-packages/powerline/bindings/vim
 
 " }}}
 
