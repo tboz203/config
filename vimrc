@@ -103,6 +103,8 @@ set shiftround
 
 set undofile
 set undodir=/tmp
+
+set spellfile=~/.vim/spell/en.utf-8.add
 " end basic options }}}
 
 " messing around with mappings {{{
@@ -195,12 +197,18 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 " adding gpg symmetric support
 Bundle 'vim-scripts/gnupg.vim'
+" tag support
+Bundle 'majutsushi/tagbar'
+" cool looking info line
+Bundle 'Lokaltog/powerline'
+" tern support
+Bundle 'marijnh/tern_for_vim'
 
-" auto-set indentation variables{{{
+" auto-set indentation variables {{{
 " Bundle 'tpope/vim-sleuth'
 " " indentation guides
 " Bundle 'nathanaelkane/vim-indent-guides'
-" " powerful file-system searching"
+" " powerful file-system searching
 " Bundle 'kien/ctrlp.vim'
 " " buffer explorer
 " Bundle 'corntrace/bufexplorer'
@@ -217,12 +225,12 @@ Bundle 'vim-scripts/gnupg.vim'
 " " javascript helpers
 " Bundle 'Shutnik/jshint2.vim'
 " Bundle 'walm/jshint.vim'
-" " testing (not yet tring to learn, lol)
-" Bundle 'majutsushi/tagbar'
 " Bundle 'vim-scripts/TabBar'
-" Bundle 'Lokaltog/powerline'
 " " external syntax checking (?)
-" Bundle 'scrooloose/syntastic'"}}}
+" Bundle 'scrooloose/syntastic'
+" " ctags from some other place, lol
+" Bundle 'clausreinke/scoped_tags'
+" }}}
 
 filetype plugin indent on
 " end Vundle }}}
@@ -248,12 +256,19 @@ let g:gundo_right = 1
 " instead of surrounding with 'p' use value from prompt
 let g:surround_112 = "\1surround: \1\r\1\1"
 
+" javascript tags
+let g:tagbar_type_javascript = { 'ctagsbin': '/usr/local/bin/jsctags' }
+" let g:tagbar_type_javascript = { 'ctagsbin': '/home/tommy/config/bin/ejstags' }
+
 " mappings for plugins that don't have these nice settings
 noremap <silent> <leader>u :GundoToggle<cr>
 noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
-noremap <silent> <leader>tt :TlistToggle<cr>
-noremap <silent> <leader>to :TlistOpen<cr>
-noremap <silent> <leader>tc :TlistClose<cr>
+noremap <silent> <leader>tt :TagbarToggle<cr>
+noremap <silent> <leader>to :TagbarOpen<cr>
+noremap <silent> <leader>tc :TagbarClose<cr>
+
+
+set rtp+=/home/tommy/.vim/bundle/powerline/powerline/bindings/vim
 
 " }}}
 
@@ -263,6 +278,9 @@ set softtabstop=4
 set expandtab
 set smarttab
 " end tabs }}}
+
+" when diff'ing, ignore whitespace
+set diffopt+=iwhite
 
 filetype indent on
 " vim: sw=4 sts=4 et

@@ -21,6 +21,7 @@ wicd
 htop
 exuberant-ctags
 ruby
+wkhtmltopdf
 
 build-essential
 gcc-multilib

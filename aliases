@@ -70,3 +70,6 @@ alias open='xdg-open'
 alias tidy='tidy -f /dev/null -iqmw'
 alias server='python -m SimpleHTTPServer'
 
+alias astyle='astyle -sajcn'
+alias eq='pulseaudio-equalizer-gtk'
+alias lla='ll -A'
