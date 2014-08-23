@@ -124,7 +124,7 @@ noremap <leader>sv :source $MYVIMRC<cr>
 " quick mapping to get rid of search highlighting
 noremap <silent> <leader>h :nohlsearch<cr>
 " paste from clipboard
-noremap <silent> <leader>p o<esc>:set paste<cr>"+p:set nopaste<cr>
+noremap <silent> <leader>p o<esc>"+p
 " insert the current date or date and time
 noremap <silent> <leader>d :r !day<cr>kJ
 noremap <silent> <leader>f :r !full<cr>kJ
@@ -136,6 +136,8 @@ noremap ? q?a
 noremap <leader>j :JSHint<cr><cr>
 " make a mapping for traditional ex binding
 noremap ; :
+" toggle listmode
+noremap gl :set list!<cr>
 
 " visual mode
 vnoremap <leader>" di""<esc>hp
@@ -201,10 +203,11 @@ Bundle 'vim-scripts/gnupg.vim'
 Bundle 'majutsushi/tagbar'
 " cool looking info line
 Bundle 'Lokaltog/powerline'
-" tern support
-Bundle 'marijnh/tern_for_vim'
 
-" auto-set indentation variables {{{
+" {{{
+" " tern support
+" Bundle 'marijnh/tern_for_vim'
+" auto-set indentation variables
 " Bundle 'tpope/vim-sleuth'
 " " indentation guides
 " Bundle 'nathanaelkane/vim-indent-guides'

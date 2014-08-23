@@ -22,6 +22,7 @@ htop
 exuberant-ctags
 ruby
 wkhtmltopdf
+calibre
 
 build-essential
 gcc-multilib
@@ -52,4 +53,7 @@ jshint *
 google-chrome *
 skype *
 john *
-vim *
+
+metasploit *
+armitage *
+vmware / virtualbox *

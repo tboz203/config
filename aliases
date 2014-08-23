@@ -10,6 +10,7 @@ alias la='ls -A'
 alias lf='ll -S'
 alias lv='ls --sort=v'
 alias l='ls -CF'
+alias lla='ll -A'
 
 # shorten some stuff
 alias h='hostname'
@@ -48,7 +49,11 @@ alias du='du -hc 2>/dev/null'
 alias mv='mv -vi'
 alias cp='cp -vri'
 alias rm='rm -vI'
-alias rmf='rm -rf'
+
+# some ps aliases
+alias ps='ps -H'
+alias psef='ps -ef'
+alias psme='ps -u `id -u`'
 
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
@@ -65,11 +70,11 @@ alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
 alias update='sudo apt-get update && sudo apt-get upgrade'
 alias math='python3 -ic "from math import *"'
-alias beta='ssh twb015@beta.latech.edu'
-alias open='xdg-open'
 alias tidy='tidy -f /dev/null -iqmw'
 alias server='python -m SimpleHTTPServer'
 
 alias astyle='astyle -sajcn'
 alias eq='pulseaudio-equalizer-gtk'
-alias lla='ll -A'
+alias rmf='rm -rf'
+alias lt='ll --sort=t'
+alias listening='lsof -i -s TCP:Listen'

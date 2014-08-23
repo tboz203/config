@@ -27,3 +27,4 @@ if [ -d "$HOME/.pymodules" ]; then
 fi
 
 export EDITOR=/usr/bin/vim
+export PYTHONDONTWRITEBYTECODE=1
