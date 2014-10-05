@@ -37,3 +37,6 @@
 [submodule "Shutnik/jshint2.vim"]
     path = vim/bundle/jshint2.vim
     url = https://github.com/Shutnik/jshint2.vim
+[submodule "Localtog/powerline"]
+    path = vim/bundle/powerline
+    url = https://github.com/Lokaltog/powerline

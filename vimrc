@@ -195,19 +195,20 @@ Bundle 'tpope/vim-commentary'
 Bundle 'tpope/vim-surround'
 " add repeat (.) support to (some) plugins
 Bundle 'tpope/vim-repeat'
-" doing things with tags?
-Bundle 'majutsushi/tagbar'
-" javascript analyzer
-Bundle 'marijnh/tern_for_vim'
-" tag generator using tern
-Bundle 'ramitos/jsctags'
+" a cool status bar plugin
+Bundle 'Lokaltog/powerline'
 
-
-" auto-set indentation variables{{{
+" " doing things with tags? {{{
+" Bundle 'majutsushi/tagbar'
+" " javascript analyzer
+" Bundle 'marijnh/tern_for_vim'
+" " tag generator using tern
+" Bundle 'ramitos/jsctags'
+" " auto-set indentation variables
 " Bundle 'tpope/vim-sleuth'
 " " indentation guides
 " Bundle 'nathanaelkane/vim-indent-guides'
-" " powerful file-system searching"
+" " powerful file-system searching
 " Bundle 'kien/ctrlp.vim'
 " " buffer explorer
 " Bundle 'corntrace/bufexplorer'
@@ -228,7 +229,8 @@ Bundle 'ramitos/jsctags'
 " Bundle 'vim-scripts/TabBar'
 " Bundle 'Lokaltog/powerline'
 " " external syntax checking (?)
-" Bundle 'scrooloose/syntastic'"}}}
+" Bundle 'scrooloose/syntastic'
+" " }}}
 
 filetype plugin indent on
 " end Vundle }}}
