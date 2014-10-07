@@ -199,12 +199,12 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 " adding gpg symmetric support
 Bundle 'vim-scripts/gnupg.vim'
-" tag support
-Bundle 'majutsushi/tagbar'
 " cool looking info line
 Bundle 'Lokaltog/powerline'
 
 " {{{
+" " tag support
+" Bundle 'majutsushi/tagbar'
 " " tern support
 " Bundle 'marijnh/tern_for_vim'
 " auto-set indentation variables

@@ -1,5 +1,5 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_cnt =9
 let g:netrw_dirhist_1='/home/tommy/docs/class/senior_capstone/FullVersion/information/figure/js'
 let g:netrw_dirhist_2='/usr/share/pyshared/scapy/layers'
 let g:netrw_dirhist_3='/home/tommy/sketchbook/BallTest'
@@ -8,3 +8,4 @@ let g:netrw_dirhist_5='/home/tommy/sketchbook/asdf'
 let g:netrw_dirhist_6='/home/tommy/sketchbook/Ball'
 let g:netrw_dirhist_7='/home/tommy/sketchbook/Gravity'
 let g:netrw_dirhist_8='/home/tommy/truecrack/src'
+let g:netrw_dirhist_9='/home/tommy/workspace/matplotlib/test'

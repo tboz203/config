@@ -7,8 +7,8 @@ doxygen
 ghc
 dropbox
 tree
-7z
-steam
+p7zip-full
+steam-launcher
 curl
 sublime-text
 emacs
@@ -23,11 +23,15 @@ exuberant-ctags
 ruby
 wkhtmltopdf
 calibre
+screen
 
 build-essential
 gcc-multilib
 aircrack-ng
 kismet
+
+pip:
+    pip install --user git+git://github.com/Lokaltog/powerline
 
 for system monitor:
     gir1.2-gtop-2.0
@@ -53,7 +57,21 @@ jshint *
 google-chrome *
 skype *
 john *
+pulseaudio-equalizer *
 
 metasploit *
 armitage *
 vmware / virtualbox *
+
+dolphin-emu-master
+autopsy
+sleuthkit
+python-matplotlib
+python-tk
+cython
+libmpc-dev
+gparted
+openssh-server
+molly-guard
+mednafen
+libav-tools
