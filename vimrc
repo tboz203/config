@@ -124,6 +124,8 @@ noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
 " quick mapping to get rid of search highlighting
 noremap <silent> <leader>h :nohlsearch<cr>
+" copy to clipboard
+noremap <silent> <leader>c "+y
 " paste from clipboard
 noremap <silent> <leader>p o<esc>"+p
 " insert the current date or date and time
@@ -200,7 +202,7 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 " adding gpg symmetric support
 Bundle 'vim-scripts/gnupg.vim'
-" cool looking info line
+" a cool status bar plugin
 Bundle 'Lokaltog/powerline'
 
 " {{{
@@ -208,7 +210,9 @@ Bundle 'Lokaltog/powerline'
 " Bundle 'majutsushi/tagbar'
 " " tern support
 " Bundle 'marijnh/tern_for_vim'
-" auto-set indentation variables
+" " tag generator using tern
+" Bundle 'ramitos/jsctags'
+" " auto-set indentation variables
 " Bundle 'tpope/vim-sleuth'
 " " indentation guides
 " Bundle 'nathanaelkane/vim-indent-guides'
@@ -234,7 +238,7 @@ Bundle 'Lokaltog/powerline'
 " Bundle 'scrooloose/syntastic'
 " " ctags from some other place, lol
 " Bundle 'clausreinke/scoped_tags'
-" }}}
+" " }}}
 
 filetype plugin indent on
 " end Vundle }}}
@@ -245,7 +249,7 @@ filetype plugin indent on
 " let g:UltiSnipsExpandTrigger = '<c-l>'
 " let g:UltiSnipsJumpForwardTrigger = '<c-j>'
 " let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
-"
+
 " " indent guide settings
 " let g:indent_guides_enable_on_vim_startup = 0
 " let g:indent_guides_auto_colors = 0
