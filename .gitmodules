@@ -4,18 +4,18 @@
 ; [submodule "tpope/vim-sensible"]
 ;     path = vim/bundle/vim-sensible
 ;     url = https://github.com/tpope/vim-sensible
-; # [submodule "nathanaelkane/vim-indent-guides"]
-; #     path = vim/bundle/vim-indent-guides
-; #     url = https://github.com/nathanaelkane/vim-indent-guides
-; # [submodule "SirVer/ultisnips"]
-; #     path = vim/bundle/ultisnips
-; #     url = https://github.com/SirVer/ultisnips
-; # [submodule "scrooloose/nerdtree"]
-; #     path = vim/bundle/nerdtree
-; #     url = https://github.com/scrooloose/nerdtree
-; # [submodule "jistr/vim-nerdtree-tabs"]
-; #     path = vim/bundle/vim-nerdtree-tabs
-; #     url = https://github.com/jistr/vim-nerdtree-tabs
+; [submodule "nathanaelkane/vim-indent-guides"]
+;     path = vim/bundle/vim-indent-guides
+;     url = https://github.com/nathanaelkane/vim-indent-guides
+; [submodule "SirVer/ultisnips"]
+;     path = vim/bundle/ultisnips
+;     url = https://github.com/SirVer/ultisnips
+; [submodule "scrooloose/nerdtree"]
+;     path = vim/bundle/nerdtree
+;     url = https://github.com/scrooloose/nerdtree
+; [submodule "jistr/vim-nerdtree-tabs"]
+;     path = vim/bundle/vim-nerdtree-tabs
+;     url = https://github.com/jistr/vim-nerdtree-tabs
 ; [submodule "sjl/gundo.vim"]
 ;     path = vim/bundle/gundo.vim
 ;     url = https://github.com/sjl/gundo.vim
@@ -28,12 +28,12 @@
 ; [submodule "tpope/vim-surround"]
 ;     path = vim/bundle/vim-surround
 ;     url = https://github.com/tpope/vim-surround
-; # [submodule "Valloric/YouCompleteMe"]
-; #     path = vim/bundle/YouCompleteMe
-; #     url = https://github.com/Valloric/YouCompleteMe
-; # [submodule "Shutnik/jshint2.vim"]
-; #     path = vim/bundle/jshint2.vim
-; #     url = https://github.com/Shutnik/jshint2.vim
+; [submodule "Valloric/YouCompleteMe"]
+;     path = vim/bundle/YouCompleteMe
+;     url = https://github.com/Valloric/YouCompleteMe
+; [submodule "Shutnik/jshint2.vim"]
+;     path = vim/bundle/jshint2.vim
+;     url = https://github.com/Shutnik/jshint2.vim
 ; [submodule "tpope/vim-repeat"]
 ;     path = vim/bundle/vim-repeat
 ;     url = https://github.com/tpope/vim-repeat

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # we're going to try this out.
+# the intent is to make a wrapper around `markdown` to add a bit of bootstrap
 
 def main (args)
     files = []

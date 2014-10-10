@@ -25,10 +25,18 @@ wkhtmltopdf
 calibre
 screen
 
+imagemagick
+python-gnuplot
+python-pyx
+
 build-essential
 gcc-multilib
 aircrack-ng
 kismet
+
+python-pip
+powerline (?)
+ternjs (?)
 
 pip:
     pip install --user git+git://github.com/Lokaltog/powerline
