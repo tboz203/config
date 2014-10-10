@@ -149,3 +149,8 @@ if [ -f ~/.git-prompt ]; then
     GIT_PS1_SHOWUNTRACKEDFILE=1
     GIT_PS1_SHOWCOLORHINTS=1
 fi
+
+if [ -z "$WITHIN_SCREEN" ]; then
+    export WITHIN_SCREEN=1
+    exec screen -xRR
+fi
