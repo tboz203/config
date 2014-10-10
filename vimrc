@@ -87,6 +87,7 @@ set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
 set list
+let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
 set background=dark     " make the text easier to read on a dark background
 set modeline            " if a file has a modeline, use it
 set splitbelow          " put new windows to the right or below

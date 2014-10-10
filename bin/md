@@ -20,6 +20,7 @@ def main (args)
         /^(?<output>.*?)(\.markdown|\.md)?$/ =~ file
         output += '.html'
         `markdown #{file} > #{output}`
+        # `markdown-calibre #{file} -f #{output}`
 
         html = File.read(output)
         html = header + html + footer

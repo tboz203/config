@@ -59,8 +59,11 @@ alias psme='ps -u `id -u`'
 alias day='date +%Y-%m-%d'
 alias full='date "+%Y.%m.%d-%H.%M.%S"'
 
-# default wc to use all options
+# set some default flags
 alias wc='wc -cmlLw'
+alias tidy='tidy -f /dev/null -iqmw'
+alias astyle='astyle -sajcn'
+alias find='find 2>/dev/null'
 
 # misc
 alias rgrep='grep -r'
@@ -70,10 +73,8 @@ alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
 alias update='sudo apt-get update && sudo apt-get upgrade'
 alias math='python3 -ic "from math import *"'
-alias tidy='tidy -f /dev/null -iqmw'
 alias server='python -m SimpleHTTPServer'
 
-alias astyle='astyle -sajcn'
 alias eq='pulseaudio-equalizer-gtk'
 alias rmf='rm -rf'
 alias lt='ll --sort=t'
