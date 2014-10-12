@@ -64,6 +64,7 @@ alias wc='wc -cmlLw'
 alias tidy='tidy -f /dev/null -iqmw'
 alias astyle='astyle -sajcn'
 alias find='find 2>/dev/null'
+alias less='less -SR'
 
 # misc
 alias rgrep='grep -r'
@@ -71,7 +72,6 @@ alias quit='exit'
 alias vimrc='vim ~/.vimrc'
 alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
-alias update='sudo apt-get update && sudo apt-get upgrade'
 alias math='python3 -ic "from math import *"'
 alias server='python -m SimpleHTTPServer'
 
@@ -79,3 +79,6 @@ alias eq='pulseaudio-equalizer-gtk'
 alias rmf='rm -rf'
 alias lt='ll --sort=t'
 alias listening='lsof -i -s TCP:Listen'
+
+# obsoleted by update script and sudoers
+# alias update='sudo apt-get update && sudo apt-get upgrade'
