@@ -82,3 +82,6 @@ alias listening='lsof -i -s TCP:Listen'
 
 # obsoleted by update script and sudoers
 # alias update='sudo apt-get update && sudo apt-get upgrade'
+alias update='sudo update'
+
+alias snst='snort-stat < /var/log/snort/alert | vim -c "set ft=snort-stat nolist" -'
