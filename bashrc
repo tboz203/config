@@ -160,6 +160,6 @@ fi
 if [ -z "$WITHIN_SCREEN" ]; then
     export WITHIN_SCREEN=1
     exec /usr/bin/screen -xRR
-else
-    archey
+# else
+#     archey
 fi

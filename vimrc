@@ -277,7 +277,7 @@ noremap <silent> <leader>to :TagbarOpen<cr>
 noremap <silent> <leader>tc :TagbarClose<cr>
 
 
-set rtp+=/home/tommy/.vim/bundle/powerline/powerline/bindings/vim
+" set rtp+=/home/tommy/.vim/bundle/powerline/powerline/bindings/vim
 
 " }}}
 

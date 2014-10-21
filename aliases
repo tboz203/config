@@ -83,3 +83,4 @@ alias listening='lsof -i -s TCP:Listen'
 alias update='sudo update'
 
 alias hping='sudo hping3'
+alias snst='snort-stat < /var/log/snort/alert | vim -c "set ft=snort-stat nolist" -'
