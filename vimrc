@@ -141,6 +141,7 @@ noremap <leader>j :JSHint<cr><cr>
 noremap ; :
 " toggle listmode
 noremap gl :set list!<cr>
+noremap gs :set spell!<cr>
 
 " visual mode
 vnoremap <leader>" di""<esc>hp

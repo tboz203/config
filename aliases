@@ -11,6 +11,7 @@ alias lf='ll -S'
 alias lv='ls --sort=v'
 alias l='ls -CF'
 alias lla='ll -A'
+alias lt='ll --sort=t'
 
 # shorten some stuff
 alias h='hostname'
@@ -53,7 +54,6 @@ alias rm='rm -vI'
 # some ps aliases
 alias ps='ps -H'
 alias psef='ps -ef'
-alias psme='ps -u `id -u`'
 
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
@@ -74,11 +74,12 @@ alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
 alias math='python3 -ic "from math import *"'
 alias server='python -m SimpleHTTPServer'
-
 alias eq='pulseaudio-equalizer-gtk'
 alias rmf='rm -rf'
-alias lt='ll --sort=t'
 alias listening='lsof -i -s TCP:Listen'
 
 # obsoleted by update script and sudoers
 # alias update='sudo apt-get update && sudo apt-get upgrade'
+alias update='sudo update'
+
+alias hping='sudo hping3'

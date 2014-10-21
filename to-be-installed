@@ -3,46 +3,51 @@ git
 wireshark
 nmap
 graphviz
-doxygen
 ghc
-dropbox
 tree
 p7zip-full
 steam-launcher
 curl
 sublime-text
 emacs
-nodejs
-npm
-tidy
-lighttpd
 scapy
 wicd
 htop
-exuberant-ctags
 ruby
+gem
 wkhtmltopdf
-calibre
 screen
+gparted
+openssh-server
+pv
 
+libav-tools
 imagemagick
 python-gnuplot
 python-pyx
+docx2txt
+odt2txt
+markdown
+source-highlight
+ttf-mscorefonts-installer
 
 build-essential
 gcc-multilib
 aircrack-ng
 kismet
+hydra
+john
+samdump2
+bkhive
+
+figlet
+cowsay
 
 python-pip
 powerline (?)
-ternjs (?)
 
 pip:
     pip install --user git+git://github.com/Lokaltog/powerline
-
-for system monitor:
-    gir1.2-gtop-2.0
 
 > for vim:
     mercurial
@@ -78,8 +83,14 @@ python-matplotlib
 python-tk
 cython
 libmpc-dev
-gparted
-openssh-server
 molly-guard
 mednafen
 libav-tools
+doxygen
+dropbox
+nodejs
+npm
+tidy
+lighttpd
+exuberant-ctags
+calibre
