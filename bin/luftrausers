@@ -1,0 +1,3 @@
+#!/bin/bash
+cd $HOME/.config/luftrausers-nodrm/
+exec ./launch.sh

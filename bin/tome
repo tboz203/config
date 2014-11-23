@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd $HOME/.config/t-engine4-linux64-1.2.5
+./t-engine
