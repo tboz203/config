@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# we're going to try this out.
+# the intent is to make a wrapper around `markdown` to add a bit of bootstrap
+
+def main (args)
+    files = []
+    flags = []
+    header = "<link href='bootstrap/css/bootstrap.min.css' rel='stylesheet'><body class='container'>\n"
+    footer = "\n</body>"
+    for arg in args
+        if /^-/ =~ arg
+            flags += [arg]
+        elsif File.exist?(arg)
+            files += [arg]
+        else
+            p "I don't know what to do with this: #{arg}"
+        end
+    end
+
+    for file in files
+        /^(?<output>.*?)(\.markdown|\.md)?$/ =~ file
+        output += '.html'
+        `markdown < #{file} > #{output}`
+        # `markdown-calibre #{file} -f #{output}`
+
+        html = File.read(output)
+        html = header + html + footer
+        File.write(output, html)
+    end
+end
+
+if __FILE__ == $0
+    main(ARGV)
+end

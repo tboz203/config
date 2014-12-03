@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -ge 1 ]; then
+    sketch="$1"
+else
+    sketch="../$(pwd | xargs basename)"
+fi
+
+if [ $# -ge 2 ]; then
+    temp="$2"
+else
+    temp="/tmp/$$-processing-$sketch"
+fi
+
+processing-java --sketch="$sketch" --output="$temp" --force --run

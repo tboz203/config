@@ -1,1 +1,1 @@
-./configure --prefix=/usr --enable-fail-if-missing --enable-pythoninterp --enable-rubyinterp=dynamic --disable-netbeans --enable-gui --with-modified-by=tboz203 --with-features=big --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu --with-x | tee ~/conf.out
+./configure --prefix=/usr --enable-fail-if-missing --enable-pythoninterp --enable-rubyinterp=dynamic --disable-netbeans --enable-gui --with-features=big --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu --with-x | tee ~/conf.out

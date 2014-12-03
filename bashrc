@@ -17,8 +17,8 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+HISTSIZE=5000
+HISTFILESIZE=100000
 HISTTIMEFORMAT="%h d %H:%M:%S> "
 HISTIGNORE="ls:la:lf:ll:l"
 
@@ -142,10 +142,24 @@ fi
 #     ll
 # }
 
+# a function to open files using the default file handler
+open () {
+    for item in "$@"; do
+        xdg-open "$item"
+    done
+}
+
 if [ -f ~/.git-prompt ]; then
     . ~/.git-prompt
     GIT_PS1_SHOWDIRTYSTATE=1
     GIT_PS1_SHOWSTASHSTATE=1
     GIT_PS1_SHOWUNTRACKEDFILE=1
     GIT_PS1_SHOWCOLORHINTS=1
+fi
+
+if [ -z "$WITHIN_SCREEN" ]; then
+    export WITHIN_SCREEN=1
+    exec /usr/bin/screen -xRR
+# else
+#     archey
 fi

@@ -87,6 +87,7 @@ set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
 set list
+let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
 set background=dark     " make the text easier to read on a dark background
 set modeline            " if a file has a modeline, use it
 set splitbelow          " put new windows to the right or below
@@ -103,6 +104,8 @@ set shiftround
 
 set undofile
 set undodir=/tmp
+
+set spellfile=~/.vim/spell/en.utf-8.add
 " end basic options }}}
 
 " messing around with mappings {{{
@@ -111,11 +114,11 @@ let maplocalleader = ','
 
 " normal mode
 " remove whitespace at end of line
-noremap <silent> <leader>rs :%s/\s\+$//e<cr>:noh<cr>
+noremap <silent> <leader>rs :%s/\s\+$//<cr>:noh<cr>
 " retab the file
 noremap <silent> <leader>rt :retab<cr>
 " do both
-noremap <silent> <leader>rr :retab<cr>:%s/\s\+$//e<cr>:noh<cr>
+noremap <silent> <leader>rr :retab<cr>:%s/\s\+$//<cr>:noh<cr>
 " easy edit/source of my vimrc (this file)
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
@@ -124,7 +127,7 @@ noremap <silent> <leader>h :nohlsearch<cr>
 " copy to clipboard
 noremap <silent> <leader>c "+y
 " paste from clipboard
-noremap <silent> <leader>p o<esc>"+p0
+noremap <silent> <leader>p o<esc>"+p
 " insert the current date or date and time
 noremap <silent> <leader>d :r !day<cr>kJ
 noremap <silent> <leader>f :r !full<cr>kJ
@@ -136,6 +139,13 @@ noremap ? q?a
 noremap <leader>j :JSHint<cr><cr>
 " make a mapping for traditional ex binding
 noremap ; :
+
+noremap gl :set list!<cr>
+noremap gs :set spell!<cr>
+" b/c we use screen so much, give us a mapping to increment
+noremap <c-s> <c-a>
+" ... and decrement
+noremap <c-c> <c-x>
 
 " visual mode
 vnoremap <leader>" di""<esc>hp
@@ -195,12 +205,15 @@ Bundle 'tpope/vim-commentary'
 Bundle 'tpope/vim-surround'
 " add repeat (.) support to (some) plugins
 Bundle 'tpope/vim-repeat'
+" adding gpg symmetric support
+Bundle 'vim-scripts/gnupg.vim'
 " a cool status bar plugin
 Bundle 'Lokaltog/powerline'
 
-" " doing things with tags? {{{
+" {{{
+" " tag support
 " Bundle 'majutsushi/tagbar'
-" " javascript analyzer
+" " tern support
 " Bundle 'marijnh/tern_for_vim'
 " " tag generator using tern
 " Bundle 'ramitos/jsctags'
@@ -225,29 +238,29 @@ Bundle 'Lokaltog/powerline'
 " " javascript helpers
 " Bundle 'Shutnik/jshint2.vim'
 " Bundle 'walm/jshint.vim'
-" " testing (not yet tring to learn, lol)
 " Bundle 'vim-scripts/TabBar'
-" Bundle 'Lokaltog/powerline'
 " " external syntax checking (?)
 " Bundle 'scrooloose/syntastic'
+" " ctags from some other place, lol
+" Bundle 'clausreinke/scoped_tags'
 " " }}}
 
 filetype plugin indent on
 " end Vundle }}}
 
-" plugin settings {{{
-" UltiSnips tab-completion conflicts with YCM, new triggers for snippet
-" expansion/jumping
-let g:UltiSnipsExpandTrigger = '<c-l>'
-let g:UltiSnipsJumpForwardTrigger = '<c-j>'
-let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
+" " plugin settings {{{
+" " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
+" " expansion/jumping
+" let g:UltiSnipsExpandTrigger = '<c-l>'
+" let g:UltiSnipsJumpForwardTrigger = '<c-j>'
+" let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
 
-" indent guide settings
-let g:indent_guides_enable_on_vim_startup = 0
-let g:indent_guides_auto_colors = 0
-autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
-autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
-autocmd VimEnter,Colorscheme * :hi Normal NONE
+" " indent guide settings
+" let g:indent_guides_enable_on_vim_startup = 0
+" let g:indent_guides_auto_colors = 0
+" autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
+" autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
+" autocmd VimEnter,Colorscheme * :hi Normal NONE
 
 " gundo setting(s)
 let g:gundo_right = 1
@@ -256,12 +269,19 @@ let g:gundo_right = 1
 " instead of surrounding with 'p' use value from prompt
 let g:surround_112 = "\1surround: \1\r\1\1"
 
+" javascript tags
+let g:tagbar_type_javascript = { 'ctagsbin': '/usr/local/bin/jsctags' }
+" let g:tagbar_type_javascript = { 'ctagsbin': '/home/tommy/config/bin/ejstags' }
+
 " mappings for plugins that don't have these nice settings
 noremap <silent> <leader>u :GundoToggle<cr>
 noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
 noremap <silent> <leader>tt :TagbarToggle<cr>
+noremap <silent> <leader>to :TagbarOpen<cr>
+noremap <silent> <leader>tc :TagbarClose<cr>
 
-set rtp+=/home/tommy/.local/lib/python2.7/site-packages/powerline/bindings/vim
+
+set rtp+=/home/tommy/.vim/bundle/powerline/powerline/bindings/vim
 
 " }}}
 
@@ -271,6 +291,9 @@ set softtabstop=4
 set expandtab
 set smarttab
 " end tabs }}}
+
+" when diff'ing, ignore whitespace
+set diffopt+=iwhite
 
 filetype indent on
 " vim: sw=4 sts=4 et

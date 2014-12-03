@@ -6,7 +6,7 @@
 
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
-umask 002
+umask 027
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
@@ -15,6 +15,8 @@ if [ -n "$BASH_VERSION" ]; then
     . "$HOME/.bashrc"
     fi
 fi
+
+export PATH="$PATH:/sbin:/usr/sbin"
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/.bin" ] ; then
@@ -27,3 +29,4 @@ if [ -d "$HOME/.pymodules" ]; then
 fi
 
 export EDITOR=/usr/bin/vim
+export PYTHONDONTWRITEBYTECODE=1

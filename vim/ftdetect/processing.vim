@@ -1,2 +1,1 @@
-
-au BufRead,BufNewFile *.pde setf processing
+au BufNewFile,BufRead *.pde setf processing

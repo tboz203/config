@@ -2,6 +2,7 @@ vim
 git
 wireshark
 nmap
+graphviz
 ghc
 tree
 p7zip-full
@@ -12,6 +13,15 @@ emacs
 scapy
 wicd
 htop
+ruby
+gem
+wkhtmltopdf
+screen
+gparted
+openssh-server
+pv
+
+libav-tools
 imagemagick
 build-essential
 python-pip
@@ -35,6 +45,42 @@ skype
 john
 
 ternjs (?)
+docx2txt
+odt2txt
+markdown
+source-highlight
+ttf-mscorefonts-installer
+
+build-essential
+gcc-multilib
+aircrack-ng
+kismet
+hydra
+john
+samdump2
+bkhive
+
+figlet
+cowsay
+
+python-pip
+powerline (?)
+
+pip:
+    pip install --user git+git://github.com/Lokaltog/powerline
+
+> for vim:
+    mercurial
+    ruby1.9.1-full
+    libncurses5-dev
+    python-dev
+    libX11-dev
+    libxtst-dev
+    libxt-dev
+    libsm-dev
+    libxpm-dev
+    libxmu-dev
+    libgtk2.0-dev
 
 truecrypt *
 truecrack *
@@ -42,3 +88,29 @@ processing *
 komodo *
 jshint *
 google-chrome *
+skype *
+john *
+pulseaudio-equalizer *
+
+metasploit *
+armitage *
+vmware / virtualbox *
+
+dolphin-emu-master
+autopsy
+sleuthkit
+python-matplotlib
+python-tk
+cython
+libmpc-dev
+molly-guard
+mednafen
+libav-tools
+doxygen
+dropbox
+nodejs
+npm
+tidy
+lighttpd
+exuberant-ctags
+calibre

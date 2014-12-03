@@ -10,6 +10,8 @@ alias la='ls -A'
 alias lf='ll -S'
 alias lv='ls --sort=v'
 alias l='ls -CF'
+alias lla='ll -A'
+alias lt='ll --sort=t'
 
 # shorten some stuff
 alias h='hostname'
@@ -49,23 +51,36 @@ alias mv='mv -vi'
 alias cp='cp -vri'
 alias rm='rm -vI'
 
+# some ps aliases
+alias ps='ps -H'
+alias psef='ps -ef'
+
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
 alias full='date "+%Y.%m.%d-%H.%M.%S"'
 
-# default wc to use all options
+# set some default flags
 alias wc='wc -cmlLw'
+alias tidy='tidy -f /dev/null -iqmw'
+alias astyle='astyle -sajcn'
+alias find='find 2>/dev/null'
+alias less='less -SR'
 
 # misc
-alias rmf='rm -rf'
 alias rgrep='grep -r'
 alias quit='exit'
-alias mip='hostname -I'
 alias vimrc='vim ~/.vimrc'
-alias psf='ps -o pid,user,pcpu,pmem,args'
-alias update='sudo apt-get update && sudo apt-get upgrade'
+alias aliases='vim ~/.bash_aliases'
+alias bashrc='vim ~/.bashrc'
 alias math='python3 -ic "from math import *"'
-alias beta='ssh twb015@beta.latech.edu'
-alias open='xdg-open'
-alias tidy='tidy -f /dev/null -iqmw'
-alias j='jobs'
+alias server='python -m SimpleHTTPServer'
+alias eq='pulseaudio-equalizer-gtk'
+alias rmf='rm -rf'
+alias listening='lsof -i -s TCP:Listen'
+
+# obsoleted by update script and sudoers
+# alias update='sudo apt-get update && sudo apt-get upgrade'
+alias update='sudo update'
+
+alias hping='sudo hping3'
+alias snst='snort-stat < /var/log/snort/alert | vim -c "set ft=snort-stat nolist" -'
