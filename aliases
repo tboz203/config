@@ -10,6 +10,7 @@ alias la='ls -A'
 alias lf='ll -S'
 alias lv='ls --sort=v'
 alias l='ls -CF'
+alias lla='ll -A'
 
 # shorten some stuff
 alias h='hostname'
