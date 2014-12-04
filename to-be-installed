@@ -23,8 +23,28 @@ pv
 
 libav-tools
 imagemagick
+build-essential
+python-pip
+openssh-server
+screen
+
+exuberant-ctags
 python-gnuplot
 python-pyx
+nodejs
+npm
+dropbox
+graphviz
+doxygen
+tidy
+lighttpd
+gcc-multilib
+aircrack-ng
+kismet
+skype
+john
+
+ternjs (?)
 docx2txt
 odt2txt
 markdown
