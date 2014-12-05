@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# remove blank lines from stdin
+
+while gets
+    /^\s*$/ =~ $_ && next
+    print $_
+end
+

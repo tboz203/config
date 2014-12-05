@@ -142,6 +142,13 @@ fi
 #     ll
 # }
 
+# a function to open files using the default file handler
+open () {
+    for item in "$@"; do
+        xdg-open "$item"
+    done
+}
+
 if [ -f ~/.git-prompt ]; then
     . ~/.git-prompt
     GIT_PS1_SHOWDIRTYSTATE=1

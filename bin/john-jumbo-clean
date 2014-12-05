@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rm -f $HOME/.local/john/john.{pot,log}

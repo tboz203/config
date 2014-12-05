@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -ge 1 ]; then 
+    sketch="$1"
+else
+    sketch="../$(pwd | xargs basename)"
+fi
+
+if [ $# -ge 2] then
+    out="$2"
+else
+    out="$sketch/build"
+fi
+
+processing-java --sketch="$sketch" --output="$out" --export

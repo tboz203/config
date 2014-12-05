@@ -3,32 +3,71 @@ git
 wireshark
 nmap
 graphviz
-doxygen
 ghc
-dropbox
 tree
-7z
-steam
+p7zip-full
+steam-launcher
 curl
 sublime-text
 emacs
-nodejs
-npm
-tidy
-lighttpd
 scapy
 wicd
 htop
-exuberant-ctags
 ruby
+gem
+wkhtmltopdf
+screen
+gparted
+openssh-server
+pv
+
+libav-tools
+imagemagick
+build-essential
+python-pip
+openssh-server
+screen
+
+exuberant-ctags
+python-gnuplot
+python-pyx
+nodejs
+npm
+dropbox
+graphviz
+doxygen
+tidy
+lighttpd
+gcc-multilib
+aircrack-ng
+kismet
+skype
+john
+
+ternjs (?)
+docx2txt
+odt2txt
+markdown
+source-highlight
+ttf-mscorefonts-installer
 
 build-essential
 gcc-multilib
 aircrack-ng
 kismet
+hydra
+john
+samdump2
+bkhive
 
-for system monitor:
-    gir1.2-gtop-2.0
+figlet
+cowsay
+
+python-pip
+powerline (?)
+
+pip:
+    pip install --user git+git://github.com/Lokaltog/powerline
 
 > for vim:
     mercurial
@@ -51,4 +90,27 @@ jshint *
 google-chrome *
 skype *
 john *
-vim *
+pulseaudio-equalizer *
+
+metasploit *
+armitage *
+vmware / virtualbox *
+
+dolphin-emu-master
+autopsy
+sleuthkit
+python-matplotlib
+python-tk
+cython
+libmpc-dev
+molly-guard
+mednafen
+libav-tools
+doxygen
+dropbox
+nodejs
+npm
+tidy
+lighttpd
+exuberant-ctags
+calibre

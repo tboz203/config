@@ -1,0 +1,5 @@
+#!/bin/bash
+
+battery="/org/freedesktop/UPower/devices/battery_BAT0"
+
+upower -i "$battery" | egrep 'state|to full|percentage'
