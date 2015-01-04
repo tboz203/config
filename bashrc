@@ -157,6 +157,10 @@ if [ -f ~/.git-prompt ]; then
     GIT_PS1_SHOWCOLORHINTS=1
 fi
 
+# for some reason or other, this has stopped functioning correctly. we'll
+# look into it later.
+# update: on this box, i had set the gnome-terminal default shell to screen, so
+# we got caught in an infinite loop. now fixed.
 if [ -z "$WITHIN_SCREEN" ]; then
     export WITHIN_SCREEN=1
     exec /usr/bin/screen -xRR
