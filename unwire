@@ -12,3 +12,4 @@ rm -f ~/.toprc
 rm -f ~/.gitconfig
 rm -f ~/.git-prompt
 rm -f ~/.vim
+rm -f ~/.screenrc

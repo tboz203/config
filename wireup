@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# TODO: some manner of check to make sure we are run from the script directory
+
+# remove everything we collide with beforehand to prevent errors
 ./unwire
 
+# link up each item
+# (we would do this as a loop, except that the names aren't a consistent
+# transformation)
 ln -s "$(pwd)/profile"        ~/.profile
 ln -s "$(pwd)/bashrc"         ~/.bashrc
 ln -s "$(pwd)/vimrc"          ~/.vimrc
@@ -15,3 +21,15 @@ ln -s "$(pwd)/gitconfig"      ~/.gitconfig
 ln -s "$(pwd)/git-prompt"     ~/.git-prompt
 ln -s "$(pwd)/vim"            ~/.vim
 ln -s "$(pwd)/screenrc"       ~/.screenrc
+
+# # install the "setuid-but-not" update script
+# sudo cp update /usr/local/bin/update
+# sudo chmod 755 /usr/local/bin/update
+# sudo cp update.sudo /etc/sudoers.d/update
+# sudo chmod 440 /etc/sudoers.d/update
+
+# # set up powerline
+# sudo pip install git+git://github.com/lokaltog/powerline
+# # install the powerline fonts (really only necessary on local machines)
+# git clone https://github.com/lokaltog/powerline-fonts
+# cd powerline-fonts && ./install.sh ; cd ..
