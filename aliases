@@ -76,6 +76,7 @@ alias math='python3 -ic "from math import *"'
 alias server='python -m SimpleHTTPServer'
 alias eq='pulseaudio-equalizer-gtk'
 alias rmf='rm -rf'
+alias psf='ps -ef'
 alias listening='lsof -i -s TCP:Listen'
 
 # obsoleted by update script and sudoers

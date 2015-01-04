@@ -14,3 +14,4 @@ ln -s "$(pwd)/toprc"          ~/.toprc
 ln -s "$(pwd)/gitconfig"      ~/.gitconfig
 ln -s "$(pwd)/git-prompt"     ~/.git-prompt
 ln -s "$(pwd)/vim"            ~/.vim
+ln -s "$(pwd)/screenrc"       ~/.screenrc

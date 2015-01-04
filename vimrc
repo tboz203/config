@@ -207,8 +207,8 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 " adding gpg symmetric support
 Bundle 'vim-scripts/gnupg.vim'
-" a cool status bar plugin
-Bundle 'Lokaltog/powerline'
+" " a cool status bar plugin
+" Bundle 'Lokaltog/powerline'
 
 " {{{
 " " tag support

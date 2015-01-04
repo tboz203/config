@@ -19,7 +19,7 @@ shopt -s histappend
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=5000
 HISTFILESIZE=100000
-HISTTIMEFORMAT="%h d %H:%M:%S> "
+HISTTIMEFORMAT="%h %d %H:%M:%S> "
 HISTIGNORE="ls:la:lf:ll:l"
 
 # check the window size after each command and, if necessary,
@@ -53,7 +53,7 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-if [ "$color_prompt" = yes ]; then
+if [ "$color_prompt" = yes ]; then # {{{
     # some expansions i made, trying some stuff out for PS1
     black="$(tput sgr0 && tput setaf 0)"
     BLACK="$(tput bold && tput setaf 0)"
@@ -90,7 +90,7 @@ else
     white="\e[0;37m"
     WHITE="\e[1;37m"
     reset="\e[0m"
-fi
+fi # }}}
 
 u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
 PS1="\[$reset\]$debian_chroot\[$u_color\]\u\[$WHITE\]@\[$GREEN\]\h\[$WHITE\]:"
@@ -167,3 +167,5 @@ if [ -z "$WITHIN_SCREEN" ]; then
 # else
 #     archey
 fi
+
+# vim: foldmethod=marker
