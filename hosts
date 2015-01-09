@@ -1,10 +1,9 @@
-127.0.0.1	localhost
-127.0.1.1	mint-laptop
+127.0.0.1       localhost
 
-138.47.102.109	ace-debian.latech.edu
-138.47.102.218	defalt-debian.latech.edu
+138.47.102.109  ace-debian.latech.edu
+138.47.102.218  defalt-debian.latech.edu
 
-173.217.220.184	pavilion
+173.217.220.184 pavilion
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback
