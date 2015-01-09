@@ -1,7 +1,4 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =5
-let g:netrw_dirhist_1='/etc/apache2/conf.d'
-let g:netrw_dirhist_2='/home/tommy/config/vim/bundle/vim-commentary'
-let g:netrw_dirhist_3='/home/tommy/config/vim/bundle/vim-commentary/plugin'
-let g:netrw_dirhist_4='/etc/cron.hourly'
-let g:netrw_dirhist_5='/etc/cron.daily'
+let g:netrw_dirhist_cnt =2
+let g:netrw_dirhist_1='/home/tommy/public_html'
+let g:netrw_dirhist_2='/home/tommy/public_html/website/bloopers'
