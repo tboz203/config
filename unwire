@@ -12,3 +12,6 @@ rm -f ~/.toprc
 rm -f ~/.gitconfig
 rm -f ~/.git-prompt
 rm -f ~/.vim
+# rm -f ~/.screenrc
+rm -f ~/.tmux.conf
+rm -f ~/.config/htop/htoprc

@@ -1,48 +1,68 @@
-vim
-git
-wireshark
-nmap
-graphviz
-doxygen
-ghc
-dropbox
-tree
-p7zip-full
-steam-launcher
+aircrack-ng
+autopsy
+bkhive
+build-essential
+calibre
+cowsay
 curl
-sublime-text
+cython
+docx2txt
+dolphin-emu-master
+doxygen
+dropbox
 emacs
+exuberant-ctags
+figlet
+gcc-multilib
+gem
+ghc
+git
+gparted
+graphviz
+htop
+hydra
+imagemagick
+john
+kismet
+libav-tools
+libmpc-dev
+lighttpd
+markdown
+mednafen
+molly-guard
+nmap
 nodejs
 npm
-tidy
-lighttpd
-scapy
-wicd
-htop
-exuberant-ctags
-ruby
-wkhtmltopdf
-calibre
-screen
-
-imagemagick
-python-gnuplot
-python-pyx
-
-build-essential
-gcc-multilib
-aircrack-ng
-kismet
-
-python-pip
+odt2txt
+openssh-server
+p7zip-full
 powerline (?)
+pv
+python-gnuplot
+python-matplotlib
+python-pip
+python-pyx
+python-tk
+ruby
+samdump2
+scapy
+screen
+skype
+sleuthkit
+source-highlight
+steam-launcher
+sublime-text
 ternjs (?)
+tidy
+tree
+ttf-mscorefonts-installer
+vim
+wicd
+wireshark
+wkhtmltopdf
 
-pip:
+> pip:
     pip install --user git+git://github.com/Lokaltog/powerline
-
-for system monitor:
-    gir1.2-gtop-2.0
 
 > for vim:
     mercurial
@@ -70,16 +90,3 @@ pulseaudio-equalizer *
 metasploit *
 armitage *
 vmware / virtualbox *
-
-dolphin-emu-master
-autopsy
-sleuthkit
-python-matplotlib
-python-tk
-cython
-libmpc-dev
-gparted
-openssh-server
-molly-guard
-mednafen
-libav-tools

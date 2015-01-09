@@ -139,8 +139,13 @@ noremap ? q?a
 noremap <leader>j :JSHint<cr><cr>
 " make a mapping for traditional ex binding
 noremap ; :
-" toggle listmode
+
 noremap gl :set list!<cr>
+noremap gs :set spell!<cr>
+" b/c we use screen so much, give us a mapping to increment
+noremap <c-s> <c-a>
+" ... and decrement
+noremap <c-c> <c-x>
 
 " visual mode
 vnoremap <leader>" di""<esc>hp

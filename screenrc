@@ -1,0 +1,3 @@
+termcapinfo xterm ti@:te@
+shell -/bin/bash
+# escape ^xx

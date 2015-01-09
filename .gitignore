@@ -3,3 +3,6 @@
 .*
 *.pyc
 *.pyo
+
+# gonna try this:
+vim/bundle/*
