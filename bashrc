@@ -14,7 +14,7 @@ HISTCONTROL=ignoreboth
 [[ -z "$PS1" ]] && return
 # if has tmux, attach to session or start one
 if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
-    tmux
+    exec tmux
 fi
 
 # append to the history file, don't overwrite it
