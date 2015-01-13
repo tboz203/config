@@ -8,19 +8,11 @@
 # for ssh logins, install and configure the libpam-umask package.
 umask 027
 
-# if running bash
-if [ -n "$BASH_VERSION" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-    . "$HOME/.bashrc"
-    fi
-fi
-
 export PATH="$PATH:/sbin:/usr/sbin"
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/.bin" ] ; then
-    export PATH="$HOME/.bin:$PATH"
+    export PATH="$HOME/.bin:$HOME/.local/bin:$PATH"
 fi
 
 # add a personal module directory for python
@@ -30,3 +22,11 @@ fi
 
 export EDITOR=/usr/bin/vim
 export PYTHONDONTWRITEBYTECODE=1
+
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+    . "$HOME/.bashrc"
+    fi
+fi

@@ -50,7 +50,8 @@ This file.
 
 ## `toprc`
 
-`top`'s generated rc file with my settings.
+`top`'s generated rc file with my settings. don't really use this anymore in
+favor of `htop`, but whatever.
 
 ## `unwire`
 
@@ -68,3 +69,13 @@ the command window.
 
 A script to install these config files.
 
+## `screenrc`
+
+enable scrolling, set my shell, and possibly change the escape character for
+`screen`
+
+---
+
+this repo also contains a few other random files that I make use of when
+setting up a new computer; for instance, i have a script that configures a vim
+build system to compile with a few preferences.

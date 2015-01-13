@@ -1,5 +1,11 @@
 
 " ^\d{2}:\d{2}:\d{2}\.\d{6} (IP|IP6) \S+ > \S+: [^,]+(, [^,]*)*?, length \d+$
+" UPDATE: got a raw tcpdump capture (as opposed to the snort output). there
+" were a number of options that we were missing. it looks like snort is only
+" capturing IP/IP6 traffic
+"
+" Also: the TCP/UDP traffic always has the port at the end of the address (from
+" what I can tell)
 
 syntax clear
 syntax case match

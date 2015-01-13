@@ -12,6 +12,10 @@ HISTCONTROL=ignoreboth
 
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
+# if has tmux, attach to session or start one
+if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
+    tmux
+fi
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -157,11 +161,10 @@ if [ -f ~/.git-prompt ]; then
     GIT_PS1_SHOWCOLORHINTS=1
 fi
 
-if [ -z "$WITHIN_SCREEN" ]; then
-    export WITHIN_SCREEN=1
-    exec /usr/bin/screen -xRR
-# else
-#     archey
-fi
+# powerline
+powerline-daemon -q
+POWERLINE_BASH_CONTINUATION=1
+POWERLINE_BASH_SELECT=1
+.  ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh
 
 # vim: foldmethod=marker

@@ -207,8 +207,6 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 " adding gpg symmetric support
 Bundle 'vim-scripts/gnupg.vim'
-" " a cool status bar plugin
-" Bundle 'Lokaltog/powerline'
 
 " {{{
 " " tag support
@@ -281,8 +279,6 @@ noremap <silent> <leader>to :TagbarOpen<cr>
 noremap <silent> <leader>tc :TagbarClose<cr>
 
 
-set rtp+=/home/tommy/.vim/bundle/powerline/powerline/bindings/vim
-
 " }}}
 
 " tabs {{{
@@ -291,6 +287,12 @@ set softtabstop=4
 set expandtab
 set smarttab
 " end tabs }}}
+
+" powerline {{{
+python from powerline.vim import setup as powerline_setup
+python powerline_setup()
+python del powerline_setup
+" }}}
 
 " when diff'ing, ignore whitespace
 set diffopt+=iwhite
