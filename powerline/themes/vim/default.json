@@ -23,7 +23,10 @@
 			{
 				"function": "branch",
 				"exclude_modes": ["nc"],
-				"priority": 30
+				"priority": 30,
+				"args": {
+					"status_colors": true
+				}
 			},
 			{
 				"function": "readonly_indicator",
