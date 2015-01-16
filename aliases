@@ -24,7 +24,7 @@ alias .....='../../../..'
 
 # some git commands
 alias gits='git status'
-alias gitl='git log --oneline --graph'
+alias gitl='git log --oneline --graph --decorate'
 alias gitb='git branch -vva'
 alias gitr='git remote -vv'
 alias gitd='git diff'

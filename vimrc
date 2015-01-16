@@ -207,6 +207,8 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 " adding gpg symmetric support
 Bundle 'vim-scripts/gnupg.vim'
+" tmux syntax highlighting
+Bundle 'zaiste/tmux.vim'
 
 " {{{
 " " tag support

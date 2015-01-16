@@ -10,6 +10,13 @@
 
 HISTCONTROL=ignoreboth
 
+# fix the term, specifically for tmux (otherwise powerline doesn't work well)
+if [ "$COLORTERM" == "gnome-terminal" ] || [ "$COLORTERM" == "xfce4-terminal" ]; then
+    TERM=xterm-256color
+elif [ "$COLORTERM" == "rxvt-xpm" ]; then
+    TERM=rxvt-256color
+fi
+
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
 # if has tmux, attach to session or start one
