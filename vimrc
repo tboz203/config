@@ -291,9 +291,11 @@ set smarttab
 " end tabs }}}
 
 " powerline {{{
-python from powerline.vim import setup as powerline_setup
-python powerline_setup()
-python del powerline_setup
+if $HAS_POWERLINE
+    python from powerline.vim import setup as powerline_setup
+    python powerline_setup()
+    python del powerline_setup
+endif
 " }}}
 
 " when diff'ing, ignore whitespace
