@@ -26,6 +26,9 @@ ln -s "$(pwd)/tmux-powerline.conf"	~/.tmux-powerline.conf
 ln -s "$(pwd)/htop"			~/.config/
 ln -s "$(pwd)/powerline"		~/.config/
 
+[[ -d ~/.ssh ]] || mkdir ~/.ssh
+ln -s "$(pwd)/sshconfig"		~/.ssh/config
+
 # # install the "setuid-but-not" update script
 # sudo cp update /usr/local/bin/update
 # sudo chmod 755 /usr/local/bin/update

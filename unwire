@@ -12,6 +12,7 @@ rm -f ~/.git-prompt
 rm -f ~/.vim
 rm -f ~/.tmux.conf
 rm -f ~/.tmux-powerline.conf
+rm -f ~/.ssh/config
 
 rm -rf ~/.bin
 rm -rf ~/.pymodules

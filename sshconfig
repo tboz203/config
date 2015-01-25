@@ -1,5 +1,8 @@
 # so this is a config file
 ServerAliveInterval 60
+SendEnv TERM
+SendEnv COLORTERM
+SendEnv HAS_POWERLINE
 
 Host pavilion
     # HostName 173.217.220.184
@@ -9,9 +12,6 @@ Host pavilion
 Host beta
     HostName beta.latech.edu
     User twb015
-
-Host openwrt
-    User root
 
 Host ace-debian
     # HostName 138.47.102.109
