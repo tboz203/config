@@ -1,94 +1,78 @@
-" Standard vimrc {{{
-" When started as "evim", evim.vim will already have done these settings.
-if v:progname =~? "evim"
-    finish
-endif
+" Standard gvimrc "{{{
+" An example for a gvimrc file.
+" The commands in this are executed when the GUI is started.
+"
+" Maintainer:   Bram Moolenaar <Bram@vim.org>
+" Last change:  2001 Sep 02
+"
+" To use it, copy it to
+"     for Unix and OS/2:  ~/.gvimrc
+"             for Amiga:  s:.gvimrc
+"  for MS-DOS and Win32:  $VIM\_gvimrc
+"           for OpenVMS:  sys$login:.gvimrc
 
-" Use Vim settings, rather than Vi settings (much better!).
-" This must be first, because it changes other options as a side effect.
-set nocompatible
+" Make external commands work through a pipe instead of a pseudo-tty
+"set noguipty
 
-" allow backspacing over everything in insert mode
-set backspace=indent,eol,start
+" set the X11 font to use
+" set guifont=-misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-1
+set guifont=Source\ Code\ Pro\ for\ Powerline
 
-set history=50      " keep 50 lines of command line history
-set ruler       " show the cursor position all the time
-set showcmd     " display incomplete commands
-set incsearch       " do incremental searching
+set ch=2                " Make command line two lines high
 
-" For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
-" let &guioptions = substitute(&guioptions, "t", "", "g")
+set mousehide           " Hide the mouse when typing text
 
-" Don't use Ex mode, use Q for formatting
-map Q gq
+" Make shift-insert work like in Xterm
+map <S-Insert> <MiddleMouse>
+map! <S-Insert> <MiddleMouse>
 
-" CTRL-U in insert mode deletes a lot.  Use CTRL-G u to first break undo,
-" so that you can undo CTRL-U after inserting a line break.
-inoremap <C-U> <C-G>u<C-U>
+" Only do this for Vim version 5.0 and later.
+if version >= 500
 
-" In many terminal emulators the mouse works just fine, thus enable it.
-if has('mouse')
-    set mouse=a
-endif
+  " I like highlighting strings inside C comments
+  let c_comment_strings=1
 
-" Switch syntax highlighting on, when the terminal has colors
-" Also switch on highlighting the last used search pattern.
-if &t_Co > 2 || has("gui_running")
-  syntax on
+  " Switch on syntax highlighting if it wasn't on yet.
+  if !exists("syntax_on")
+    syntax on
+  endif
+
+  " Switch on search pattern highlighting.
   set hlsearch
-  nohlsearch
+
+  " For Win32 version, have "K" lookup the keyword in a help file
+  "if has("win32")
+  "  let winhelpfile='windows.hlp'
+  "  map K :execute "!start winhlp32 -k <cword> " . winhelpfile <CR>
+  "endif
+
+  " Set nice colors
+  " background for normal text is light grey
+  " Text below the last line is darker grey
+  " Cursor is green, Cyan when ":lmap" mappings are active
+  " Constants are not underlined but have a slightly lighter background
+  highlight Normal guibg=grey90
+  highlight Cursor guibg=Green guifg=NONE
+  highlight lCursor guibg=Cyan guifg=NONE
+  highlight NonText guibg=grey80
+  highlight Constant gui=NONE guibg=grey95
+  highlight Special gui=NONE guibg=grey95
+
 endif
-
-" Only do this part when compiled with support for autocommands.
-if has("autocmd")
-
-  " Enable file type detection.
-  " Use the default filetype settings, so that mail gets 'tw' set to 72,
-  " 'cindent' is on in C files, etc.
-  " Also load indent files, to automatically do language-dependent indenting.
-  filetype plugin indent on
-
-  " Put these in an autocmd group, so that we can delete them easily.
-  augroup vimrcEx
-  au!
-
-  " For all text files set 'textwidth' to 76 characters.
-  autocmd FileType text setlocal textwidth=76
-
-  " When editing a file, always jump to the last known cursor position.
-  " Don't do it when the position is invalid or when inside an event handler
-  " (happens when dropping a file on gvim).
-  " Also don't do it when the mark is in the first line, that is the default
-  " position when opening a file.
-  autocmd BufReadPost *
-    \ if line("'\"") > 1 && line("'\"") <= line("$") |
-    \   exe "normal! g`\"" |
-    \ endif
-  augroup END
-
-else
-  set autoindent        " always set autoindenting on
-endif " has("autocmd")
-
-" Convenient command to see the difference between the current buffer and the
-" file it was loaded from, thus the changes you made.
-" Only define it when not defined already.
-if !exists(":DiffOrig")
-  command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
-          \ | wincmd p | diffthis
-endif
-" end standard vimrc }}}
+" }}}
 
 " Tommy Bozeman
 " my personal additions
 
 " basic options {{{
+colorscheme default
 set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
 set list
 let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
-set background=dark     " make the text easier to read on a dark background
+" set background=dark     " make the text easier to read on a dark background
+set background=light    " make the text easier to read on a light background
 set modeline            " if a file has a modeline, use it
 set splitbelow          " put new windows to the right or below
 set splitright
@@ -213,10 +197,10 @@ Bundle 'zaiste/tmux.vim'
 Bundle 'Valloric/YouCompleteMe'
 " tag support
 Bundle 'majutsushi/tagbar'
+" something something binary/hex editing?
+Bundle 'tpope/vim-afterimage'
 
 " {{{
-" " rudimentary image editing
-" Bundle 'tpope/vim-afterimage'
 " " tern support
 " Bundle 'marijnh/tern_for_vim'
 " " tag generator using tern
