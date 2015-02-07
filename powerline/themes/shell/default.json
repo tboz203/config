@@ -5,10 +5,12 @@
 				"function": "powerline.segments.shell.mode"
 			},
 			{
-				"function": "powerline.segments.common.net.hostname"
+				"function": "powerline.segments.common.net.hostname",
+				"priority": 10
 			},
 			{
-				"function": "powerline.segments.common.env.user"
+				"function": "powerline.segments.common.env.user",
+				"priority": 30
 			},
 			{
 				"function": "powerline.segments.common.env.virtualenv",
@@ -16,7 +18,7 @@
 			},
 			{
 				"function": "powerline.segments.common.vcs.branch",
-				"priority": 40,
+				"priority": 20,
 				"args": {
 					"status_colors": true
 				}
@@ -28,6 +30,16 @@
 			{
 				"function": "powerline.segments.shell.jobnum",
 				"priority": 20
+			}
+		],
+		"right": [
+			{
+				"function": "powerline.segments.shell.last_pipe_status",
+				"priority": 10
+			},
+			{
+				"function": "powerline.segments.common.vcs.branch",
+				"priority": 40
 			}
 		]
 	}

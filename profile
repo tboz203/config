@@ -20,8 +20,12 @@ if [ -d "$HOME/.pymodules" ]; then
     export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
 fi
 
+if ( fc-list | grep -iq powerline ); then
+    export HAS_POWERLINE_FONTS=1
+fi
+
 export EDITOR=/usr/bin/vim
-export PYTHONDONTWRITEBYTECODE=1
+# export PYTHONDONTWRITEBYTECODE=1
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then

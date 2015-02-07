@@ -21,6 +21,7 @@ gparted
 graphviz
 htop
 hydra
+iftop
 imagemagick
 john
 kismet
@@ -30,13 +31,14 @@ lighttpd
 markdown
 mednafen
 molly-guard
+nethogs
 nmap
 nodejs
 npm
 odt2txt
 openssh-server
 p7zip-full
-powerline (?)
+powerline (*)
 pv
 python-gnuplot
 python-matplotlib
