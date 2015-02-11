@@ -87,7 +87,7 @@ set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
 set list
-let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
+"let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
 set background=dark     " make the text easier to read on a dark background
 set modeline            " if a file has a modeline, use it
 set splitbelow          " put new windows to the right or below
@@ -148,7 +148,7 @@ noremap ? q?a
 " a quick mapping for JSHint
 noremap <leader>j :JSHint<cr><cr>
 " make a mapping for traditional ex binding
-noremap ; :
+" noremap ; :
 
 noremap gl :set list!<cr>
 noremap gs :set spell!<cr>
@@ -224,38 +224,38 @@ Bundle 'zaiste/tmux.vim'
 " tag support
 Bundle 'majutsushi/tagbar'
 
-" {{{
-" " rudimentary image editing
-" Bundle 'tpope/vim-afterimage'
-" " tern support
-" Bundle 'marijnh/tern_for_vim'
-" " tag generator using tern
-" Bundle 'ramitos/jsctags'
-" " auto-set indentation variables
-" Bundle 'tpope/vim-sleuth'
-" " indentation guides
-" Bundle 'nathanaelkane/vim-indent-guides'
-" " powerful file-system searching
-" Bundle 'kien/ctrlp.vim'
-" " buffer explorer
-" Bundle 'corntrace/bufexplorer'
-" " increment/decrement dates w/ <c-a>/<c-x>
-" Bundle 'tpope/vim-speeddating'
-" " snippet insertion (for boilerplate code)
-" Bundle 'SirVer/ultisnips'
-" " file-system browser
-" Bundle 'scrooloose/nerdtree'
-" " tab-support for nerdtree
-" Bundle 'jistr/vim-nerdtree-tabs'
-" " javascript helpers
-" Bundle 'Shutnik/jshint2.vim'
-" Bundle 'walm/jshint.vim'
-" Bundle 'vim-scripts/TabBar'
-" " external syntax checking (?)
-" Bundle 'scrooloose/syntastic'
-" " ctags from some other place, lol
-" Bundle 'clausreinke/scoped_tags'
-" " }}}
+" " {{{
+" " " rudimentary image editing
+" " Bundle 'tpope/vim-afterimage'
+" " " tern support
+" " Bundle 'marijnh/tern_for_vim'
+" " " tag generator using tern
+" " Bundle 'ramitos/jsctags'
+" " " auto-set indentation variables
+" " Bundle 'tpope/vim-sleuth'
+" " " indentation guides
+" " Bundle 'nathanaelkane/vim-indent-guides'
+" " " powerful file-system searching
+" " Bundle 'kien/ctrlp.vim'
+" " " buffer explorer
+" " Bundle 'corntrace/bufexplorer'
+" " " increment/decrement dates w/ <c-a>/<c-x>
+" " Bundle 'tpope/vim-speeddating'
+" " " snippet insertion (for boilerplate code)
+" " Bundle 'SirVer/ultisnips'
+" " " file-system browser
+" " Bundle 'scrooloose/nerdtree'
+" " " tab-support for nerdtree
+" " Bundle 'jistr/vim-nerdtree-tabs'
+" " " javascript helpers
+" " Bundle 'Shutnik/jshint2.vim'
+" " Bundle 'walm/jshint.vim'
+" " Bundle 'vim-scripts/TabBar'
+" " " external syntax checking (?)
+" " Bundle 'scrooloose/syntastic'
+" " " ctags from some other place, lol
+" " Bundle 'clausreinke/scoped_tags'
+" " " }}}
 
 filetype plugin indent on
 " end Vundle }}}

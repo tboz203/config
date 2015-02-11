@@ -7,17 +7,22 @@
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
 
-# fix the term, specifically for tmux (otherwise powerline doesn't work well)
-if [[ $TERM != *256color && \
-        $COLORTERM == "gnome-terminal" || \
-        $COLORTERM == "xfce4-terminal" ]]; then
+# # fix the term, specifically for tmux (otherwise powerline doesn't work well)
+# if [[ $TERM != *256color && \
+#         $COLORTERM == "gnome-terminal" || \
+#         $COLORTERM == "xfce4-terminal" ]]; then
+#     export TERM=xterm-256color
+# elif [[ $COLORTERM == "rxvt-xpm" ]]; then
+#     export TERM=rxvt-256color
+# fi
+
+# hotfix for cygwin
+if [[ $TERM != screen* ]]; then
     export TERM=xterm-256color
-elif [[ $COLORTERM == "rxvt-xpm" ]]; then
-    export TERM=rxvt-256color
 fi
 
 # set powerline availability flag (for all programs)
-if [[ $(which powerline) ]]; then
+if ( which powerline >& /dev/null ) ; then
     if [[ -z $SSH_CONNECTION && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
         # if we're over ssh, then `HAS_POWERLINE` will already be set
         # appropriately. otherwise the local box needs to support it
@@ -43,6 +48,8 @@ fi
 if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
     exec tmux
 fi
+
+umask 077
 
 # ignore something-or-other (i think it's `ls` and `cd`?)
 HISTCONTROL=ignoreboth
@@ -171,6 +178,14 @@ if [[ -f /etc/bash_completion ]] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
+if [[ -d $HOME/.local/bin && $PATH != *$HOME/.local/bin* ]]; then
+    export PATH=$HOME/.local/bin:$PATH
+fi
+
+if [[ -d $HOME/.bin && $PATH != *$HOME/.bin* ]]; then
+    export PATH=$HOME/.bin:$PATH
+fi
+
 # dircolors
 if [[ -x /usr/bin/dircolors ]]; then
     if [[ -r ~/.dircolors ]]; then
@@ -195,7 +210,7 @@ fi
 # a function to open files using the default file handler
 open () {
     for item in "$@"; do
-        xdg-open "$item"
+        explorer.exe "$item"
     done
 }
 

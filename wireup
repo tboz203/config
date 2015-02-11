@@ -22,9 +22,7 @@ ln -s "$(pwd)/gitconfig"		~/.gitconfig
 ln -s "$(pwd)/git-prompt"		~/.git-prompt
 ln -s "$(pwd)/vim"			~/.vim
 ln -s "$(pwd)/tmux.conf"		~/.tmux.conf
-ln -s "$(pwd)/tmux-powerline.conf"	~/.tmux-powerline.conf
 ln -s "$(pwd)/htop"			~/.config/
-ln -s "$(pwd)/powerline"		~/.config/
 
 [[ -d ~/.ssh ]] || mkdir ~/.ssh
 ln -s "$(pwd)/sshconfig"		~/.ssh/config
@@ -42,4 +40,3 @@ ln -s "$(pwd)/sshconfig"		~/.ssh/config
 # cd powerline-fonts && ./install.sh ; cd ..
 
 # sudo cat hosts >> /etc/hosts
-# sudo chsh tommy -s /usr/bin/tmux
