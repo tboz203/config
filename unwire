@@ -3,11 +3,18 @@
 rm -f ~/.profile
 rm -f ~/.bashrc
 rm -f ~/.vimrc
+rm -f ~/.gvimrc
 rm -f ~/.inputrc
 rm -f ~/.bash_aliases
-rm -f ~/.bin
-rm -f ~/.pymodules
 rm -f ~/.bash_logout
-rm -f ~/.toprc
 rm -f ~/.gitconfig
 rm -f ~/.git-prompt
+rm -f ~/.vim
+rm -f ~/.tmux.conf
+rm -f ~/.tmux-powerline.conf
+rm -f ~/.ssh/config
+
+rm -rf ~/.bin
+rm -rf ~/.pymodules
+rm -rf ~/.config/htop
+rm -rf ~/.config/powerline

@@ -1,0 +1,8 @@
+# things to ignore
+*~
+.*
+*.pyc
+*.pyo
+
+# gonna try this:
+vim/bundle/*

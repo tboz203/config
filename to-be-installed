@@ -1,0 +1,94 @@
+aircrack-ng
+autopsy
+bkhive
+build-essential
+calibre
+cowsay
+curl
+cython
+docx2txt
+dolphin-emu-master
+doxygen
+dropbox
+emacs
+exuberant-ctags
+figlet
+gcc-multilib
+gem
+ghc
+git
+gparted
+graphviz
+htop
+hydra
+iftop
+imagemagick
+john
+kismet
+libav-tools
+libmpc-dev
+lighttpd
+markdown
+mednafen
+molly-guard
+nethogs
+nmap
+nodejs
+npm
+odt2txt
+openssh-server
+p7zip-full
+powerline (*)
+pv
+python-gnuplot
+python-matplotlib
+python-pip
+python-pyx
+python-tk
+ruby
+samdump2
+scapy
+screen
+skype
+sleuthkit
+source-highlight
+steam-launcher
+sublime-text
+ternjs (?)
+tidy
+tree
+ttf-mscorefonts-installer
+vim
+wicd
+wireshark
+wkhtmltopdf
+
+> pip:
+    pip install --user git+git://github.com/Lokaltog/powerline
+
+> for vim:
+    mercurial
+    ruby1.9.1-full
+    libncurses5-dev
+    python-dev
+    libX11-dev
+    libxtst-dev
+    libxt-dev
+    libsm-dev
+    libxpm-dev
+    libxmu-dev
+    libgtk2.0-dev
+
+truecrypt *
+truecrack *
+processing *
+komodo *
+jshint *
+google-chrome *
+skype *
+john *
+pulseaudio-equalizer *
+
+metasploit *
+armitage *
+vmware / virtualbox *

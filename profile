@@ -6,7 +6,26 @@
 
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
-umask 002
+umask 027
+
+export PATH="$PATH:/sbin:/usr/sbin"
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.bin" ] ; then
+    export PATH="$HOME/.bin:$HOME/.local/bin:$PATH"
+fi
+
+# add a personal module directory for python
+if [ -d "$HOME/.pymodules" ]; then
+    export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
+fi
+
+if ( fc-list | grep -iq powerline ); then
+    export HAS_POWERLINE_FONTS=1
+fi
+
+export EDITOR=/usr/bin/vim
+# export PYTHONDONTWRITEBYTECODE=1
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
@@ -15,15 +34,3 @@ if [ -n "$BASH_VERSION" ]; then
     . "$HOME/.bashrc"
     fi
 fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.bin" ] ; then
-    export PATH="$HOME/.bin:$PATH"
-fi
-
-# add a personal module directory for python
-if [ -d "$HOME/.pymodules" ]; then
-    export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
-fi
-
-export EDITOR=/usr/bin/vim

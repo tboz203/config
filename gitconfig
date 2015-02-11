@@ -12,3 +12,7 @@
 	prompt = false
 [difftool]
 	prompt = false
+[push]
+	default = matching
+[http]
+	sslVerify = false
