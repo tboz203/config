@@ -5,8 +5,9 @@ SendEnv COLORTERM
 SendEnv HAS_POWERLINE
 
 Host pavilion
-    HostName pavilion
-    Port 2200
+    # HostName 173.217.220.184
+    # HostName 98.183.86.139
+    user tommy
 
 Host beta
     HostName beta.latech.edu
@@ -15,15 +16,14 @@ Host beta
 Host ace-debian
     # HostName 138.47.102.109
     HostName ace-debian.latech.edu
+    user tommy
     Port 8000
 
 Host defalt-debian
     # HostName 138.47.102.217
     HostName defalt-debian.latech.edu
+    user tommy
     Port 8000
-
-Host cyberlab
-    HostName 138.47.102.85
 
 Host tboz203* !*.terminal.com
     HostName %h.terminal.com
@@ -31,3 +31,6 @@ Host tboz203* !*.terminal.com
 Host *.terminal.com
     User root
     ProxyCommand ssh -p 2200 tboz203@sshterminal.com setup_terminal_proxy %h %p
+
+Host home
+    Port 8000

@@ -1,51 +1,51 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
-
 # with modifications by tboz203
+# vim: foldmethod=marker
 
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
 
-# # fix the term, specifically for tmux (otherwise powerline doesn't work well)
-# if [[ $TERM != *256color && \
-#         $COLORTERM == "gnome-terminal" || \
-#         $COLORTERM == "xfce4-terminal" ]]; then
-#     export TERM=xterm-256color
-# elif [[ $COLORTERM == "rxvt-xpm" ]]; then
-#     export TERM=rxvt-256color
-# fi
-
-# hotfix for cygwin
-if [[ $TERM != screen* ]]; then
-    export TERM=xterm-256color
-fi
-
-# set powerline availability flag (for all programs)
-if ( which powerline >& /dev/null ) ; then
-    if [[ -z $SSH_CONNECTION && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
-        # if we're over ssh, then `HAS_POWERLINE` will already be set
-        # appropriately. otherwise the local box needs to support it
-        export HAS_POWERLINE=1
-    fi
-else
-    unset HAS_POWERLINE
-fi
-
-if [[ $HAS_POWERLINE ]]; then
-    # TODO: this could probably be streamlined, but it works
-    if [[ -d /usr/local/lib/python2.7/dist-packages/powerline ]]; then
-        export POWERLINE_ROOT=/usr/local/lib/python2.7/dist-packages/powerline
-    elif [[ -d $HOME/.local/lib/python2.7/site-packages/powerline ]]; then
-        export POWERLINE_ROOT=$HOME/.local/lib/python2.7/site-packages/powerline
-    else
-        echo >2 "[-] Powerline root not found"
-        unset HAS_POWERLINE
-    fi
-fi
-
 # if has tmux and not nested, change process to new session
 if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
+    # fix the term, specifically for tmux (otherwise powerline doesn't work well)
+    if [[ $TERM != *256color && \
+            $COLORTERM == "gnome-terminal" || \
+            $COLORTERM == "xfce4-terminal" ]]; then
+        export TERM=xterm-256color
+    elif [[ $COLORTERM == "rxvt-xpm" ]]; then
+        export TERM=rxvt-256color
+    # ugly hack for terminal.com
+    elif [[ $(hostname) == tboz203* ]]; then
+        export TERM=xterm-256color
+        # export HAS_POWERLINE_FONTS=1
+        export TERM=xterm-256color
+    fi
+
+    # set powerline availability flag (for all programs)
+    if ( which powerline >& /dev/null ) ; then
+        if [[ -z $SSH_CONNECTION && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
+            # if we're over ssh, then `HAS_POWERLINE` will already be set
+            # appropriately. otherwise the local box needs to support it
+            export HAS_POWERLINE=1
+        fi
+    else
+        unset HAS_POWERLINE
+    fi
+
+    if [[ $HAS_POWERLINE ]]; then
+        # TODO: this could probably be streamlined, but it works
+        if [[ -d /usr/local/lib/python2.7/dist-packages/powerline ]]; then
+            export POWERLINE_ROOT=/usr/local/lib/python2.7/dist-packages/powerline
+        elif [[ -d $HOME/.local/lib/python2.7/site-packages/powerline ]]; then
+            export POWERLINE_ROOT=$HOME/.local/lib/python2.7/site-packages/powerline
+        else
+            echo >&2 "[-] Powerline root not found"
+            unset HAS_POWERLINE
+        fi
+    fi
+
     exec tmux
 fi
 
@@ -214,4 +214,17 @@ open () {
     done
 }
 
-# vim: foldmethod=marker
+# The next line updates PATH for the Google Cloud SDK.
+source '/home/tommy/google-cloud-sdk/path.bash.inc'
+
+# The next line enables bash completion for gcloud.
+source '/home/tommy/google-cloud-sdk/completion.bash.inc'
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"
+
+# commands for virtualenvwrapper {{{
+export WORKON_HOME=$HOME/.local/envs/
+export PROJECT_HOME=$HOME/workspace/
+source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+# }}}

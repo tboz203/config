@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ -z $1 ]]; then
+    echo '[-] What do you want me to do?' >&2
+    exit 1
+fi
+
+ps -fN --pid $$ --pid $PPID --ppid $$ | grep "$1"
