@@ -32,3 +32,6 @@ Host tboz203* !*.terminal.com
 Host *.terminal.com
     User root
     ProxyCommand ssh -p 2200 tboz203@sshterminal.com setup_terminal_proxy %h %p
+
+Host home
+    Port 8000

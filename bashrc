@@ -1,8 +1,8 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
-
 # with modifications by tboz203
+# vim: foldmethod=marker
 
 # If not running interactively, don't do anything
 [[ -z "$PS1" ]] && return
@@ -199,4 +199,17 @@ open () {
     done
 }
 
-# vim: foldmethod=marker
+# The next line updates PATH for the Google Cloud SDK.
+source '/home/tommy/google-cloud-sdk/path.bash.inc'
+
+# The next line enables bash completion for gcloud.
+source '/home/tommy/google-cloud-sdk/completion.bash.inc'
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"
+
+# commands for virtualenvwrapper {{{
+export WORKON_HOME=$HOME/.local/envs/
+export PROJECT_HOME=$HOME/workspace/
+source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+# }}}
