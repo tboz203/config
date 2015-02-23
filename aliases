@@ -67,6 +67,7 @@ alias find='find 2>/dev/null'
 alias less='less -SR'
 alias nethogs='nethogs wlan0'
 alias iftop='iftop -i wlan0'
+alias nmap='nmap -unpriv'
 
 # misc
 alias rgrep='grep -r'
