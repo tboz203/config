@@ -4,6 +4,37 @@
 *.pyc
 *.pyo
 
-# gonna try this:
 vim/bundle/*
 vim/.netrwhist
+
+# # going to try moving everything to my home directory
+# *
+# !bin
+# !htop
+# !powerline
+# !pymodules
+# !vim
+# !aliases
+# !bashrc
+# !export.tgz
+# !gitconfig
+# !git-prompt
+# !gvimrc
+# !hosts
+# !htoprc
+# !inputrc
+# !logout
+# !profile
+# !README.md
+# !screenrc
+# !sshconfig
+# !tmux.conf
+# !tmux-powerline.conf
+# !to-be-installed
+# !toprc
+# !unwire
+# !update
+# !update.sudo
+# !vim-conf-build.sh
+# !vimrc
+# !wireup

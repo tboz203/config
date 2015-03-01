@@ -53,8 +53,8 @@ alias cp='cp -vri'
 alias rm='rm -vI'
 
 # some ps aliases
-alias ps='ps -H'
-alias psef='ps -ef'
+# alias ps='ps -H'
+# alias psef='ps -ef'
 
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
@@ -90,3 +90,6 @@ alias update='sudo update'
 
 alias snst='snort-stat < /var/log/snort/alert | vim -c "set ft=snort-stat nolist bt=nofile" -'
 alias hping='sudo hping3'
+
+# because on windows
+alias dir=ll

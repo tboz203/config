@@ -18,10 +18,12 @@ ln -s "$(pwd)/aliases"			~/.bash_aliases
 ln -s "$(pwd)/bin"			~/.bin
 ln -s "$(pwd)/pymodules"		~/.pymodules
 ln -s "$(pwd)/logout"			~/.bash_logout
-ln -s "$(pwd)/gitconfig"		~/.gitconfig
+# modified for CGI cygwin env
+# ln -s "$(pwd)/gitconfig"		~/.gitconfig
 ln -s "$(pwd)/git-prompt"		~/.git-prompt
 ln -s "$(pwd)/vim"			~/.vim
 ln -s "$(pwd)/tmux.conf"		~/.tmux.conf
+ln -s "$(pwd)/tmux-powerline.conf"	~/.tmux-powerline.conf
 ln -s "$(pwd)/htop"			~/.config/
 
 [[ -d ~/.ssh ]] || mkdir ~/.ssh

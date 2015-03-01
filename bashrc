@@ -17,10 +17,14 @@ if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
     elif [[ $COLORTERM == "rxvt-xpm" ]]; then
         export TERM=rxvt-256color
     # ugly hack for terminal.com
-    elif [[ $(hostname) == tboz203* ]]; then
+    elif [[ $HOSTNAME == tboz203* ]]; then
         export TERM=xterm-256color
         # export HAS_POWERLINE_FONTS=1
         export TERM=xterm-256color
+    # more ugly hacks
+    elif [[ $HOSTNAME == FFXMOMT-F08327 ]]; then
+        export TERM=xterm-256color
+        export HAS_POWERLINE_FONTS=1
     fi
 
     # set powerline availability flag (for all programs)
@@ -40,6 +44,8 @@ if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
             export POWERLINE_ROOT=/usr/local/lib/python2.7/dist-packages/powerline
         elif [[ -d $HOME/.local/lib/python2.7/site-packages/powerline ]]; then
             export POWERLINE_ROOT=$HOME/.local/lib/python2.7/site-packages/powerline
+        elif [[ -d /usr/lib/python2.7/site-packages/powerline ]]; then
+            export POWERLINE_ROOT=/usr/lib/python2.7/site-packages/powerline
         else
             echo >&2 "[-] Powerline root not found"
             unset HAS_POWERLINE
@@ -214,17 +220,21 @@ open () {
     done
 }
 
-# The next line updates PATH for the Google Cloud SDK.
-source '/home/tommy/google-cloud-sdk/path.bash.inc'
+if [[ $HOSTNAME != FFXMOMT-F08327 ]]; then
 
-# The next line enables bash completion for gcloud.
-source '/home/tommy/google-cloud-sdk/completion.bash.inc'
+    # The next line updates PATH for the Google Cloud SDK.
+    source '/home/tommy/google-cloud-sdk/path.bash.inc'
 
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
+    # The next line enables bash completion for gcloud.
+    source '/home/tommy/google-cloud-sdk/completion.bash.inc'
+
+    ### Added by the Heroku Toolbelt
+    export PATH="/usr/local/heroku/bin:$PATH"
+
+fi
 
 # commands for virtualenvwrapper {{{
 export WORKON_HOME=$HOME/.local/envs/
 export PROJECT_HOME=$HOME/workspace/
-source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+source /usr/bin/virtualenvwrapper.sh
 # }}}

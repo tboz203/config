@@ -7,7 +7,8 @@ rm -f ~/.gvimrc
 rm -f ~/.inputrc
 rm -f ~/.bash_aliases
 rm -f ~/.bash_logout
-rm -f ~/.gitconfig
+# modified for CGI cygwin env
+# rm -f ~/.gitconfig
 rm -f ~/.git-prompt
 rm -f ~/.vim
 rm -f ~/.tmux.conf

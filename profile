@@ -20,7 +20,7 @@ if [ -d "$HOME/.pymodules" ]; then
     export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
 fi
 
-if ( fc-list | grep -iq powerline ); then
+if ( which fc-list 2>/dev/null && fc-list | grep -iq powerline ); then
     export HAS_POWERLINE_FONTS=1
 fi
 
