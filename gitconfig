@@ -1,8 +1,8 @@
 [color]
-	ui = auto
+	ui = true
 [user]
-	name = tboz203
-	email = tboz203@gmail.com
+	name = Thomas Bozeman
+	email = tbozeman@cgifederal.com
 [core]
 	editor = vim
 [merge]
@@ -13,4 +13,4 @@
 [difftool]
 	prompt = false
 [push]
-	default = matching
+	default = simple

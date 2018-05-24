@@ -5,7 +5,16 @@
 # vim: foldmethod=marker
 
 # If not running interactively, don't do anything
-[[ -z "$PS1" ]] && return
+case $- in
+    *i*) ;;
+    *) return ;;
+esac
+
+# if [[ $__bashrc ]]; then
+#     return
+# else
+#     export __bashrc=1
+# fi
 
 # if has tmux and not nested, change process to new session
 if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
@@ -184,36 +193,5 @@ if [[ -x /usr/bin/dircolors ]]; then
     fi
 fi
 
-# # clear screen and list files after changing directory #{{{
-# # this functionality is obsoleted by the PROMPT_COMMAND
-# cd(){
-#     if [ -n "$1" ]; then
-#         builtin cd "$1"
-#     else
-#         builtin cd "$HOME"
-#     fi
-#     clear
-#     ll
-# } #}}}
-
-# a function to open files using the default file handler
-open () {
-    for item in "$@"; do
-        xdg-open "$item"
-    done
-}
-
-# The next line updates PATH for the Google Cloud SDK.
-source '/home/tommy/google-cloud-sdk/path.bash.inc'
-
-# The next line enables bash completion for gcloud.
-source '/home/tommy/google-cloud-sdk/completion.bash.inc'
-
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
-
-# commands for virtualenvwrapper {{{
-export WORKON_HOME=$HOME/.local/envs/
-export PROJECT_HOME=$HOME/workspace/
-source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
-# }}}
+export PYTHONSTARTUP=$HOME/.pythonrc.py
+export EDITOR=/usr/bin/vim

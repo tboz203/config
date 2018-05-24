@@ -52,8 +52,8 @@ if has("autocmd")
   augroup vimrcEx
   au!
 
-  " For all text files set 'textwidth' to 76 characters.
-  autocmd FileType text setlocal textwidth=76
+  " For all text files set 'textwidth' to 78 characters.
+  autocmd FileType text setlocal textwidth=78
 
   " When editing a file, always jump to the last known cursor position.
   " Don't do it when the position is invalid or when inside an event handler
@@ -74,7 +74,7 @@ endif " has("autocmd")
 " file it was loaded from, thus the changes you made.
 " Only define it when not defined already.
 if !exists(":DiffOrig")
-  command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
+  command DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
           \ | wincmd p | diffthis
 endif
 " end standard vimrc }}}
@@ -87,7 +87,8 @@ set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
 set list
-let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
+" let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
+set listchars=tab:>-,trail:-,extends:$,precedes:$
 set background=dark     " make the text easier to read on a dark background
 set modeline            " if a file has a modeline, use it
 set splitbelow          " put new windows to the right or below
@@ -188,11 +189,11 @@ onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:no
 " Vundle {{{
 filetype off
 
-set rtp+=~/.vim/bundle/vundle
+set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#rc()
 
 " vundle itself
-Bundle 'gmarik/vundle'
+Bundle 'VundleVim/Vundle.vim'
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
 " graphical undo tree
@@ -205,16 +206,26 @@ Bundle 'tpope/vim-commentary'
 Bundle 'tpope/vim-surround'
 " add repeat (.) support to (some) plugins
 Bundle 'tpope/vim-repeat'
-" adding gpg symmetric support
-Bundle 'vim-scripts/gnupg.vim'
 " tmux syntax highlighting
 Bundle 'zaiste/tmux.vim'
-" a 'fuzzy' code-completion engine
-Bundle 'Valloric/YouCompleteMe'
 " tag support
 Bundle 'majutsushi/tagbar'
 
+" 'Tabularize' alignment
+Bundle 'godlygeek/tabular'
+" golang tools
+Bundle 'fatih/vim-go'
+" dockerfile syntax
+Bundle 'ekalinin/Dockerfile.vim'
+" vagrantfile syntax
+Bundle 'hashivim/vim-vagrant'
+
 " {{{
+" " a 'fuzzy' code-completion engine
+" Bundle 'Valloric/YouCompleteMe'
+" " adding gpg symmetric support
+" Bundle 'vim-scripts/gnupg.vim'
+"
 " " rudimentary image editing
 " Bundle 'tpope/vim-afterimage'
 " " tern support

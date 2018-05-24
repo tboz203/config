@@ -1,3 +1,5 @@
+# https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+# sudo yum install ruby ruby-devel ctags python36-devel ncurses ncurses-devel
 cat $0 | tee conf.out
 ./configure \
     --enable-fail-if-missing \

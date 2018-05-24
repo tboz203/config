@@ -17,14 +17,15 @@ alias lt='ll --sort=t'
 alias h='hostname'
 alias py='python -B'
 alias py3='python3 -B'
-alias tc='sudo truecrypt -t'
 alias ...='../..'
 alias ....='../../..'
 alias .....='../../../..'
 
 # some git commands
 alias gits='git status'
-alias gitl='git log --oneline --graph --decorate'
+alias gitl='git log --oneline --graph --decorate --date-order'
+alias gitla='gitl --all'
+# alias gitlf='gitl --format="format:%C(yellow)%h %C(
 alias gitb='git branch -vva'
 alias gitr='git remote -vv'
 alias gitd='git diff'
@@ -65,9 +66,6 @@ alias tidy='tidy -f /dev/null -iqmw'
 alias astyle='astyle -sajcn'
 alias find='find 2>/dev/null'
 alias less='less -SR'
-alias nethogs='nethogs wlan0'
-alias iftop='iftop -i wlan0'
-alias nmap='nmap -unpriv'
 
 # misc
 alias rgrep='grep -r'
@@ -76,16 +74,13 @@ alias vimrc='vim ~/.vimrc'
 alias gvimrc='gvim ~/.gvimrc'
 alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
-alias math='python3 -ic "from math import *"'
-alias server='python -m SimpleHTTPServer'
-alias eq='pulseaudio-equalizer-gtk'
 alias rmf='rm -rf'
-alias psf='ps -ef'
 alias listening='lsof -i -s TCP:Listen'
 
 # obsoleted by update script and sudoers
 # alias update='sudo apt-get update && sudo apt-get upgrade'
 alias update='sudo update'
 
-alias snst='snort-stat < /var/log/snort/alert | vim -c "set ft=snort-stat nolist bt=nofile" -'
 alias hping='sudo hping3'
+
+alias status='systemctl status "diesel*"'
