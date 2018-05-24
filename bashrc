@@ -194,4 +194,4 @@ if [[ -x /usr/bin/dircolors ]]; then
 fi
 
 export PYTHONSTARTUP=$HOME/.pythonrc.py
-export EDITOR=/usr/bin/vim
+export EDITOR=/usr/local/bin/vim
