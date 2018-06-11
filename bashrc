@@ -1,8 +1,7 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-# for examples
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc) for examples
 # with modifications by tboz203
-# vim: foldmethod=marker
+# vim: tw=119
 
 # If not running interactively, don't do anything
 case $- in
@@ -10,51 +9,37 @@ case $- in
     *) return ;;
 esac
 
-# if [[ $__bashrc ]]; then
-#     return
-# else
-#     export __bashrc=1
-# fi
-
 # if has tmux and not nested, change process to new session
-if [[ -x $(which tmux) ]] && [[ -z "$TMUX" ]]; then
-    # fix the term, specifically for tmux (otherwise powerline doesn't work well)
-    if [[ $TERM != *256color && \
-            $COLORTERM == "gnome-terminal" || \
-            $COLORTERM == "xfce4-terminal" ]]; then
+if [[ -x /usr/bin/tmux ]] && [[ -z "$TMUX" ]]; then
+    # fix TERM for tmux (otherwise powerline doesn't work well)
+    if [[ $TERM != *256color && $COLORTERM == gnome-terminal || $COLORTERM == xfce4-terminal ]]; then
         export TERM=xterm-256color
-    elif [[ $COLORTERM == "rxvt-xpm" ]]; then
+    elif [[ $COLORTERM == rxvt-xpm ]]; then
         export TERM=rxvt-256color
-    # ugly hack for terminal.com
-    elif [[ $(hostname) == tboz203* ]]; then
-        export TERM=xterm-256color
-        # export HAS_POWERLINE_FONTS=1
     fi
 
     # set powerline availability flag (for all programs)
-    if [[ $(which powerline) ]]; then
-        if [[ -z $SSH_CONNECTION && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
-            # if we're over ssh, then `HAS_POWERLINE` will already be set
-            # appropriately. otherwise the local box needs to support it
-            export HAS_POWERLINE=1
-        fi
-    else
-        unset HAS_POWERLINE
+    if [[ $(which powerline) && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
+        export HAS_POWERLINE=1
     fi
+
+    shopt -s nullglob
 
     if [[ $HAS_POWERLINE ]]; then
-        # TODO: this could probably be streamlined, but it works
-        if [[ -d /usr/local/lib/python2.7/dist-packages/powerline ]]; then
-            export POWERLINE_ROOT=/usr/local/lib/python2.7/dist-packages/powerline
-        elif [[ -d $HOME/.local/lib/python2.7/site-packages/powerline ]]; then
-            export POWERLINE_ROOT=$HOME/.local/lib/python2.7/site-packages/powerline
+        for _location in {/usr,/usr/local,$HOME/.local}/lib/python*/site-packages/powerline; do
+            _root=$_location
+        done
+        if [[ $_root ]]; then
+            export POWERLINE_ROOT=$_root
         else
             echo >&2 "[-] Powerline root not found"
+            read -p "press enter to continue: "
             unset HAS_POWERLINE
         fi
+        unset _location _root
     fi
 
-    exec tmux
+    exec /usr/bin/tmux
 fi
 
 # ignore something-or-other (i think it's `ls` and `cd`?)
@@ -76,75 +61,39 @@ shopt -s checkwinsize
 [[ -x /usr/bin/lesspipe ]] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # set our prompt, depending on powerline availability
-if [[ -z $HAS_POWERLINE ]]; then
-    # no powerline # {{{
-    # set variable identifying the chroot you work in (used in the prompt below)
-    if [[ -z "$debian_chroot" && -r /etc/debian_chroot ]]; then
-        debian_chroot=$(cat /etc/debian_chroot)
-    fi
+if [[ $HAS_POWERLINE ]]; then
+    powerline-daemon -q
+    export POWERLINE_BASH_CONTINUATION=1
+    export POWERLINE_BASH_SELECT=1
+    .  $POWERLINE_ROOT/bindings/bash/powerline.sh
+else
 
-    # set a fancy prompt (non-color, unless we know we "want" color)
     case "$TERM" in
-        xterm-color) color_prompt=yes;;
+        *color*) color_prompt=yes;;
     esac
 
-    # uncomment for a colored prompt, if the terminal has the capability
-    force_color_prompt=yes
-
-    if [[ $force_color_prompt ]]; then
-        if [[ -x /usr/bin/tput ]] && tput setaf 1 >& /dev/null; then
-            # We have color support; assume it's compliant with Ecma-48
-            # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-            # a case would tend to support setf rather than setaf.)
-            color_prompt=yes
-        else
-            color_prompt=
-        fi
+    if [ "$color_prompt" = yes ]; then
+        black="\[\e[0;30m\]"
+        BLACK="\[\e[1;30m\]"
+        red="\[\e[0;31m\]"
+        RED="\[\e[1;31m\]"
+        green="\[\e[0;32m\]"
+        GREEN="\[\e[1;32m\]"
+        yellow="\[\e[0;33m\]"
+        YELLOW="\[\e[1;33m\]"
+        blue="\[\e[0;34m\]"
+        BLUE="\[\e[1;34m\]"
+        magenta="\[\e[0;35m\]"
+        MAGENTA="\[\e[1;35m\]"
+        cyan="\[\e[0;36m\]"
+        CYAN="\[\e[1;36m\]"
+        white="\[\e[0;37m\]"
+        WHITE="\[\e[1;37m\]"
+        reset="\[\e[0m\]"
     fi
 
-    if [ "$color_prompt" = yes ]; then #{{{
-        # some expansions i made, trying some stuff out for PS1
-        black="$(tput sgr0 && tput setaf 0)"
-        BLACK="$(tput bold && tput setaf 0)"
-        red="$(tput sgr0 && tput setaf 1)"
-        RED="$(tput bold && tput setaf 1)"
-        green="$(tput sgr0 && tput setaf 2)"
-        GREEN="$(tput bold && tput setaf 2)"
-        yellow="$(tput sgr0 && tput setaf 3)"
-        YELLOW="$(tput bold && tput setaf 3)"
-        blue="$(tput sgr0 && tput setaf 4)"
-        BLUE="$(tput bold && tput setaf 4)"
-        magenta="$(tput sgr0 && tput setaf 5)"
-        MAGENTA="$(tput bold && tput setaf 5)"
-        cyan="$(tput sgr0 && tput setaf 6)"
-        CYAN="$(tput bold && tput setaf 6)"
-        white="$(tput sgr0 && tput setaf 7)"
-        WHITE="$(tput bold && tput setaf 7)"
-        reset="$(tput sgr0)"
-    else
-        black="\e[0;30m"
-        BLACK="\e[1;30m"
-        red="\e[0;31m"
-        RED="\e[1;31m"
-        green="\e[0;32m"
-        GREEN="\e[1;32m"
-        yellow="\e[0;33m"
-        YELLOW="\e[1;33m"
-        blue="\e[0;34m"
-        BLUE="\e[1;34m"
-        magenta="\e[0;35m"
-        MAGENTA="\e[1;35m"
-        cyan="\e[0;36m"
-        CYAN="\e[1;36m"
-        white="\e[0;37m"
-        WHITE="\e[1;37m"
-        reset="\e[0m"
-    fi #}}}
-
     u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
-    PS1="\[$reset\]$debian_chroot\[$u_color\]\u\[$WHITE\]@\[$GREEN\]\h\[$WHITE\]:"
-    PS1+="\[$BLUE\]\w\[$reset\]"
-    PS1+='$(__git_ps1 ":(%s)")\$ '
+    PS1="${u_color}\u${WHITE}@${GREEN}\h${WHITE} ${BLUE}\w${reset}"
     unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
     unset white WHITE reset color_prompt force_color_prompt
 
@@ -157,13 +106,10 @@ if [[ -z $HAS_POWERLINE ]]; then
         GIT_PS1_SHOWSTASHSTATE=1
         GIT_PS1_SHOWUNTRACKEDFILE=1
         GIT_PS1_SHOWCOLORHINTS=1
-    fi #}}}
-else
-    # we have powerline #{{{
-    powerline-daemon -q
-    export POWERLINE_BASH_CONTINUATION=1
-    export POWERLINE_BASH_SELECT=1
-    .  $POWERLINE_ROOT/bindings/bash/powerline.sh #}}}
+        PS1+='$(__git_ps1 ":(%s)")'
+    fi
+
+    PS1+="${WHITE}$ ${reset}"
 fi
 
 # set autocd: if command is a directory, cd to it
@@ -193,5 +139,10 @@ if [[ -x /usr/bin/dircolors ]]; then
     fi
 fi
 
-export PYTHONSTARTUP=$HOME/.pythonrc.py
-export EDITOR=/usr/local/bin/vim
+if [[ -x $(which thefuck) ]]; then
+    eval "$(thefuck --alias drat)"
+fi
+
+if [[ -x $(which pipenv) ]]; then
+    eval "$(pipenv --completion)"
+fi

@@ -115,11 +115,13 @@ let maplocalleader = ','
 
 " normal mode
 " remove whitespace at end of line
-noremap <silent> <leader>rs :%s/\s\+$//<cr>:noh<cr>
+noremap <silent> <leader>rs :%s/\s\+$//<cr>:noh<cr><C-o>
 " retab the file
-noremap <silent> <leader>rt :retab<cr>
-" do both
-noremap <silent> <leader>rr :retab<cr>:%s/\s\+$//<cr>:noh<cr>
+noremap <silent> <leader>rt :retab<cr><C-o>
+" remove extra <CR> characters
+noremap <silent> <leader>rn :%s/\r$//<cr><C-o>
+" do all
+noremap <silent> <leader>rr :retab<cr>:%s/\s*\r\?$//<cr>:noh<cr><C-o>
 " easy edit/source of my vimrc (this file)
 noremap <leader>ev :vsplit $MYVIMRC<cr>
 noremap <leader>sv :source $MYVIMRC<cr>
@@ -220,6 +222,8 @@ Bundle 'ekalinin/Dockerfile.vim'
 " vagrantfile syntax
 Bundle 'hashivim/vim-vagrant'
 
+Bundle 'chr4/nginx.vim'
+
 " {{{
 " " a 'fuzzy' code-completion engine
 " Bundle 'Valloric/YouCompleteMe'
@@ -305,9 +309,9 @@ set smarttab
 
 " powerline {{{
 if $HAS_POWERLINE
-    python from powerline.vim import setup as powerline_setup
-    python powerline_setup()
-    python del powerline_setup
+    python3 from powerline.vim import setup as powerline_setup
+    python3 powerline_setup()
+    python3 del powerline_setup
 endif
 " }}}
 

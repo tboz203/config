@@ -1,3 +1,4 @@
+#!/bin/bash
 # color aliases
 alias ls='ls --color=auto --hide=*~ --hide=.*~ --group-directories-first'
 alias grep='grep --color=auto'
@@ -24,8 +25,9 @@ alias .....='../../../..'
 # some git commands
 alias gits='git status'
 alias gitl='git log --oneline --graph --decorate --date-order'
+alias gitlf='gitl --format="format:%C(yellow)%h %C(cyan)%an %C(green)%ar%C(magenta)%d %C(white)%s"'
 alias gitla='gitl --all'
-# alias gitlf='gitl --format="format:%C(yellow)%h %C(
+alias gitlaf='gitlf --all'
 alias gitb='git branch -vva'
 alias gitr='git remote -vv'
 alias gitd='git diff'
@@ -40,7 +42,7 @@ alias fl=lf
 alias f=lf
 alias ivm=vim
 alias vmi=vim
-alias oepn=open
+alias cdd=cd
 
 # make du and df a bit more readable
 alias df='df -h'
@@ -84,3 +86,5 @@ alias update='sudo update'
 alias hping='sudo hping3'
 
 alias status='systemctl status "diesel*"'
+
+alias svim='sudo vim "+set nu bg=dark ls=2 so=3" -p'

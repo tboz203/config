@@ -1,3 +1,4 @@
+#!/bin/sh
 # ~/.profile: executed by the command interpreter for login shells.
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
 # exists.
@@ -6,31 +7,47 @@
 
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
-umask 027
+umask 022
 
-export PATH="$PATH:/sbin:/usr/sbin"
+pathmunge () {
+    case ":${PATH}:" in
+        *:"$1":*)
+            ;;
+        *)
+            if [ ! -d "$1" ] ; then
+                return
+            fi
+            if [ "$2" = "after" ] ; then
+                PATH=$PATH:$1
+            else
+                PATH=$1:$PATH
+            fi
+    esac
+}
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.bin" ] ; then
-    export PATH="$HOME/.bin:$HOME/.local/bin:$PATH"
-fi
+pathmunge /usr/sbin         after
+pathmunge $HOME/.local/bin
+pathmunge $HOME/.bin
 
 # add a personal module directory for python
 if [ -d "$HOME/.pymodules" ]; then
     export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
 fi
 
-if ( fc-list | grep -iq powerline ); then
+if ( fc-list | grep -iq powerline ) && [ -z "$SSH_CONNECTION" ] ; then
     export HAS_POWERLINE_FONTS=1
 fi
 
-export EDITOR=/usr/bin/vim
-# export PYTHONDONTWRITEBYTECODE=1
+export EDITOR=$HOME/.local/bin/vim
+export PYTHONSTARTUP=$HOME/.pythonrc.py
+export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
     if [ -f "$HOME/.bashrc" ]; then
-    . "$HOME/.bashrc"
+        . "$HOME/.bashrc"
     fi
 fi
+
+unset pathmunge

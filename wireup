@@ -16,7 +16,6 @@ ln -s "$(pwd)/gvimrc"			~/.gvimrc
 ln -s "$(pwd)/inputrc"			~/.inputrc
 ln -s "$(pwd)/aliases"			~/.bash_aliases
 ln -s "$(pwd)/bin"			~/.bin
-ln -s "$(pwd)/pymodules"		~/.pymodules
 ln -s "$(pwd)/logout"			~/.bash_logout
 ln -s "$(pwd)/gitconfig"		~/.gitconfig
 ln -s "$(pwd)/git-prompt"		~/.git-prompt

@@ -2,7 +2,7 @@
 	ui = true
 [user]
 	name = Thomas Bozeman
-	email = tbozeman@cgifederal.com
+	email = thomas.bozeman@cgifederal.com
 [core]
 	editor = vim
 [merge]
@@ -14,3 +14,5 @@
 	prompt = false
 [push]
 	default = simple
+[credential]
+	helper = cache
