@@ -41,6 +41,7 @@ fi
 export EDITOR=$HOME/.local/bin/vim
 export PYTHONSTARTUP=$HOME/.pythonrc.py
 export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
+export ORACLE_HOME=/opt/apps/oracle/oracle12.1.0.2/product/12.1.0.2/client_1
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then

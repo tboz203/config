@@ -33,7 +33,7 @@ alias gitr='git remote -vv'
 alias gitd='git diff'
 
 # open each file in its own tab
-alias vim='vim -p'
+alias vim='vim -Xp'
 
 # common misspellings
 alias sl=ls

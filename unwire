@@ -1,19 +1,38 @@
-#!/bin/bash
+#!/bin/bash -eu
 
-rm -f ~/.profile
-rm -f ~/.bashrc
-rm -f ~/.vimrc
-rm -f ~/.gvimrc
-rm -f ~/.inputrc
-rm -f ~/.bash_aliases
-rm -f ~/.bash_logout
-rm -f ~/.gitconfig
-rm -f ~/.git-prompt
-rm -f ~/.vim
-rm -f ~/.tmux.conf
-rm -f ~/.tmux-powerline.conf
-rm -f ~/.ssh/config
+# remove dotfiles (either uninstalling a previous "wireup", or clearing out the initial "skel")
 
-rm -rf ~/.bin
-rm -rf ~/.config/htop
-rm -rf ~/.config/powerline
+BACKUP_DIR=$HOME/dotfiles
+mkdir -p $BACKUP_DIR
+
+function maybe_delete {
+    # if it's a symbolic link, nuke it
+    # otherwise, move it to $BACKUP_DIR (possibly numbered)
+    if [[ -L $1 ]]; then
+        rm -f $1
+    else
+        newname=$(basename $1)
+        # `${newname##.}` turns ".bashrc" into "bashrc"
+        mv --backup=numbered $1 $BACKUP_DIR/${newname##.}
+    fi
+}
+
+# regular files
+maybe_delete ~/.profile
+maybe_delete ~/.bashrc
+maybe_delete ~/.vimrc
+maybe_delete ~/.gvimrc
+maybe_delete ~/.inputrc
+maybe_delete ~/.bash_aliases
+maybe_delete ~/.bash_logout
+maybe_delete ~/.gitconfig
+maybe_delete ~/.git-prompt
+maybe_delete ~/.vim
+maybe_delete ~/.tmux.conf
+maybe_delete ~/.tmux-powerline.conf
+maybe_delete ~/.ssh/config
+
+# directories
+maybe_delete ~/.bin
+maybe_delete ~/.config/htop
+maybe_delete ~/.config/powerline

@@ -221,8 +221,12 @@ Bundle 'fatih/vim-go'
 Bundle 'ekalinin/Dockerfile.vim'
 " vagrantfile syntax
 Bundle 'hashivim/vim-vagrant'
-
+" nginx syntax
 Bundle 'chr4/nginx.vim'
+" powershell syntax
+Bundle 'PProvost/vim-ps1'
+" external syntax checking (?)
+Bundle 'scrooloose/syntastic'
 
 " {{{
 " " a 'fuzzy' code-completion engine
@@ -256,8 +260,6 @@ Bundle 'chr4/nginx.vim'
 " Bundle 'Shutnik/jshint2.vim'
 " Bundle 'walm/jshint.vim'
 " Bundle 'vim-scripts/TabBar'
-" " external syntax checking (?)
-" Bundle 'scrooloose/syntastic'
 " " ctags from some other place, lol
 " Bundle 'clausreinke/scoped_tags'
 " " }}}
@@ -307,13 +309,13 @@ set expandtab
 set smarttab
 " end tabs }}}
 
-" powerline {{{
-if $HAS_POWERLINE
-    python3 from powerline.vim import setup as powerline_setup
-    python3 powerline_setup()
-    python3 del powerline_setup
-endif
-" }}}
+" " powerline {{{
+" if $HAS_POWERLINE
+"     python3 from powerline.vim import setup as powerline_setup
+"     python3 powerline_setup()
+"     python3 del powerline_setup
+" endif
+" " }}}
 
 " when diff'ing, ignore whitespace
 set diffopt+=iwhite

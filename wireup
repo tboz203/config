@@ -1,7 +1,9 @@
-#wq!/bin/bash -eu
+#!/bin/bash -eu
 
 # move to script directory
 cd $(dirname $0)
+
+CONFIG_ROOT=$(pwd)
 
 # remove everything we collide with beforehand to prevent errors
 ./unwire
@@ -9,24 +11,26 @@ cd $(dirname $0)
 # link up each item
 # (we would do this as a loop, except that the names aren't a consistent
 # transformation)
-ln -s "$(pwd)/profile"			~/.profile
-ln -s "$(pwd)/bashrc"			~/.bashrc
-ln -s "$(pwd)/vimrc"			~/.vimrc
-ln -s "$(pwd)/gvimrc"			~/.gvimrc
-ln -s "$(pwd)/inputrc"			~/.inputrc
-ln -s "$(pwd)/aliases"			~/.bash_aliases
-ln -s "$(pwd)/bin"			~/.bin
-ln -s "$(pwd)/logout"			~/.bash_logout
-ln -s "$(pwd)/gitconfig"		~/.gitconfig
-ln -s "$(pwd)/git-prompt"		~/.git-prompt
-ln -s "$(pwd)/vim"			~/.vim
-ln -s "$(pwd)/tmux.conf"		~/.tmux.conf
-ln -s "$(pwd)/tmux-powerline.conf"	~/.tmux-powerline.conf
-ln -s "$(pwd)/htop"			~/.config/
-ln -s "$(pwd)/powerline"		~/.config/
+ln -s "$CONFIG_ROOT/profile"              ~/.profile
+ln -s "$CONFIG_ROOT/bashrc"               ~/.bashrc
+ln -s "$CONFIG_ROOT/vimrc"                ~/.vimrc
+ln -s "$CONFIG_ROOT/gvimrc"               ~/.gvimrc
+ln -s "$CONFIG_ROOT/inputrc"              ~/.inputrc
+ln -s "$CONFIG_ROOT/aliases"              ~/.bash_aliases
+ln -s "$CONFIG_ROOT/bin"                  ~/.bin
+ln -s "$CONFIG_ROOT/logout"               ~/.bash_logout
+ln -s "$CONFIG_ROOT/gitconfig"            ~/.gitconfig
+ln -s "$CONFIG_ROOT/git-prompt"           ~/.git-prompt
+ln -s "$CONFIG_ROOT/vim"                  ~/.vim
+ln -s "$CONFIG_ROOT/tmux.conf"            ~/.tmux.conf
+ln -s "$CONFIG_ROOT/tmux-powerline.conf"  ~/.tmux-powerline.conf
+ln -s "$CONFIG_ROOT/htop"                 ~/.config/
+ln -s "$CONFIG_ROOT/powerline"            ~/.config/
+ln -s "$CONFIG_ROOT/pymodules"            ~/.pymodules/
+ln -s "$CONFIG_ROOT/pythonrc.py"          ~/.pythonrc.py
 
 [[ -d ~/.ssh ]] || mkdir ~/.ssh
-ln -s "$(pwd)/sshconfig"		~/.ssh/config
+ln -s "$CONFIG_ROOT/sshconfig"                ~/.ssh/config
 
 # # install the "setuid-but-not" update script
 # sudo cp update /usr/local/bin/update

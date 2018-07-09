@@ -10,7 +10,7 @@ case $- in
 esac
 
 # if has tmux and not nested, change process to new session
-if [[ -x /usr/bin/tmux ]] && [[ -z "$TMUX" ]]; then
+if [[ -x /usr/bin/tmux ]] && [[ -z "$TMUX" ]] && [[ -z $NO_TMUX ]]; then
     # fix TERM for tmux (otherwise powerline doesn't work well)
     if [[ $TERM != *256color && $COLORTERM == gnome-terminal || $COLORTERM == xfce4-terminal ]]; then
         export TERM=xterm-256color
@@ -39,7 +39,7 @@ if [[ -x /usr/bin/tmux ]] && [[ -z "$TMUX" ]]; then
         unset _location _root
     fi
 
-    exec /usr/bin/tmux
+    exec /usr/bin/tmux new-session -A -s main
 fi
 
 # ignore something-or-other (i think it's `ls` and `cd`?)
@@ -114,6 +114,8 @@ fi
 
 # set autocd: if command is a directory, cd to it
 shopt -s autocd
+# set recursive globbing w/ "**"
+shopt -s globstar
 
 # Alias definitions.
 if [[ -f ~/.bash_aliases ]]; then
@@ -145,4 +147,11 @@ fi
 
 if [[ -x $(which pipenv) ]]; then
     eval "$(pipenv --completion)"
+fi
+
+# Node Version Manager
+if [[ -d "$HOME/.nvm" ]]; then
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
