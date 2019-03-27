@@ -1,3 +1,4 @@
+; vim: ft=dosini sw=8 ts=8 noet
 [color]
 	ui = true
 [user]
@@ -5,14 +6,35 @@
 	email = thomas.bozeman@cgifederal.com
 [core]
 	editor = vim
+	autocrlf = false
 [merge]
 	tool = vimdiff
+	conflictstyle = diff3
+	ff = false
 [diff]
 	tool = vimdiff
-	prompt = false
-[difftool]
-	prompt = false
+	algorithm = histogram
 [push]
-	default = simple
+	default = current
 [credential]
 	helper = cache
+[fetch]
+	recursesubmodules = on-demand
+	prune = true
+[pretty]
+	myline = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d %C(reset)%s%C(reset)
+	myshort = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d%C(reset)%n%C(reset)%s
+	tableable = & %h & %an & %ad & %<(80,trunc)%s & %d
+[alias]
+	l = "log --graph --decorate --date-order --format=myline --date=relative"
+	la = "log --graph --decorate --date-order --format=myline --date=relative --all"
+	path = "log --graph --decorate --format=myline --date=relative --boundary --ancestry-path"
+	refs = "for-each-ref --format='%(refname:short)'"
+	longrefs = "for-each-ref --format='%(refname)'"
+	log-int = !git path $(git refs **/integration) $( git merge-base --all $( git refs **/integration))^! --decorate-refs=*/integration
+	hard-push = !env GIT_SSH_COMMAND=\"ssh -i ~/.ssh/etpinfrs\" git push
+;	pull-all = "!git refs refs/heads | while read item ; do git fetch origin $item:$item & done ; wait"
+[pull]
+	ff = only
+[rerere]
+	enabled = true

@@ -68,3 +68,6 @@ Django
 py
 Admin
 exclude
+rsync
+rrsync
+rsync's

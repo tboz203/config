@@ -1,0 +1,75 @@
+#!/bin/bash
+
+update() {
+    local repo=$1
+    pushd $repo
+
+    errors=0
+
+    git fetch --all --prune || errors=1
+
+    # # get the branch name
+    # local branch=$(git rev-parse --abbrev-ref HEAD)
+    # # if we have a branch checked out & there is only one remote
+    # if [[ $branch != HEAD && $(git remote show | wc -l) -eq 1 ]]; then
+    #     # checkout the commit directly, leaving the current branch
+    #     git checkout $(git rev-parse HEAD) || errors=1
+    #     # fetch from our remote, updating the branch we just left behind
+    #     git fetch $(git remote show) $branch:$branch || errors=1
+    #     # and check it back out
+    #     git checkout $branch || errors=1
+    # fi
+
+    git pull --ff-only || errors=1
+
+    popd
+    return $errors
+}
+
+while [[ $# -gt 0 ]]; do
+
+    arg="$1" ; shift
+    case $arg in
+        -h|--help)
+            HELP=1 ;;
+        -d|--depth)
+            DEPTH="-maxdepth $1" ; shift ;;
+        -*)
+            echo "[X] I don't understand this argument: ($arg)"
+            HELP=1
+            ;;
+        *)
+            if [[ -z $ROOT ]]; then
+                ROOT="$arg" ; shift
+            else
+                echo "[X] I don't understand this argument: ($arg)"
+                HELP=1
+            fi
+            ;;
+    esac
+done
+
+if [[ $HELP ]]; then
+    cat <<EOF
+Usage: $0 [-h|--help] [-d|--depth DEPTH] [ROOT]
+
+Search for git repositories & update them.
+
+Arguments:
+ROOT:               (optional) The root under which to search for git repositories.
+
+Options:
+-h|-help            Print out this message.
+-d|--depth DEPTH    Maximum depth at which to look for git repositories.
+EOF
+
+    exit 1
+fi
+
+# we should probably set some qualifiers on this `find` call...
+for repo in $(find $ROOT $DEPTH -type d -name .git); do
+    # update each repo (mostly) silently in the background
+    ( update "$(dirname $repo)" &> /dev/null || echo "[X] $(dirname $repo)" ) &
+done
+
+wait

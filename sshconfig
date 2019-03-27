@@ -2,35 +2,29 @@
 ServerAliveInterval 60
 SendEnv TERM
 SendEnv COLORTERM
-SendEnv HAS_POWERLINE
+SendEnv HAS_POWERLINE_FONTS
 
-Host pavilion
-    # HostName 173.217.220.184
-    # HostName 98.183.86.139
-    user tommy
+Host localhost op2-mom-ldev83*
+    SendEnv TMUX
 
-Host beta
-    HostName beta.latech.edu
-    User twb015
+Host aix*
+    User rcsbuild
+    HostName ffx-mom-%h
 
-Host ace-debian
-    # HostName 138.47.102.109
-    HostName ace-debian.latech.edu
-    user tommy
-    Port 8000
+Host ffx-mom-aix*
+    User rcsbuild
 
-Host defalt-debian
-    # HostName 138.47.102.217
-    HostName defalt-debian.latech.edu
-    user tommy
-    Port 8000
+Host cgi-acq-*
+    User tbozeman
+    IdentityFile ~/.ssh/laptop
 
-Host tboz203* !*.terminal.com
-    HostName %h.terminal.com
+Host op2-mom-ldev9
+    User psgcmtea
 
-Host *.terminal.com
-    User root
-    ProxyCommand ssh -p 2200 tboz203@sshterminal.com setup_terminal_proxy %h %p
+Host op2-mom-ltest*
+    User etpinfrs
 
-Host home
-    Port 8000
+Host aws-01
+    HostName ec2-34-234-69-147.compute-1.amazonaws.com
+    User ec2-user
+    IdentityFile ~/.ssh/aws-01.pem

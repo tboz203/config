@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import sys, re
+import readline
+import rlcompleter
 import shutil
 import traceback
 from pprint import pprint, pformat

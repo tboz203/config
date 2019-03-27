@@ -14,6 +14,16 @@ class CallError(CalledProcessError):
         self.stdout = stdout
         self.stderr = stderr
 
+    def preformatted(self):
+        base = str(self)
+        output = '[X] {}\n'.format(base)
+        if self.stdout.strip():
+            output += ('> ' + self.stdout.strip().replace('\n', '\n> ') + '\n')
+        if self.stderr.strip():
+            output += ('! ' + self.stderr.strip().replace('\n', '\n! ') + '\n')
+        return output
+
+
 def call(*popenargs, raise_on_error=True, **kwargs):
     '''Call an external command. if `raise_on_error`, return stdout and stderr as a 2-tuple.
     or a CallError if the return code is not 0. if not `raise_on_error`, return

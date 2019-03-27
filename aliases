@@ -4,6 +4,7 @@ alias ls='ls --color=auto --hide=*~ --hide=.*~ --group-directories-first'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
+alias tree='tree -C'
 
 # some aliases based off ls
 alias ll='ls -lhF'
@@ -23,14 +24,15 @@ alias ....='../../..'
 alias .....='../../../..'
 
 # some git commands
-alias gits='git status'
-alias gitl='git log --oneline --graph --decorate --date-order'
-alias gitlf='gitl --format="format:%C(yellow)%h %C(cyan)%an %C(green)%ar%C(magenta)%d %C(white)%s"'
-alias gitla='gitl --all'
-alias gitlaf='gitlf --all'
-alias gitb='git branch -vva'
-alias gitr='git remote -vv'
-alias gitd='git diff'
+# start using the built-in git alias stuff!
+# alias gits='git status'
+# alias gitl='git log --graph --decorate --date-order --decorate-refs-exclude="*-staging-*" --oneline'
+# alias gitlf='git log --graph --decorate --date-order --decorate-refs-exclude="*-staging-*" --format=bigline'
+# alias gitla='gitl --all'
+# alias gitlaf='gitlf --all'
+# alias gitb='git branch -vva'
+# alias gitr='git remote -vv'
+# alias gitd='git diff'
 
 # open each file in its own tab
 alias vim='vim -Xp'
@@ -47,6 +49,8 @@ alias cdd=cd
 # make du and df a bit more readable
 alias df='df -h'
 alias du='du -hc 2>/dev/null'
+
+alias dfx='df -h -t xfs'
 
 # make some basic commands default to verbose, interactive, and recursive (if
 # not already)
@@ -78,13 +82,7 @@ alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
 alias rmf='rm -rf'
 alias listening='lsof -i -s TCP:Listen'
-
-# obsoleted by update script and sudoers
-# alias update='sudo apt-get update && sudo apt-get upgrade'
-alias update='sudo update'
-
-alias hping='sudo hping3'
-
 alias status='systemctl status "diesel*"'
+alias docker-prune='docker system prune -f'
 
 alias svim='sudo vim "+set nu bg=dark ls=2 so=3" -p'

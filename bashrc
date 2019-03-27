@@ -3,42 +3,47 @@
 # with modifications by tboz203
 # vim: tw=119
 
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
     *) return ;;
 esac
 
+# fix TERM for tmux (otherwise powerline doesn't work well)
+if [[ $TERM != *256color && $COLORTERM == gnome-terminal || $COLORTERM == xfce4-terminal ]]; then
+    export TERM=xterm-256color
+elif [[ $COLORTERM == rxvt-xpm ]]; then
+    export TERM=rxvt-256color
+fi
+
+# set powerline availability flag (for all programs)
+if [[ $(which powerline) && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
+    export HAS_POWERLINE=1
+fi
+
+if [[ $HAS_POWERLINE ]]; then
+    for _location in {/usr,/usr/local,$HOME/.local}/lib/python*/site-packages/powerline; do
+        if [[ -d $_location ]]; then
+            _root=$_location
+        fi
+    done
+    if [[ $_root ]]; then
+        export POWERLINE_ROOT=$_root
+    else
+        echo >&2 "[-] Powerline root not found"
+        read -p "press enter to continue: "
+        unset HAS_POWERLINE
+    fi
+    unset _location _root
+fi
+
 # if has tmux and not nested, change process to new session
 if [[ -x /usr/bin/tmux ]] && [[ -z "$TMUX" ]] && [[ -z $NO_TMUX ]]; then
-    # fix TERM for tmux (otherwise powerline doesn't work well)
-    if [[ $TERM != *256color && $COLORTERM == gnome-terminal || $COLORTERM == xfce4-terminal ]]; then
-        export TERM=xterm-256color
-    elif [[ $COLORTERM == rxvt-xpm ]]; then
-        export TERM=rxvt-256color
-    fi
-
-    # set powerline availability flag (for all programs)
-    if [[ $(which powerline) && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
-        export HAS_POWERLINE=1
-    fi
-
-    shopt -s nullglob
-
-    if [[ $HAS_POWERLINE ]]; then
-        for _location in {/usr,/usr/local,$HOME/.local}/lib/python*/site-packages/powerline; do
-            _root=$_location
-        done
-        if [[ $_root ]]; then
-            export POWERLINE_ROOT=$_root
-        else
-            echo >&2 "[-] Powerline root not found"
-            read -p "press enter to continue: "
-            unset HAS_POWERLINE
-        fi
-        unset _location _root
-    fi
-
     exec /usr/bin/tmux new-session -A -s main
 fi
 
@@ -63,8 +68,8 @@ shopt -s checkwinsize
 # set our prompt, depending on powerline availability
 if [[ $HAS_POWERLINE ]]; then
     powerline-daemon -q
-    export POWERLINE_BASH_CONTINUATION=1
-    export POWERLINE_BASH_SELECT=1
+    # export POWERLINE_BASH_CONTINUATION=1
+    # export POWERLINE_BASH_SELECT=1
     .  $POWERLINE_ROOT/bindings/bash/powerline.sh
 else
 
@@ -93,7 +98,7 @@ else
     fi
 
     u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
-    PS1="${u_color}\u${WHITE}@${GREEN}\h${WHITE} ${BLUE}\w${reset}"
+    PS1="${u_color}\u${WHITE}@${GREEN}\h${WHITE} ${BLUE}\w ${reset}"
     unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
     unset white WHITE reset color_prompt force_color_prompt
 
@@ -111,6 +116,9 @@ else
 
     PS1+="${WHITE}$ ${reset}"
 fi
+
+# use a specific key for rsync over ssh
+export RSYNC_RSH="ssh -i $HOME/.ssh/rsync_key"
 
 # set autocd: if command is a directory, cd to it
 shopt -s autocd
@@ -142,16 +150,15 @@ if [[ -x /usr/bin/dircolors ]]; then
 fi
 
 if [[ -x $(which thefuck) ]]; then
-    eval "$(thefuck --alias drat)"
+    eval "$(thefuck --alias ugh)"
 fi
 
 if [[ -x $(which pipenv) ]]; then
     eval "$(pipenv --completion)"
 fi
 
-# Node Version Manager
-if [[ -d "$HOME/.nvm" ]]; then
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-fi
+PATH="/home/tbozeman@cgifederal.com/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="/home/tbozeman@cgifederal.com/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="/home/tbozeman@cgifederal.com/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"/home/tbozeman@cgifederal.com/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=/home/tbozeman@cgifederal.com/perl5"; export PERL_MM_OPT;

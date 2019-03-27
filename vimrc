@@ -199,7 +199,8 @@ Bundle 'VundleVim/Vundle.vim'
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
 " graphical undo tree
-Bundle 'sjl/gundo.vim'
+" Bundle 'sjl/gundo.vim'
+Bundle 'dsummersl/gundo.vim'
 " integration w/ git
 Bundle 'tpope/vim-fugitive'
 " multi-language block commenting
@@ -227,6 +228,18 @@ Bundle 'chr4/nginx.vim'
 Bundle 'PProvost/vim-ps1'
 " external syntax checking (?)
 Bundle 'scrooloose/syntastic'
+" typescript syntax
+Bundle 'leafgarland/typescript-vim'
+
+" Plugins for Javascript & JSX
+Bundle 'pangloss/vim-javascript'
+Bundle 'mxw/vim-jsx'
+
+Bundle 'rodjek/vim-puppet'
+
+Bundle 'robbles/logstash.vim'
+
+Bundle 'martinda/Jenkinsfile-vim-syntax'
 
 " {{{
 " " a 'fuzzy' code-completion engine
@@ -281,8 +294,8 @@ filetype plugin indent on
 " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
 " autocmd VimEnter,Colorscheme * :hi Normal NONE
 
-" gundo setting(s)
-let g:gundo_right = 1
+" mundo setting(s)
+let g:mundo_right = 1
 
 " vim-surround settings
 " instead of surrounding with 'p' use value from prompt
@@ -292,8 +305,15 @@ let g:surround_112 = "\1surround: \1\r\1\1"
 let g:tagbar_type_javascript = { 'ctagsbin': '/usr/local/bin/jsctags' }
 " let g:tagbar_type_javascript = { 'ctagsbin': '/home/tommy/config/bin/ejstags' }
 
+" syntastic settings
+let g:syntastic_check_on_wq = 0
+let g:syntastic_mode_map = {
+    \ "mode": "passive",
+    \ "active_filetypes": [],
+    \ "passive_filetypes": [] }
+
 " mappings for plugins that don't have these nice settings
-noremap <silent> <leader>u :GundoToggle<cr>
+noremap <silent> <leader>u :MundoToggle<cr>
 noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
 noremap <silent> <leader>tt :TagbarToggle<cr>
 noremap <silent> <leader>to :TagbarOpen<cr>

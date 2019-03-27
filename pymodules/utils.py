@@ -2,10 +2,12 @@
 
 import collections as _collections
 import datetime as _datetime
+import functools as _functools
 import getpass as _getpass
 import itertools as _itertools
 import os as _os
 import warnings as _warnings
+import shutil as _shutil
 
 from pprint import pprint as _pprint
 
@@ -214,5 +216,17 @@ def walk_xml(elem, depth=None):
 
 def show(*args, **kwargs):
     if 'width' not in kwargs:
-        kwargs['width'] = os.get_terminal_size().columns
+        kwargs['width'] = _shutil.get_terminal_size().columns
     _pprint(*args, **kwargs)
+
+
+def group_by(collection, keyfunc):
+    grouped = _collections.defaultdict(list)
+    for item in collection:
+        grouped[keyfunc(item)].append(item)
+    return dict(grouped)
+
+
+def compose(*functions):
+    compose2 = lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))
+    return _functools.reduce(compose2, functions)
