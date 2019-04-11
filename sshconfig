@@ -28,3 +28,6 @@ Host aws-01
     HostName ec2-34-234-69-147.compute-1.amazonaws.com
     User ec2-user
     IdentityFile ~/.ssh/aws-01.pem
+
+Host gntbuild gntbuild.cgifederal.com
+    User tbozeman

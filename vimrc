@@ -104,7 +104,7 @@ set smartcase
 set shiftround
 
 set undofile
-set undodir=/tmp
+set undodir=~/.vim/undodir
 
 set spellfile=~/.vim/spell/en.utf-8.add
 " end basic options }}}

@@ -1,29 +1,26 @@
-#!/bin/bash
+#!/usr/bin/bash
+
+# want to only print output if the command fails;
+# would also like to print it all at once instead of as the command executes
 
 update() {
     local repo=$1
-    pushd $repo
+    pushd $repo &> /dev/null
 
-    errors=0
+    errors=()
 
-    git fetch --all --prune || errors=1
+    capture="$( git fetch --all --prune 2>&1 )" || errors+=( "$capture" )
 
-    # # get the branch name
-    # local branch=$(git rev-parse --abbrev-ref HEAD)
-    # # if we have a branch checked out & there is only one remote
-    # if [[ $branch != HEAD && $(git remote show | wc -l) -eq 1 ]]; then
-    #     # checkout the commit directly, leaving the current branch
-    #     git checkout $(git rev-parse HEAD) || errors=1
-    #     # fetch from our remote, updating the branch we just left behind
-    #     git fetch $(git remote show) $branch:$branch || errors=1
-    #     # and check it back out
-    #     git checkout $branch || errors=1
-    # fi
+    capture="$( git pull --ff-only 2>&1 )" || errors+=( "$capture" )
 
-    git pull --ff-only || errors=1
+    popd &> /dev/null
 
-    popd
-    return $errors
+    if [[ ${#errors[@]} -gt 0 ]]; then
+        echo "[X] $repo"
+        [[ $VERBOSE ]] && echo "${errors[@]}" | sed "s/^/    /" && echo
+    fi
+
+    return ${#errors[@]}
 }
 
 while [[ $# -gt 0 ]]; do
@@ -34,6 +31,8 @@ while [[ $# -gt 0 ]]; do
             HELP=1 ;;
         -d|--depth)
             DEPTH="-maxdepth $1" ; shift ;;
+        -v|--verbose)
+            VERBOSE=1 ;;
         -*)
             echo "[X] I don't understand this argument: ($arg)"
             HELP=1
@@ -61,6 +60,7 @@ ROOT:               (optional) The root under which to search for git repositori
 Options:
 -h|-help            Print out this message.
 -d|--depth DEPTH    Maximum depth at which to look for git repositories.
+-v|--verbose        print out error messages
 EOF
 
     exit 1
@@ -69,7 +69,7 @@ fi
 # we should probably set some qualifiers on this `find` call...
 for repo in $(find $ROOT $DEPTH -type d -name .git); do
     # update each repo (mostly) silently in the background
-    ( update "$(dirname $repo)" &> /dev/null || echo "[X] $(dirname $repo)" ) &
+    update "$(dirname $repo)" &
 done
 
 wait
