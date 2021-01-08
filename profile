@@ -29,27 +29,11 @@ pathmunge /usr/sbin         after
 pathmunge $HOME/.local/bin
 pathmunge $HOME/.bin
 
-# add a personal module directory for python
-if [ -d "$HOME/.pymodules" ]; then
-    export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
-fi
+[[ -f /usr/local/bin/vim ]] && export EDITOR=/usr/local/bin/vim
+[[ -f $HOME/.pythonrc.py ]] && export PYTHONSTARTUP=$HOME/.pythonrc.py
 
-if ( fc-list | grep -iq powerline ) && [ -z "$SSH_CONNECTION" ] ; then
-    export HAS_POWERLINE_FONTS=1
-fi
-
-export EDITOR=/usr/local/bin/vim
 export PAGER="/usr/bin/less -SR"
-export MAILTO=thomas.bozeman@cgifederal.com
-export PYTHONSTARTUP=$HOME/.pythonrc.py
 export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
-export ORACLE_HOME=/opt/apps/oracle/oracle12.1.0.2/product/12.1.0.2/client_1
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-
-if [ -d $HOME/.local/share/man ]; then
-    export MANPATH=$HOME/.local/share/man:/usr/share/man
-fi
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then

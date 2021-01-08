@@ -39,14 +39,7 @@
 	log-int = !git path $(git refs **/integration) $( git merge-base --octopus $( git refs **/integration))^! --decorate-refs=*/integration
 	hard-push = !env GIT_SSH_COMMAND=\"ssh -i ~/.ssh/etpinfrs\" git push
 	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
-;	pull-all = "!git refs refs/heads | while read item ; do git fetch origin $item:$item & done ; wait"
 [pull]
 	ff = only
 [rerere]
 	enabled = true
-[url "https://github.com/"]
-	insteadOf = git://github.com/
-[url "ssh://git@momcode.cgifederal.com:7999/"]
-	insteadOf = https://momcode.cgifederal.com/scm/
-[url "ssh://git@alm.cgifederal.com/"]
-	insteadOf = https://alm.cgifederal.com/scm/scm/

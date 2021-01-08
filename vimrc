@@ -133,9 +133,6 @@ noremap <silent> <leader>h :nohlsearch<cr>
 noremap <silent> <leader>c "+y
 " paste from clipboard
 noremap <silent> <leader>p o<esc>"+p
-" insert the current date or date and time
-noremap <silent> <leader>d :r !day<cr>kJ
-noremap <silent> <leader>f :r !full<cr>kJ
 " default to using the command window
 " noremap : q:a
 " noremap / q/a
@@ -143,8 +140,6 @@ noremap <silent> <leader>f :r !full<cr>kJ
 noremap : :<c-f>a
 noremap / /<c-f>a
 noremap ? ?<c-f>a
-" a quick mapping for JSHint
-noremap <leader>j :JSHint<cr><cr>
 " make a mapping for traditional ex binding
 noremap ; :
 
@@ -166,124 +161,97 @@ inoremap <c-h> <c-k>
 
 " end messing around with mappings }}}
 
-" Vimscript file settings {{{
-augroup filetype_vim
-    autocmd!
-    autocmd Filetype vim setlocal foldmethod=marker
-augroup END
-" }}}
+"" Vundle {{{
+"filetype off
 
-" notes files settings {{{
-augroup filetype_notes
-    autocmd!
-augroup END
-" }}}
+"set rtp+=$HOME/.vim/bundle/Vundle.vim
+"call vundle#rc()
 
-" custom movements {{{
-" next/last parentheses movement
-onoremap in( :<c-u>normal! f(vi(<cr>
-onoremap il( :<c-u>normal! F)vi(<cr>
+"" vundle itself
+"Bundle 'VundleVim/Vundle.vim'
+"" a vimrc starting point
+"Bundle 'tpope/vim-sensible'
+"" graphical undo tree
+"Bundle 'dsummersl/gundo.vim'
+"" integration w/ git
+"Bundle 'tpope/vim-fugitive'
+"" multi-language block commenting
+"Bundle 'tpope/vim-commentary'
+"" quick manipulation of wrapping elements
+"Bundle 'tpope/vim-surround'
+"" add repeat (.) support to (some) plugins
+"Bundle 'tpope/vim-repeat'
+"" tag support
+"Bundle 'majutsushi/tagbar'
+"" auto-set indentation variables
+"Bundle 'tpope/vim-sleuth'
 
-" markdown header movements
-onoremap ih :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rkvg_"<cr>
-onoremap ah :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rg_vk0"<cr>
+"Bundle 'nathanaelkane/vim-indent-guides'
 
-" next/last email movement
-onoremap in@ :<c-u>execute "normal! /\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
-onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
-" }}}
+"" 'Tabularize' alignment
+"Bundle 'godlygeek/tabular'
+"" external syntax checking (?)
+"Bundle 'scrooloose/syntastic'
 
-" Vundle {{{
-filetype off
+"Bundle 'vim-scripts/AnsiEsc.vim'
 
-set rtp+=$HOME/.vim/bundle/Vundle.vim
-call vundle#rc()
+"Bundle 'zaiste/tmux.vim'
+"Bundle 'pangloss/vim-javascript'
+"Bundle 'mxw/vim-jsx'
+"Bundle 'leafgarland/typescript-vim'
+"Bundle 'fatih/vim-go'
+"Bundle 'ekalinin/Dockerfile.vim'
+"Bundle 'hashivim/vim-vagrant'
+"Bundle 'hashivim/vim-terraform'
+"Bundle 'chr4/nginx.vim'
+"Bundle 'PProvost/vim-ps1'
+"Bundle 'rodjek/vim-puppet'
+"Bundle 'robbles/logstash.vim'
+"Bundle 'martinda/Jenkinsfile-vim-syntax'
 
-" vundle itself
-Bundle 'VundleVim/Vundle.vim'
-" a vimrc starting point
-Bundle 'tpope/vim-sensible'
-" graphical undo tree
-Bundle 'dsummersl/gundo.vim'
-" integration w/ git
-Bundle 'tpope/vim-fugitive'
-" multi-language block commenting
-Bundle 'tpope/vim-commentary'
-" quick manipulation of wrapping elements
-Bundle 'tpope/vim-surround'
-" add repeat (.) support to (some) plugins
-Bundle 'tpope/vim-repeat'
-" tag support
-Bundle 'majutsushi/tagbar'
-" auto-set indentation variables
-Bundle 'tpope/vim-sleuth'
+"Bundle 'mustache/vim-mustache-handlebars'
 
-Bundle 'nathanaelkane/vim-indent-guides'
+"Bundle 'dylon/vim-antlr'
+"Bundle 'RobRoseKnows/lark-vim'
 
-" 'Tabularize' alignment
-Bundle 'godlygeek/tabular'
-" external syntax checking (?)
-Bundle 'scrooloose/syntastic'
+"Bundle 'sheerun/vim-polyglot'
 
-Bundle 'vim-scripts/AnsiEsc.vim'
+"Bundle 'noah/vim256-color'
 
-Bundle 'zaiste/tmux.vim'
-Bundle 'pangloss/vim-javascript'
-Bundle 'mxw/vim-jsx'
-Bundle 'leafgarland/typescript-vim'
-Bundle 'fatih/vim-go'
-Bundle 'ekalinin/Dockerfile.vim'
-Bundle 'hashivim/vim-vagrant'
-Bundle 'hashivim/vim-terraform'
-Bundle 'chr4/nginx.vim'
-Bundle 'PProvost/vim-ps1'
-Bundle 'rodjek/vim-puppet'
-Bundle 'robbles/logstash.vim'
-Bundle 'martinda/Jenkinsfile-vim-syntax'
+"" {{{
+"" " a 'fuzzy' code-completion engine
+"" Bundle 'Valloric/YouCompleteMe'
+"" " adding gpg symmetric support
+"" Bundle 'vim-scripts/gnupg.vim'
+""
+"" " rudimentary image editing
+"" Bundle 'tpope/vim-afterimage'
+"" " tern support
+"" Bundle 'marijnh/tern_for_vim'
+"" " tag generator using tern
+"" Bundle 'ramitos/jsctags'
+"" " powerful file-system searching
+"" Bundle 'kien/ctrlp.vim'
+"" " buffer explorer
+"" Bundle 'corntrace/bufexplorer'
+"" " increment/decrement dates w/ <c-a>/<c-x>
+"" Bundle 'tpope/vim-speeddating'
+"" " snippet insertion (for boilerplate code)
+"" Bundle 'SirVer/ultisnips'
+"" " file-system browser
+"" Bundle 'scrooloose/nerdtree'
+"" " tab-support for nerdtree
+"" Bundle 'jistr/vim-nerdtree-tabs'
+"" " javascript helpers
+"" Bundle 'Shutnik/jshint2.vim'
+"" Bundle 'walm/jshint.vim'
+"" Bundle 'vim-scripts/TabBar'
+"" " ctags from some other place, lol
+"" Bundle 'clausreinke/scoped_tags'
+"" " }}}
 
-Bundle 'mustache/vim-mustache-handlebars'
-
-Bundle 'dylon/vim-antlr'
-Bundle 'RobRoseKnows/lark-vim'
-
-Bundle 'sheerun/vim-polyglot'
-
-Bundle 'noah/vim256-color'
-
-" {{{
-" " a 'fuzzy' code-completion engine
-" Bundle 'Valloric/YouCompleteMe'
-" " adding gpg symmetric support
-" Bundle 'vim-scripts/gnupg.vim'
-"
-" " rudimentary image editing
-" Bundle 'tpope/vim-afterimage'
-" " tern support
-" Bundle 'marijnh/tern_for_vim'
-" " tag generator using tern
-" Bundle 'ramitos/jsctags'
-" " powerful file-system searching
-" Bundle 'kien/ctrlp.vim'
-" " buffer explorer
-" Bundle 'corntrace/bufexplorer'
-" " increment/decrement dates w/ <c-a>/<c-x>
-" Bundle 'tpope/vim-speeddating'
-" " snippet insertion (for boilerplate code)
-" Bundle 'SirVer/ultisnips'
-" " file-system browser
-" Bundle 'scrooloose/nerdtree'
-" " tab-support for nerdtree
-" Bundle 'jistr/vim-nerdtree-tabs'
-" " javascript helpers
-" Bundle 'Shutnik/jshint2.vim'
-" Bundle 'walm/jshint.vim'
-" Bundle 'vim-scripts/TabBar'
-" " ctags from some other place, lol
-" Bundle 'clausreinke/scoped_tags'
-" " }}}
-
-filetype plugin indent on
-" end Vundle }}}
+"filetype plugin indent on
+"" end Vundle }}}
 
 " plugin settings {{{
 " " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
@@ -319,22 +287,23 @@ let g:syntastic_mode_map = {
 let g:syntastic_python_python_exec = 'python3'
 let g:syntastic_python_checkers = ['python', 'flake8']
 
-" mappings for plugins that don't have these nice settings
-noremap <silent> <leader>u :MundoToggle<cr>
-noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
-noremap <silent> <leader>tt :TagbarToggle<cr>
-noremap <silent> <leader>to :TagbarOpen<cr>
-noremap <silent> <leader>tc :TagbarClose<cr>
+" " mappings for plugins that don't have these nice settings
+" noremap <silent> <leader>u :MundoToggle<cr>
+" noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
+" noremap <silent> <leader>tt :TagbarToggle<cr>
+" noremap <silent> <leader>to :TagbarOpen<cr>
+" noremap <silent> <leader>tc :TagbarClose<cr>
 
-noremap <silent> <leader>a :AnsiEsc<cr>
-noremap <silent> <leader>A :AnsiEsc!<cr>
+" noremap <silent> <leader>a :AnsiEsc<cr>
+" noremap <silent> <leader>A :AnsiEsc!<cr>
 
-noremap <silent> <leader>se :Errors<cr>
-noremap <silent> <leader>sc :SyntasticCheck<cr>
-noremap <silent> <leader>st :SyntasticToggleMode<cr>
-noremap <silent> <leader>si :SyntasticInfo<cr>
-noremap <silent> <leader>sr :SyntasticReset<cr>
+" noremap <silent> <leader>se :Errors<cr>
+" noremap <silent> <leader>sc :SyntasticCheck<cr>
+" noremap <silent> <leader>st :SyntasticToggleMode<cr>
+" noremap <silent> <leader>si :SyntasticInfo<cr>
+" noremap <silent> <leader>sr :SyntasticReset<cr>
 
+" colorscheme babymate256
 
 " }}}
 
@@ -345,17 +314,7 @@ set expandtab
 set smarttab
 " " end tabs }}}
 
-" " powerline {{{
-" if $HAS_POWERLINE
-"     python3 from powerline.vim import setup as powerline_setup
-"     python3 powerline_setup()
-"     python3 del powerline_setup
-" endif
-" " }}}
-
 set diffopt+=iwhite,algorithm:patience
-
-colorscheme babymate256
 
 filetype indent on
 " vim: sw=4 sts=4 et fdm=marker

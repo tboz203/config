@@ -1,53 +1,8 @@
-# so this is a config file
 # vim: ft=sshconfig
 
 ServerAliveInterval 60
 SendEnv TERM
 SendEnv COLORTERM
-SendEnv HAS_POWERLINE_FONTS
 
 Host localhost op2-mom-ldev83*
     SendEnv TMUX
-
-Host aix*
-    User rcsbuild
-    HostName ffx-mom-%h
-
-Host op2-mom-aix*
-    User rcsbuild
-
-Host ffx-mom-aix*
-    User rcsbuild
-
-Host cgi-acq-ops1
-    User root
-
-Host cgi-acq-*
-    User tbozeman
-    # StrictHostKeyChecking no
-    # UserKnownHostsFile /dev/null
-    IdentityFile ~/.ssh/laptop
-
-Host op2-mom-ldev9
-    User psgcmtea
-
-Host op2-mom-ltest1 op2-mom-ltest74 op2-mom-ltest74.cgifederal.com
-    User tbozeman@cgifederal.com
-
-Host momcodetest op2-mom-ltst261 op2-mom-ltst261.cgifederal.com
-    HostName op2-mom-ltst261.cgifederal.com
-    User tbozeman@cgifederal.com
-
-Host aws-01
-    HostName ec2-34-234-69-147.compute-1.amazonaws.com
-    User ec2-user
-    IdentityFile ~/.ssh/aws-01.pem
-
-Host gntbuild gntbuild.cgifederal.com
-    User tbozeman
-
-# Host momcode momcode.cgifederal.com
-#     User etpinfrs
-
-Host op2-mom-ltest* lft-mom-lops* op2-mom-ltst*
-    User etpinfrs

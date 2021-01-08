@@ -14,7 +14,6 @@ CONFIG_ROOT=$(pwd)
 ln -s "$CONFIG_ROOT/profile"              ~/.profile
 ln -s "$CONFIG_ROOT/bashrc"               ~/.bashrc
 ln -s "$CONFIG_ROOT/vimrc"                ~/.vimrc
-ln -s "$CONFIG_ROOT/gvimrc"               ~/.gvimrc
 ln -s "$CONFIG_ROOT/inputrc"              ~/.inputrc
 ln -s "$CONFIG_ROOT/aliases"              ~/.bash_aliases
 ln -s "$CONFIG_ROOT/bin"                  ~/.bin
@@ -23,26 +22,8 @@ ln -s "$CONFIG_ROOT/gitconfig"            ~/.gitconfig
 ln -s "$CONFIG_ROOT/git-prompt"           ~/.git-prompt
 ln -s "$CONFIG_ROOT/vim"                  ~/.vim
 ln -s "$CONFIG_ROOT/tmux.conf"            ~/.tmux.conf
-ln -s "$CONFIG_ROOT/tmux-powerline.conf"  ~/.tmux-powerline.conf
 ln -s "$CONFIG_ROOT/htop"                 ~/.config/
-ln -s "$CONFIG_ROOT/powerline"            ~/.config/
-ln -s "$CONFIG_ROOT/pymodules"            ~/.pymodules/
 ln -s "$CONFIG_ROOT/pythonrc.py"          ~/.pythonrc.py
 
 [[ -d ~/.ssh ]] || mkdir ~/.ssh
 ln -s "$CONFIG_ROOT/sshconfig"                ~/.ssh/config
-
-# # install the "setuid-but-not" update script
-# sudo cp update /usr/local/bin/update
-# sudo chmod 755 /usr/local/bin/update
-# sudo cp update.sudo /etc/sudoers.d/update
-# sudo chmod 440 /etc/sudoers.d/update
-
-# # set up powerline
-# sudo pip install git+git://github.com/lokaltog/powerline
-# # install the powerline fonts (really only necessary on local machines)
-# git clone https://github.com/lokaltog/powerline-fonts
-# cd powerline-fonts && ./install.sh ; cd ..
-
-# sudo cat hosts >> /etc/hosts
-# sudo chsh tommy -s /usr/bin/tmux

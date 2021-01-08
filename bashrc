@@ -3,8 +3,6 @@
 # with modifications by tboz203
 # vim: tw=119
 
-export ANSIBLE_NOCOWS=1
-
 # Source global definitions
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
@@ -40,27 +38,6 @@ elif [[ $COLORTERM == rxvt-xpm ]]; then
     export TERM=rxvt-256color
 fi
 
-# set powerline availability flag (for all programs)
-if [[ $(which powerline) && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
-    export HAS_POWERLINE=1
-fi
-
-if [[ $HAS_POWERLINE ]]; then
-    for _location in {/usr,/usr/local,$HOME/.local}/lib/python*/site-packages/powerline; do
-        if [[ -d $_location ]]; then
-            _root=$_location
-        fi
-    done
-    if [[ $_root ]]; then
-        export POWERLINE_ROOT=$_root
-    else
-        echo >&2 "[-] Powerline root not found"
-        read -p "press enter to continue: "
-        unset HAS_POWERLINE
-    fi
-    unset _location _root
-fi
-
 # if has tmux and not nested, change process to new session
 if [[ -x /usr/bin/tmux ]] && [[ -z "$TMUX" ]] && [[ -z $NO_TMUX ]]; then
     exec /usr/bin/tmux new-session -A -s main
@@ -84,60 +61,48 @@ shopt -s checkwinsize
 # make less more friendly for non-text input files, see lesspipe(1)
 [[ -x /usr/bin/lesspipe ]] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# set our prompt, depending on powerline availability
-if [[ $HAS_POWERLINE ]]; then
-    powerline-daemon -q
-    # export POWERLINE_BASH_CONTINUATION=1
-    # export POWERLINE_BASH_SELECT=1
-    .  $POWERLINE_ROOT/bindings/bash/powerline.sh
-else
+case "$TERM" in
+    *color*) color_prompt=yes;;
+esac
 
-    case "$TERM" in
-        *color*) color_prompt=yes;;
-    esac
-
-    if [ "$color_prompt" = yes ]; then
-        black="\[\e[0;30m\]"
-        BLACK="\[\e[1;30m\]"
-        red="\[\e[0;31m\]"
-        RED="\[\e[1;31m\]"
-        green="\[\e[0;32m\]"
-        GREEN="\[\e[1;32m\]"
-        yellow="\[\e[0;33m\]"
-        YELLOW="\[\e[1;33m\]"
-        blue="\[\e[0;34m\]"
-        BLUE="\[\e[1;34m\]"
-        magenta="\[\e[0;35m\]"
-        MAGENTA="\[\e[1;35m\]"
-        cyan="\[\e[0;36m\]"
-        CYAN="\[\e[1;36m\]"
-        white="\[\e[0;37m\]"
-        WHITE="\[\e[1;37m\]"
-        reset="\[\e[0m\]"
-    fi
-
-    u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
-    PS1="${u_color}\u${WHITE}@${GREEN}\h${WHITE} ${BLUE}\w ${reset}"
-    unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
-    unset white WHITE reset color_prompt force_color_prompt
-
-    # list files on directory change
-    PROMPT_COMMAND='[[ ${__new_wd:=$PWD} != $PWD ]] && ll; __new_wd=$PWD'
-
-    if [[ -f ~/.git-prompt ]]; then
-        . ~/.git-prompt
-        GIT_PS1_SHOWDIRTYSTATE=1
-        GIT_PS1_SHOWSTASHSTATE=1
-        GIT_PS1_SHOWUNTRACKEDFILE=1
-        GIT_PS1_SHOWCOLORHINTS=1
-        PS1+='$(__git_ps1 ":(%s)")'
-    fi
-
-    PS1+="${WHITE}$ ${reset}"
+if [ "$color_prompt" = yes ]; then
+    black="\[\e[0;30m\]"
+    BLACK="\[\e[1;30m\]"
+    red="\[\e[0;31m\]"
+    RED="\[\e[1;31m\]"
+    green="\[\e[0;32m\]"
+    GREEN="\[\e[1;32m\]"
+    yellow="\[\e[0;33m\]"
+    YELLOW="\[\e[1;33m\]"
+    blue="\[\e[0;34m\]"
+    BLUE="\[\e[1;34m\]"
+    magenta="\[\e[0;35m\]"
+    MAGENTA="\[\e[1;35m\]"
+    cyan="\[\e[0;36m\]"
+    CYAN="\[\e[1;36m\]"
+    white="\[\e[0;37m\]"
+    WHITE="\[\e[1;37m\]"
+    reset="\[\e[0m\]"
 fi
 
-# use a specific key for rsync over ssh
-export RSYNC_RSH="ssh -i $HOME/.ssh/rsync_key"
+u_color="$([[ "$EUID" -eq 0 ]] && echo "$RED" || echo "$GREEN")"
+PS1="${u_color}\u${WHITE}@${GREEN}\h${WHITE} ${BLUE}\w ${reset}"
+unset red RED green GREEN yellow YELLOW blue BLUE magenta MAGENTA cyan CYAN
+unset white WHITE reset color_prompt force_color_prompt
+
+# list files on directory change
+PROMPT_COMMAND='[[ ${__new_wd:=$PWD} != $PWD ]] && ll; __new_wd=$PWD'
+
+if [[ -f ~/.git-prompt ]]; then
+    . ~/.git-prompt
+    GIT_PS1_SHOWDIRTYSTATE=1
+    GIT_PS1_SHOWSTASHSTATE=1
+    GIT_PS1_SHOWUNTRACKEDFILE=1
+    GIT_PS1_SHOWCOLORHINTS=1
+    PS1+='$(__git_ps1 ":(%s)")'
+fi
+
+PS1+="${WHITE}$ ${reset}"
 
 # set autocd: if command is a directory, cd to it
 shopt -s autocd
@@ -169,50 +134,5 @@ if [[ -x /usr/bin/dircolors ]]; then
     fi
 fi
 
-if [[ -x $(which thefuck) ]]; then
-    eval "$(thefuck --alias ugh)"
-fi
-
-if [[ -x $(which pipenv) ]]; then
-    eval "$(pipenv --completion)"
-fi
-
-# if [[ -x $(which kubectl) ]]; then
-#     source <(kubectl completion bash)
-# fi
-
-# if [[ -x $(which oc) ]]; then
-#     eval "$(oc completion bash)"
-# fi
-
-pathmunge $HOME/go/bin after
-
-showmounts() {
-    # list mounts in a table, and cut off the options
-    mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
-}
-
 vimwhich () { vim $( which $@ ); }
 complete -c vimwhich
-
-# script to allow easily setting KUBECONFIG
-[[ -f ~/.setkubeconfig.sh ]] && . ~/.setkubeconfig.sh
-
-pathmunge /home/tbozeman@cgifederal.com/perl5/bin after
-export PERL5LIB="/home/tbozeman@cgifederal.com/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"
-export PERL_LOCAL_LIB_ROOT="/home/tbozeman@cgifederal.com/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"
-export PERL_MB_OPT="--install_base \"/home/tbozeman@cgifederal.com/perl5\""
-export PERL_MM_OPT="INSTALL_BASE=/home/tbozeman@cgifederal.com/perl5"
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-if [[ -f /usr/local/lib/antlr-4.9-complete.jar ]]; then
-    alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.9-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
-    alias grun='java -Xmx500M -cp "/usr/local/lib/antlr-4.9-complete.jar:$CLASSPATH" org.antlr.v4.gui.TestRig'
-fi

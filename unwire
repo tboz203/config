@@ -21,7 +21,6 @@ function maybe_delete {
 maybe_delete ~/.profile
 maybe_delete ~/.bashrc
 maybe_delete ~/.vimrc
-maybe_delete ~/.gvimrc
 maybe_delete ~/.inputrc
 maybe_delete ~/.bash_aliases
 maybe_delete ~/.bash_logout
@@ -29,10 +28,7 @@ maybe_delete ~/.gitconfig
 maybe_delete ~/.git-prompt
 maybe_delete ~/.vim
 maybe_delete ~/.tmux.conf
-maybe_delete ~/.tmux-powerline.conf
 maybe_delete ~/.ssh/config
 
 # directories
 maybe_delete ~/.bin
-maybe_delete ~/.config/htop
-maybe_delete ~/.config/powerline

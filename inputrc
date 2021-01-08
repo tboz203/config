@@ -2,8 +2,3 @@ set editing-mode vi
 "\C-l" clear-screen
 "\e[Z" menu-complete
 "jk" vi-movement-mode
-
-# Tab tab-insert
-# $if Bash
-#     Tab complete
-# $endif
