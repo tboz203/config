@@ -3,6 +3,8 @@
 # with modifications by tboz203
 # vim: tw=119
 
+export ANSIBLE_NOCOWS=1
+
 # Source global definitions
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
@@ -13,6 +15,23 @@ case $- in
     *i*) ;;
     *) return ;;
 esac
+
+pathmunge () {
+    case ":${PATH}:" in
+        *:"$1":*)
+            ;;
+        *)
+            if [ ! -d "$1" ] ; then
+                return
+            fi
+            if [ "$2" = "after" ] ; then
+                PATH=$PATH:$1
+            else
+                PATH=$1:$PATH
+            fi
+    esac
+}
+
 
 # fix TERM for tmux (otherwise powerline doesn't work well)
 if [[ $TERM != *256color && $COLORTERM == gnome-terminal || $COLORTERM == xfce4-terminal ]]; then
@@ -53,8 +72,8 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=5000
-HISTFILESIZE=100000
+HISTSIZE=
+HISTFILESIZE=
 HISTTIMEFORMAT="%h %d %H:%M:%S> "
 HISTIGNORE="ls:la:lf:ll:l"
 
@@ -138,6 +157,7 @@ fi
 # Enable programmable completion features.
 if [[ -f /etc/bash_completion ]] && ! shopt -oq posix; then
     . /etc/bash_completion
+    # complete -c export
 fi
 
 # dircolors
@@ -157,8 +177,42 @@ if [[ -x $(which pipenv) ]]; then
     eval "$(pipenv --completion)"
 fi
 
-PATH="/home/tbozeman@cgifederal.com/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/home/tbozeman@cgifederal.com/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/home/tbozeman@cgifederal.com/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/home/tbozeman@cgifederal.com/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/home/tbozeman@cgifederal.com/perl5"; export PERL_MM_OPT;
+# if [[ -x $(which kubectl) ]]; then
+#     source <(kubectl completion bash)
+# fi
+
+# if [[ -x $(which oc) ]]; then
+#     eval "$(oc completion bash)"
+# fi
+
+pathmunge $HOME/go/bin after
+
+showmounts() {
+    # list mounts in a table, and cut off the options
+    mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
+}
+
+vimwhich () { vim $( which $@ ); }
+complete -c vimwhich
+
+# script to allow easily setting KUBECONFIG
+[[ -f ~/.setkubeconfig.sh ]] && . ~/.setkubeconfig.sh
+
+pathmunge /home/tbozeman@cgifederal.com/perl5/bin after
+export PERL5LIB="/home/tbozeman@cgifederal.com/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"
+export PERL_LOCAL_LIB_ROOT="/home/tbozeman@cgifederal.com/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"
+export PERL_MB_OPT="--install_base \"/home/tbozeman@cgifederal.com/perl5\""
+export PERL_MM_OPT="INSTALL_BASE=/home/tbozeman@cgifederal.com/perl5"
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+if [[ -f /usr/local/lib/antlr-4.9-complete.jar ]]; then
+    alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.9-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
+    alias grun='java -Xmx500M -cp "/usr/local/lib/antlr-4.9-complete.jar:$CLASSPATH" org.antlr.v4.gui.TestRig'
+fi

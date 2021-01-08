@@ -15,10 +15,6 @@ alias l='ls -CF'
 alias lla='ll -A'
 alias lt='ll --sort=t'
 
-# shorten some stuff
-alias h='hostname'
-alias py='python -B'
-alias py3='python3 -B'
 alias ...='../..'
 alias ....='../../..'
 alias .....='../../../..'
@@ -33,6 +29,9 @@ alias .....='../../../..'
 # alias gitb='git branch -vva'
 # alias gitr='git remote -vv'
 # alias gitd='git diff'
+
+# because i'm a moron sometimes
+alias qgit='git'
 
 # open each file in its own tab
 alias vim='vim -Xp'
@@ -56,11 +55,7 @@ alias dfx='df -h -t xfs'
 # not already)
 alias mv='mv -vi'
 alias cp='cp -vri'
-alias rm='rm -vI'
-
-# some ps aliases
-alias ps='ps -H'
-alias psef='ps -ef'
+alias rm='rm -vI --one-file-system'
 
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
@@ -75,14 +70,26 @@ alias less='less -SR'
 
 # misc
 alias rgrep='grep -r'
-alias quit='exit'
 alias vimrc='vim ~/.vimrc'
 alias gvimrc='gvim ~/.gvimrc'
 alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
 alias rmf='rm -rf'
+alias ps='ps -H'
 alias listening='lsof -i -s TCP:Listen'
-alias status='systemctl status "diesel*"'
 alias docker-prune='docker system prune -f'
 
 alias svim='sudo vim "+set nu bg=dark ls=2 so=3" -p'
+
+# find files below current directory that are not in hidden directories (work in progress)
+alias files='find -iregex ".*/\.[^/].*" -prune -o -type f -print'
+
+alias curl='curl -w "\n"'
+
+alias http='http --ignore-stdin'
+
+alias figlet='figlet -w $(tput cols)'
+
+alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.9-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
+# alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.8-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
+# alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.7-complete.jar:$CLASSPATH" org.antlr.v4.Tool'

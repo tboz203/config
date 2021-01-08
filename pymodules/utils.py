@@ -1,16 +1,5 @@
 # pylint: disable=missing-docstring
 
-import collections as _collections
-import datetime as _datetime
-import functools as _functools
-import getpass as _getpass
-import itertools as _itertools
-import os as _os
-import warnings as _warnings
-import shutil as _shutil
-
-from pprint import pprint as _pprint
-
 SI_SUFFIXES = ['K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
 
 
@@ -28,10 +17,11 @@ def clear():
 
 
 def format_timedelta(delta, use_suffix=True):    # pylint: disable=too-many-branches
-    if not isinstance(delta, _datetime.timedelta):
+    import datetime
+    if not isinstance(delta, datetime.timedelta):
         raise ValueError("need instance of datetime.timedelta, not %s" %
                          type(delta))
-    if delta > _datetime.timedelta(0):
+    if delta > datetime.timedelta(0):
         suffix = "from now"
         prefix = ""
     else:
@@ -67,26 +57,28 @@ def format_timedelta(delta, use_suffix=True):    # pylint: disable=too-many-bran
     return timestr
 
 
-def time_since(datetime, utc=True):
+def time_since(timestamp, utc=True):
+    import datetime
     if utc:
-        now = _datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow()
     else:
-        now = _datetime.datetime.now()
-    return format_timedelta(datetime - now)
+        now = datetime.datetime.now()
+    return format_timedelta(timestamp - now)
 
 
-def color_time_since(datetime, utc=True):
+def color_time_since(timestamp, utc=True):
+    import datetime
     if utc:
-        now = _datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow()
     else:
-        now = _datetime.datetime.now()
+        now = datetime.datetime.now()
 
-    delta = datetime - now
-    if abs(delta) < _datetime.timedelta(0, 60*60):
+    delta = timestamp - now
+    if abs(delta) < datetime.timedelta(0, 60*60):
         colorfunc = red
-    elif abs(delta) < _datetime.timedelta(1, 0):
+    elif abs(delta) < datetime.timedelta(1, 0):
         colorfunc = yellow
-    elif abs(delta) < _datetime.timedelta(7):
+    elif abs(delta) < datetime.timedelta(7):
         colorfunc = green
     else:
         colorfunc = lambda d: d
@@ -128,22 +120,25 @@ def get_creds(env_prefix=None):
     "%s_USER" and "%s_PASSWORD". if `env_prefix` is not provided, or if
     matching environment variables do not exist, interactively request
     credentials from the user.'''
+    import getpass
+    import os
+    import warnings
 
     user, pw = None, None
     if env_prefix:
         user_var = '%s_USER' % env_prefix
         pw_var = '%s_PASSWORD' % env_prefix
-        if user_var in _os.environ and pw_var in _os.environ:
-            user = _os.environ[user_var]
-            pw = _os.environ[pw_var]
+        if user_var in os.environ and pw_var in os.environ:
+            user = os.environ[user_var]
+            pw = os.environ[pw_var]
         else:
-            _warnings.warn('Credential environment variables not found: %s, %s'
+            warnings.warn('Credential environment variables not found: %s, %s'
                           % (user_var, pw_var))
 
     if not (user and pw):
-        user_guess = _getpass.getuser()
+        user_guess = getpass.getuser()
         user = input('Username [%s]: ' % user_guess) or user_guess
-        pw = _getpass.getpass()
+        pw = getpass.getpass()
         if not pw:
             raise ValueError('No password supplied')
 
@@ -151,8 +146,10 @@ def get_creds(env_prefix=None):
 
 
 def columnize(alist, yfirst=True, width=None):
+    import itertools
+    import os
     roundup = lambda f: - int(f // -1)
-    width = width or _os.get_terminal_size().columns - 2
+    width = width or os.get_terminal_size().columns - 2
     alist = list(map(str, alist))
 
     # process is: divide list into two columns. check to see if columns will
@@ -190,7 +187,7 @@ def columnize(alist, yfirst=True, width=None):
     columns, c_widths = get_columns(alist, numcol)
 
     lines = []
-    for line in _itertools.zip_longest(*columns, fillvalue=""):
+    for line in itertools.zip_longest(*columns, fillvalue=""):
         out = []
         for i, word in enumerate(line):
             out.append(word.ljust(c_widths[i]))
@@ -215,18 +212,37 @@ def walk_xml(elem, depth=None):
 
 
 def show(*args, **kwargs):
+    import shutil
+    import pprint
     if 'width' not in kwargs:
-        kwargs['width'] = _shutil.get_terminal_size().columns
-    _pprint(*args, **kwargs)
+        kwargs['width'] = shutil.get_terminal_size().columns
+    pprint.pprint(*args, **kwargs)
 
 
 def group_by(collection, keyfunc):
-    grouped = _collections.defaultdict(list)
+    import collections
+    grouped = collections.defaultdict(list)
     for item in collection:
         grouped[keyfunc(item)].append(item)
     return dict(grouped)
 
 
 def compose(*functions):
+    import functools
     compose2 = lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))
-    return _functools.reduce(compose2, functions)
+    return functools.reduce(compose2, functions)
+
+
+def depthwalk(top, depth=0, **kwargs):
+    '''just like `os.walk`, but with new added `depth` parameter!'''
+    import os
+    depthmap = {top: 0}
+    for path, dirs, files in os.walk(top, **kwargs):
+        yield path, dirs, files
+        here = depthmap[path]
+        if here >= depth:
+            dirs.clear()
+            continue
+        for dir in dirs:
+            child = os.path.join(path, dir)
+            depthmap[child] = here + 1

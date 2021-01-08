@@ -11,7 +11,6 @@ set nocompatible
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
 
-set history=50      " keep 50 lines of command line history
 set ruler       " show the cursor position all the time
 set showcmd     " display incomplete commands
 set incsearch       " do incremental searching
@@ -26,10 +25,10 @@ map Q gq
 " so that you can undo CTRL-U after inserting a line break.
 inoremap <C-U> <C-G>u<C-U>
 
-" In many terminal emulators the mouse works just fine, thus enable it.
-if has('mouse')
-    set mouse=a
-endif
+" " In many terminal emulators the mouse works just fine, thus enable it.
+" if has('mouse')
+"     set mouse=a
+" endif
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -98,15 +97,18 @@ set numberwidth=5
 set foldcolumn=1
 set nowrap              " set linewrapping to behave in an intelligent manner
 set linebreak
-set textwidth=79
+set textwidth=119
 set ignorecase
 set smartcase
 set shiftround
 
 set undofile
-set undodir=~/.vim/undodir
+set undodir=$HOME/.vim/undodir
 
-set spellfile=~/.vim/spell/en.utf-8.add
+set history=10000
+
+" set spellfile=~/.vim/spell/en.utf-8.add
+
 " end basic options }}}
 
 " messing around with mappings {{{
@@ -135,9 +137,12 @@ noremap <silent> <leader>p o<esc>"+p
 noremap <silent> <leader>d :r !day<cr>kJ
 noremap <silent> <leader>f :r !full<cr>kJ
 " default to using the command window
-noremap : q:a
-noremap / q/a
-noremap ? q?a
+" noremap : q:a
+" noremap / q/a
+" noremap ? q?a
+noremap : :<c-f>a
+noremap / /<c-f>a
+noremap ? ?<c-f>a
 " a quick mapping for JSHint
 noremap <leader>j :JSHint<cr><cr>
 " make a mapping for traditional ex binding
@@ -191,7 +196,7 @@ onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:no
 " Vundle {{{
 filetype off
 
-set rtp+=~/.vim/bundle/Vundle.vim
+set rtp+=$HOME/.vim/bundle/Vundle.vim
 call vundle#rc()
 
 " vundle itself
@@ -199,7 +204,6 @@ Bundle 'VundleVim/Vundle.vim'
 " a vimrc starting point
 Bundle 'tpope/vim-sensible'
 " graphical undo tree
-" Bundle 'sjl/gundo.vim'
 Bundle 'dsummersl/gundo.vim'
 " integration w/ git
 Bundle 'tpope/vim-fugitive'
@@ -209,37 +213,42 @@ Bundle 'tpope/vim-commentary'
 Bundle 'tpope/vim-surround'
 " add repeat (.) support to (some) plugins
 Bundle 'tpope/vim-repeat'
-" tmux syntax highlighting
-Bundle 'zaiste/tmux.vim'
 " tag support
 Bundle 'majutsushi/tagbar'
+" auto-set indentation variables
+Bundle 'tpope/vim-sleuth'
+
+Bundle 'nathanaelkane/vim-indent-guides'
 
 " 'Tabularize' alignment
 Bundle 'godlygeek/tabular'
-" golang tools
-Bundle 'fatih/vim-go'
-" dockerfile syntax
-Bundle 'ekalinin/Dockerfile.vim'
-" vagrantfile syntax
-Bundle 'hashivim/vim-vagrant'
-" nginx syntax
-Bundle 'chr4/nginx.vim'
-" powershell syntax
-Bundle 'PProvost/vim-ps1'
 " external syntax checking (?)
 Bundle 'scrooloose/syntastic'
-" typescript syntax
-Bundle 'leafgarland/typescript-vim'
 
-" Plugins for Javascript & JSX
+Bundle 'vim-scripts/AnsiEsc.vim'
+
+Bundle 'zaiste/tmux.vim'
 Bundle 'pangloss/vim-javascript'
 Bundle 'mxw/vim-jsx'
-
+Bundle 'leafgarland/typescript-vim'
+Bundle 'fatih/vim-go'
+Bundle 'ekalinin/Dockerfile.vim'
+Bundle 'hashivim/vim-vagrant'
+Bundle 'hashivim/vim-terraform'
+Bundle 'chr4/nginx.vim'
+Bundle 'PProvost/vim-ps1'
 Bundle 'rodjek/vim-puppet'
-
 Bundle 'robbles/logstash.vim'
-
 Bundle 'martinda/Jenkinsfile-vim-syntax'
+
+Bundle 'mustache/vim-mustache-handlebars'
+
+Bundle 'dylon/vim-antlr'
+Bundle 'RobRoseKnows/lark-vim'
+
+Bundle 'sheerun/vim-polyglot'
+
+Bundle 'noah/vim256-color'
 
 " {{{
 " " a 'fuzzy' code-completion engine
@@ -253,10 +262,6 @@ Bundle 'martinda/Jenkinsfile-vim-syntax'
 " Bundle 'marijnh/tern_for_vim'
 " " tag generator using tern
 " Bundle 'ramitos/jsctags'
-" " auto-set indentation variables
-" Bundle 'tpope/vim-sleuth'
-" " indentation guides
-" Bundle 'nathanaelkane/vim-indent-guides'
 " " powerful file-system searching
 " Bundle 'kien/ctrlp.vim'
 " " buffer explorer
@@ -280,7 +285,7 @@ Bundle 'martinda/Jenkinsfile-vim-syntax'
 filetype plugin indent on
 " end Vundle }}}
 
-" " plugin settings {{{
+" plugin settings {{{
 " " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
 " " expansion/jumping
 " let g:UltiSnipsExpandTrigger = '<c-l>'
@@ -311,6 +316,8 @@ let g:syntastic_mode_map = {
     \ "mode": "passive",
     \ "active_filetypes": [],
     \ "passive_filetypes": [] }
+let g:syntastic_python_python_exec = 'python3'
+let g:syntastic_python_checkers = ['python', 'flake8']
 
 " mappings for plugins that don't have these nice settings
 noremap <silent> <leader>u :MundoToggle<cr>
@@ -319,15 +326,24 @@ noremap <silent> <leader>tt :TagbarToggle<cr>
 noremap <silent> <leader>to :TagbarOpen<cr>
 noremap <silent> <leader>tc :TagbarClose<cr>
 
+noremap <silent> <leader>a :AnsiEsc<cr>
+noremap <silent> <leader>A :AnsiEsc!<cr>
+
+noremap <silent> <leader>se :Errors<cr>
+noremap <silent> <leader>sc :SyntasticCheck<cr>
+noremap <silent> <leader>st :SyntasticToggleMode<cr>
+noremap <silent> <leader>si :SyntasticInfo<cr>
+noremap <silent> <leader>sr :SyntasticReset<cr>
+
 
 " }}}
 
-" tabs {{{
+" " tabs {{{
 set shiftwidth=4
 set softtabstop=4
 set expandtab
 set smarttab
-" end tabs }}}
+" " end tabs }}}
 
 " " powerline {{{
 " if $HAS_POWERLINE
@@ -337,8 +353,9 @@ set smarttab
 " endif
 " " }}}
 
-" when diff'ing, ignore whitespace
-set diffopt+=iwhite
+set diffopt+=iwhite,algorithm:patience
+
+colorscheme babymate256
 
 filetype indent on
-" vim: sw=4 sts=4 et
+" vim: sw=4 sts=4 et fdm=marker

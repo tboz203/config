@@ -1,4 +1,4 @@
-; vim: ft=dosini sw=8 ts=8 noet
+; vim: ft=gitconfig sw=8 ts=8 noet
 [color]
 	ui = true
 [user]
@@ -11,30 +11,42 @@
 	tool = vimdiff
 	conflictstyle = diff3
 	ff = false
+[mergetool]
+	prompt = false
 [diff]
 	tool = vimdiff
 	algorithm = histogram
+	colorMoved = default
+[difftool]
+	prompt = false
+	trustExitCode = true
 [push]
 	default = current
 [credential]
 	helper = cache
 [fetch]
 	recursesubmodules = on-demand
-	prune = true
 [pretty]
 	myline = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d %C(reset)%s%C(reset)
 	myshort = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d%C(reset)%n%C(reset)%s
 	tableable = & %h & %an & %ad & %<(80,trunc)%s & %d
 [alias]
 	l = "log --graph --decorate --date-order --format=myline --date=relative"
-	la = "log --graph --decorate --date-order --format=myline --date=relative --all"
-	path = "log --graph --decorate --format=myline --date=relative --boundary --ancestry-path"
+	la = "log --graph --decorate --date-order --format=myline --date=relative --exclude=refs/notes/* --all"
+	path = "log --graph --decorate --date-order --format=myline --date=relative --boundary --ancestry-path"
 	refs = "for-each-ref --format='%(refname:short)'"
 	longrefs = "for-each-ref --format='%(refname)'"
-	log-int = !git path $(git refs **/integration) $( git merge-base --all $( git refs **/integration))^! --decorate-refs=*/integration
+	log-int = !git path $(git refs **/integration) $( git merge-base --octopus $( git refs **/integration))^! --decorate-refs=*/integration
 	hard-push = !env GIT_SSH_COMMAND=\"ssh -i ~/.ssh/etpinfrs\" git push
+	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
 ;	pull-all = "!git refs refs/heads | while read item ; do git fetch origin $item:$item & done ; wait"
 [pull]
 	ff = only
 [rerere]
 	enabled = true
+[url "https://github.com/"]
+	insteadOf = git://github.com/
+[url "ssh://git@momcode.cgifederal.com:7999/"]
+	insteadOf = https://momcode.cgifederal.com/scm/
+[url "ssh://git@alm.cgifederal.com/"]
+	insteadOf = https://alm.cgifederal.com/scm/scm/

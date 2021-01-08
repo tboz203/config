@@ -1,0 +1,66 @@
+#!/bin/bash
+
+pipe=/tmp/pipe.$$
+lock=/tmp/lock.$$
+[[ -p $pipe ]] || mkfifo $pipe
+
+proc_count=${1:-4}
+
+trap 'echo exiting ; kill $( jobs -p ) ; rm -f $pipe $lock' INT
+
+echo pipe is $pipe
+
+lockdir() {
+    while true; do
+        # i'm told that "&>" is non-standard, but "2>&1 >" doesn't seem to do the trick, so...
+        mkdir "$1" &> /dev/null && break
+        # sleep 0.01
+    done
+}
+
+unlockdir() {
+    rmdir $1
+}
+
+reader() {
+    local pool_id=$1
+    local item
+    while true; do
+        lockdir $lock
+        read -t 1 item
+        sleep 0.1
+        unlockdir $lock
+        if [[ -z $item ]]; then
+            # echo done
+            break
+        fi
+
+        echo $item
+        eval $item
+        # echo continuing...
+
+        # echo reader $i got $item
+        # # sleep random time between 0 and 0.5
+        # sleep $( bc <<< "scale=1; $[ $RANDOM % 5 ] / 10 " )
+
+    done
+}
+
+pids=( $(seq $proc_count 2>/dev/null) ) || (
+    echo "[X] could not parse proc count ; expected a number ($proc_count)"
+    exit 1
+)
+
+for i in ${pids[*]}; do
+    reader $i < $pipe &
+done
+
+# for i in {1..99}; do
+#     echo "echo $i tubby tubby"
+# done > $pipe
+
+cat > $pipe
+
+wait
+
+rm $pipe

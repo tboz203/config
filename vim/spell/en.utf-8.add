@@ -71,3 +71,15 @@ exclude
 rsync
 rrsync
 rsync's
+BitBucket
+Kubernetes
+ui
+e2e
+env
+envs
+Int's
+kubernetes
+microservice
+microservices
+#erviceName
+ServiceName/!

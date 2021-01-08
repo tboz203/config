@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ldapsearch -h lf1-s-dc-2.cgifederal.com -b DC=cgifederal,DC=com \
+    -o ldif-wrap=no -D etpinfrs@cgifederal.com -w mksq@249 "$@"

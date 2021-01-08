@@ -38,7 +38,7 @@ if ( fc-list | grep -iq powerline ) && [ -z "$SSH_CONNECTION" ] ; then
     export HAS_POWERLINE_FONTS=1
 fi
 
-export EDITOR=$HOME/.local/bin/vim
+export EDITOR=/usr/local/bin/vim
 export PAGER="/usr/bin/less -SR"
 export MAILTO=thomas.bozeman@cgifederal.com
 export PYTHONSTARTUP=$HOME/.pythonrc.py

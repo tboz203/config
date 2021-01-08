@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+HOSTS=( cgi-acq-bld{s,1,2,3,4} )
+
+shortlist() {
+    docker -H $1 container ls -a --format="{{.Image}} % {{.Names}} % {{.Status}}" | column -t -s %
+}
+
+highlight() {
+    sed -r 's/(cgi-acq-bld([1234]).cgifederal.com)/\x1b[1;4\2m\1\x1b[0m/g'
+}
+
+get_containers () {
+    for host in "$@"; do
+        echo $host | figlet
+        shortlist $host | highlight
+        echo
+    done
+}
+
+while true; do
+    output="$( date ; get_containers "${HOSTS[@]}" )"
+    clear
+    echo "$output"
+    sleep 5
+done
