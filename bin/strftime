@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+
+import argparse
+import datetime
+import sys
+
+import _strptime
+
+try:
+    import dateutil.parser as du_parser
+except ImportError:
+     du_parser = None
+
+reference = '''\
+%a
+        Weekday as locale’s abbreviated name.
+%A
+        Weekday as locale’s full name.
+%w
+        Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
+%d
+        Day of the month as a zero-padded decimal number.
+%b
+        Month as locale’s abbreviated name.
+%B
+        Month as locale’s full name.
+%m
+        Month as a zero-padded decimal number.
+%y
+        Year without century as a zero-padded decimal number.
+%Y
+        Year with century as a decimal number.
+%H
+        Hour (24-hour clock) as a zero-padded decimal number.
+%I
+        Hour (12-hour clock) as a zero-padded decimal number.
+%p
+        Locale’s equivalent of either AM or PM.
+%M
+        Minute as a zero-padded decimal number.
+%S
+        Second as a zero-padded decimal number.
+%f
+        Microsecond as a decimal number, zero-padded on the left.
+%z
+        UTC offset in the form ±HHMM[SS[.ffffff]] (empty string if the object is naive).
+%Z
+        Time zone name (empty string if the object is naive).
+%j
+        Day of the year as a zero-padded decimal number.
+%U
+        Week number of the year (Sunday as the first day of the week) as a zero
+        padded decimal number. All days in a new year preceding the first Sunday are
+        considered to be in week 0.
+%W
+        Week number of the year (Monday as the first day of the week) as a decimal
+        number. All days in a new year preceding the first Monday are considered to
+        be in week 0.
+%c
+        Locale’s appropriate date and time representation.
+%x
+        Locale’s appropriate date representation.
+%X
+        Locale’s appropriate time representation.
+%%
+        A literal '%' character.
+%G
+        ISO 8601 year with century representing the year that contains the greater
+        part of the ISO week (%V).
+%u
+        ISO 8601 weekday as a decimal number where 1 is Monday.
+%V
+        ISO 8601 week as a decimal number with Monday as the first day of the week.
+        Week 01 is the week containing Jan 4.\
+'''
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Parse and format datetimes')
+    parser.add_argument('-f', '--format', help='output format. if absent, ISO-8601')
+    parser.add_argument('-d', '--datetime', nargs='+', help='datetime to parse. if absent, read stdin. repeatable')
+    parser.add_argument('-r', '--reference', action='store_true', help='output a reference, and halt')
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-p', '--parse', help='parse datetime with this format. if absent, try to guess')
+    group.add_argument('-t', '--timestamp', action='store_true',
+                       help='parse datetime as seconds since unix epoch (1970-01-01 00:00:00)')
+
+    args = parser.parse_args()
+
+    if args.reference:
+        print(reference)
+        exit()
+
+    if args.parse:
+        try:
+            _strptime._TimeRE_cache.compile(args.parse)
+        except KeyError:
+            exit(f'[X] Invalid parse format: {args.parse}')
+        parse = lambda s: datetime.datetime(s, args.parse)
+    elif args.timestamp:
+        parse = lambda s: datetime.datetime.fromtimestamp(int(s))
+    elif du_parser:
+        parse = du_parser.parse
+    else:
+        exit('[X] cannot guess format: `python-dateutil` not installed')
+
+    if args.format:
+        format = lambda dt: dt.strftime(args.format)
+    else:
+        format = str
+
+    if args.datetime:
+        items = args.datetime
+    else:
+        try:
+            items = sys.stdin.read().splitlines()
+        except KeyboardInterrupt:
+            exit()
+
+    output = []
+    for item in items:
+        try:
+            dt = parse(item)
+            output.append(format(dt))
+        except ValueError as exc:
+            output.append(str(exc))
+
+    print('\n'.join(output))
+
+
+if __name__ == '__main__':
+    main()

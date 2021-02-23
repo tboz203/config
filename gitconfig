@@ -44,8 +44,6 @@
 	ff = only
 [rerere]
 	enabled = true
-[url "https://github.com/"]
-	insteadOf = git://github.com/
 [url "ssh://git@momcode.cgifederal.com:7999/"]
 	insteadOf = https://momcode.cgifederal.com/scm/
 [url "ssh://git@alm.cgifederal.com/"]

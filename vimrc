@@ -136,6 +136,13 @@ noremap <silent> <leader>p o<esc>"+p
 " insert the current date or date and time
 noremap <silent> <leader>d :r !day<cr>kJ
 noremap <silent> <leader>f :r !full<cr>kJ
+
+noremap <leader>p :set paste!<cr>
+" mnemonic: 'text long'
+noremap <leader>tl :set tw=119<cr>
+" mnemonic: 'text short'
+noremap <leader>ts :set tw=79<cr>
+
 " default to using the command window
 " noremap : q:a
 " noremap / q/a

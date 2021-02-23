@@ -19,8 +19,12 @@ Host op2-mom-aix*
 Host ffx-mom-aix*
     User rcsbuild
 
-Host cgi-acq-ops1
-    User root
+# Host cgi-acq-ops1
+#     User root
+
+Host ffx-gnt-alm*
+    User tbozeman
+    # IdentityFile ~/.ssh/laptop
 
 Host cgi-acq-*
     User tbozeman
@@ -50,4 +54,7 @@ Host gntbuild gntbuild.cgifederal.com
 #     User etpinfrs
 
 Host op2-mom-ltest* lft-mom-lops* op2-mom-ltst*
+    User etpinfrs
+
+Host diesel diesel.cgifederal.com
     User etpinfrs
