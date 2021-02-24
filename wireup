@@ -26,7 +26,7 @@ ln -s "$CONFIG_ROOT/tmux.conf"            ~/.tmux.conf
 ln -s "$CONFIG_ROOT/tmux-powerline.conf"  ~/.tmux-powerline.conf
 ln -s "$CONFIG_ROOT/htop"                 ~/.config/
 ln -s "$CONFIG_ROOT/powerline"            ~/.config/
-ln -s "$CONFIG_ROOT/pymodules"            ~/.pymodules/
+ln -s "$CONFIG_ROOT/pymodules"            ~/.pymodules
 ln -s "$CONFIG_ROOT/pythonrc.py"          ~/.pythonrc.py
 
 [[ -d ~/.ssh ]] || mkdir ~/.ssh

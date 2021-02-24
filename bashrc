@@ -21,13 +21,12 @@ pathmunge () {
         *:"$1":*)
             ;;
         *)
-            if [ ! -d "$1" ] ; then
-                return
-            fi
-            if [ "$2" = "after" ] ; then
-                PATH=$PATH:$1
-            else
-                PATH=$1:$PATH
+            if [ -d "$1" ] ; then
+                if [ "$2" = "after" ] ; then
+                    PATH=$PATH:$1
+                else
+                    PATH=$1:$PATH
+                fi
             fi
     esac
 }
@@ -41,7 +40,7 @@ elif [[ $COLORTERM == rxvt-xpm ]]; then
 fi
 
 # set powerline availability flag (for all programs)
-if [[ $(which powerline) && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
+if [[ $(which powerline 2>/dev/null) && $TERM == *256color && $HAS_POWERLINE_FONTS ]]; then
     export HAS_POWERLINE=1
 fi
 
@@ -62,8 +61,8 @@ if [[ $HAS_POWERLINE ]]; then
 fi
 
 # if has tmux and not nested, change process to new session
-if [[ -x /usr/bin/tmux ]] && [[ -z "$TMUX" ]] && [[ -z $NO_TMUX ]]; then
-    exec /usr/bin/tmux new-session -A -s main
+if [[ -x $( which tmux 2> /dev/null ) ]] && [[ -z "$TMUX" ]] && [[ -z $NO_TMUX ]]; then
+    exec tmux new-session -A -s main
 fi
 
 # ignore something-or-other (i think it's `ls` and `cd`?)
@@ -169,19 +168,19 @@ if [[ -x /usr/bin/dircolors ]]; then
     fi
 fi
 
-if [[ -x $(which thefuck) ]]; then
+if [[ -x $(which thefuck 2>/dev/null) ]]; then
     eval "$(thefuck --alias ugh)"
 fi
 
-if [[ -x $(which pipenv) ]]; then
+if [[ -x $(which pipenv 2>/dev/null) ]]; then
     eval "$(pipenv --completion)"
 fi
 
-# if [[ -x $(which kubectl) ]]; then
+# if [[ -x $(which kubectl 2>/dev/null) ]]; then
 #     source <(kubectl completion bash)
 # fi
 
-# if [[ -x $(which oc) ]]; then
+# if [[ -x $(which oc 2>/dev/null) ]]; then
 #     eval "$(oc completion bash)"
 # fi
 

@@ -10,7 +10,7 @@ function maybe_delete {
     # otherwise, move it to $BACKUP_DIR (possibly numbered)
     if [[ -L $1 ]]; then
         rm -f $1
-    else
+    elif [[ -e $1 ]]; then
         newname=$(basename $1)
         # `${newname##.}` turns ".bashrc" into "bashrc"
         mv --backup=numbered $1 $BACKUP_DIR/${newname##.}
@@ -31,8 +31,10 @@ maybe_delete ~/.vim
 maybe_delete ~/.tmux.conf
 maybe_delete ~/.tmux-powerline.conf
 maybe_delete ~/.ssh/config
+maybe_delete ~/.pythonrc.py
 
 # directories
 maybe_delete ~/.bin
 maybe_delete ~/.config/htop
 maybe_delete ~/.config/powerline
+maybe_delete ~/.pymodules
