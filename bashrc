@@ -217,3 +217,15 @@ if [[ -f /usr/local/lib/antlr-4.9-complete.jar ]]; then
 fi
 
 pathmunge /opt/apps/oracle/oracle12.1.0.2/product/12.1.0.2/client_1/bin after
+[ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
+export JAVA_HOME=/dg/local/cots/java/default
+[[ ":${PATH}:" != *":/dg/local/cots/java/default/bin:"* ]] && PATH="/dg/local/cots/java/default/bin:${PATH}"
+export M2_HOME=/dg/local/cots/maven/default
+[[ ":${PATH}:" != *":/dg/local/cots/maven/default/bin:"* ]] && PATH="/dg/local/cots/maven/default/bin:${PATH}"
+[[ ":${PATH}:" != *":/dg/local/cots/gradle/default/bin:"* ]] && PATH="/dg/local/cots/gradle/default/bin:${PATH}"
+[[ ":${PATH}:" != *":/home/tbozeman/.tfenv/bin:"* ]] && PATH="/home/tbozeman/.tfenv/bin:${PATH}"
+[[ ":${PATH}:" != *":/home/tbozeman/.tgenv/bin:"* ]] && PATH="/home/tbozeman/.tgenv/bin:${PATH}"
+export PYENV_ROOT=$HOME/.pyenv
+[[ ":${PATH}:" != *":$HOME/.pyenv/bin:"* ]] && PATH="$HOME/.pyenv/bin:${PATH}"
+[[ ":${PATH}:" != *":$HOME/.pyenv/shims:"* ]] && PATH="$HOME/.pyenv/shims:${PATH}"
+if ! hash pyenv; then eval $(pyenv init -); fi

@@ -3,7 +3,7 @@
 	ui = true
 [user]
 	name = Thomas Bozeman
-	email = thomas.bozeman@cgifederal.com
+	email = thomas.bozeman@digitalglobe.com
 [core]
 	editor = vim
 	autocrlf = false
