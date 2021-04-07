@@ -105,7 +105,11 @@ set shiftround
 set undofile
 set undodir=$HOME/.vim/undodir
 
+set tags=./tags;,./.tags;
+
 set history=10000
+
+set nofixeol
 
 " set spellfile=~/.vim/spell/en.utf-8.add
 
@@ -141,7 +145,7 @@ if version > "500"
     noremap <silent> <leader>d :r !day<cr>kJ
     noremap <silent> <leader>f :r !full<cr>kJ
 
-    noremap <leader>p :set paste!<cr>
+    " noremap <leader>p :set paste!<cr>
     " mnemonic: 'text long'
     noremap <leader>tl :set tw=119<cr>
     " mnemonic: 'text short'
@@ -362,13 +366,14 @@ if version > "500"
     set smarttab
     " " end tabs }}}
 
-    " " powerline {{{
+    " powerline {{{
     " if $HAS_POWERLINE
+    "     " python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
     "     python3 from powerline.vim import setup as powerline_setup
     "     python3 powerline_setup()
     "     python3 del powerline_setup
     " endif
-    " " }}}
+    " }}}
 
 endif
 " vim: sw=4 sts=4 et fdm=marker

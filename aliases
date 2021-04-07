@@ -34,7 +34,8 @@ alias .....='../../../..'
 alias qgit='git'
 
 # open each file in its own tab
-alias vim='vim -Xp'
+# alias vim='vim -Xp'
+alias vim='vim -p'
 
 # common misspellings
 alias sl=ls

@@ -17,6 +17,7 @@ ln -s "$CONFIG_ROOT/vimrc"                ~/.vimrc
 ln -s "$CONFIG_ROOT/gvimrc"               ~/.gvimrc
 ln -s "$CONFIG_ROOT/inputrc"              ~/.inputrc
 ln -s "$CONFIG_ROOT/aliases"              ~/.bash_aliases
+ln -s "$CONFIG_ROOT/bash_functions"       ~/.bash_functions
 ln -s "$CONFIG_ROOT/bin"                  ~/.bin
 ln -s "$CONFIG_ROOT/logout"               ~/.bash_logout
 ln -s "$CONFIG_ROOT/gitconfig"            ~/.gitconfig

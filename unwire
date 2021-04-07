@@ -24,6 +24,7 @@ maybe_delete ~/.vimrc
 maybe_delete ~/.gvimrc
 maybe_delete ~/.inputrc
 maybe_delete ~/.bash_aliases
+maybe_delete ~/.bash_functions
 maybe_delete ~/.bash_logout
 maybe_delete ~/.gitconfig
 maybe_delete ~/.git-prompt

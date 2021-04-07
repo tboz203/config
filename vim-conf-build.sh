@@ -15,3 +15,6 @@ cat $0 | tee conf.out
 
     # --enable-python3interp=yes \
     # --with-python3-config-dir=/usr/lib64/python3.6/config-3.6m-x86_64-linux-gnu \
+
+# have most recently had an issue where `./configure ... LDFLAGS="-rdynamic"` is required for particular python
+# commands to work, notably `python3 import math`

@@ -1,0 +1,24 @@
+in general
+- vim
+- tmux
+- htop
+- tree
+- nmap
+- nc
+
+from source
+- python
+- vim
+- tmux
+- git
+
+for python `secrets`
+- glib2-devel
+- dbus-devel
+
+for compiling python from source
+- bzip2-devel
+- xz-devel
+- sqlite-devel
+- gdbm-devel
+- ...

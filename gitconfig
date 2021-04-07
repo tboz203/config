@@ -2,7 +2,7 @@
 [color]
 	ui = true
 [user]
-	name = Thomas Bozeman
+	name = Thomas Bozeman th026106
 	email = thomas.bozeman@digitalglobe.com
 [core]
 	editor = vim
@@ -26,6 +26,7 @@
 	helper = cache
 [fetch]
 	recursesubmodules = on-demand
+	prune = true
 [pretty]
 	myline = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d %C(reset)%s%C(reset)
 	myshort = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d%C(reset)%n%C(reset)%s
@@ -39,6 +40,10 @@
 	log-int = !git path $(git refs **/integration) $( git merge-base --octopus $( git refs **/integration))^! --decorate-refs=*/integration
 	hard-push = !env GIT_SSH_COMMAND=\"ssh -i ~/.ssh/etpinfrs\" git push
 	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
+;	lprune = !git checkout develop && git branch --merged develop | grep -v '^. develop$' | xargs git branch -d
+	pruneable = !git branch --format='%(refname:short)%%%(upstream:track)' | grep -F '[gone]' | cut -d% -f1
+	lprune = !git pruneable | xargs -r git branch -D
+	ctags = !.git/hooks/ctags
 ;	pull-all = "!git refs refs/heads | while read item ; do git fetch origin $item:$item & done ; wait"
 [pull]
 	ff = only
@@ -48,3 +53,5 @@
 	insteadOf = https://momcode.cgifederal.com/scm/
 [url "ssh://git@alm.cgifederal.com/"]
 	insteadOf = https://alm.cgifederal.com/scm/scm/
+[init]
+	templatedir = ~/.git_template

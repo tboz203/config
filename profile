@@ -9,28 +9,14 @@
 # for ssh logins, install and configure the libpam-umask package.
 umask 022
 
-pathmunge () {
-    case ":${PATH}:" in
-        *:"$1":*)
-            ;;
-        *)
-            if [ -d "$1" ] ; then
-                if [ "$2" = "after" ] ; then
-                    PATH=$PATH:$1
-                else
-                    PATH=$1:$PATH
-                fi
-	    fi
-    esac
-}
-
-pathmunge /usr/sbin         after
-pathmunge $HOME/.local/bin
-pathmunge $HOME/.bin
-
 # add a personal module directory for python
 if [ -d "$HOME/.pymodules" ]; then
-    export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH"
+    case ":${PYTHONPATH}:" in
+        *:"$HOME/.pymodules":*)
+            ;;
+        *)
+            export PYTHONPATH="$HOME/.pymodules:$PYTHONPATH" ;;
+    esac
 fi
 
 if ( fc-list | grep -iq powerline ) && [ -z "$SSH_CONNECTION" ] ; then
@@ -58,4 +44,3 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-unset pathmunge
