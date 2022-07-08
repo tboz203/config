@@ -17,6 +17,7 @@
 	tool = vimdiff
 	algorithm = histogram
 	colorMoved = default
+	whitespace = ignore
 [difftool]
 	prompt = false
 	trustExitCode = true
@@ -29,29 +30,35 @@
 	prune = true
 [pretty]
 	myline = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d %C(reset)%s%C(reset)
+	loudline = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d %C(black brightyellow)%s%C(reset)
 	myshort = %C(yellow)%h %C(cyan)%an %C(green)%ad%C(magenta)%d%C(reset)%n%C(reset)%s
 	tableable = & %h & %an & %ad & %<(80,trunc)%s & %d
 [alias]
+	s = status
+	d = diff
+	ch = checkout
+	co = commit
 	l = "log --graph --decorate --date-order --format=myline --date=relative"
 	la = "log --graph --decorate --date-order --format=myline --date=relative --exclude=refs/notes/* --all"
+	ll = "log --graph --decorate --date-order --format=myline --date=relative --exclude=refs/notes/* --exclude=refs/remotes/* --decorate-refs-exclude=remotes/* --all"
 	path = "log --graph --decorate --date-order --format=myline --date=relative --boundary --ancestry-path"
 	refs = "for-each-ref --format='%(refname:short)'"
 	longrefs = "for-each-ref --format='%(refname)'"
-	log-int = !git path $(git refs **/integration) $( git merge-base --octopus $( git refs **/integration))^! --decorate-refs=*/integration
-	hard-push = !env GIT_SSH_COMMAND=\"ssh -i ~/.ssh/etpinfrs\" git push
 	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
 ;	lprune = !git checkout develop && git branch --merged develop | grep -v '^. develop$' | xargs git branch -d
+;	pruneable !git for-each-ref --format="%(refname:short) %(upstream)" refs/heads | grep -E " (.+)$" | while read here there; do [[ -z $(git for-each-ref $there) ]] && echo $here; done
 	pruneable = !git branch --format='%(refname:short)%%%(upstream:track)' | grep -F '[gone]' | cut -d% -f1
 	lprune = !git pruneable | xargs -r git branch -D
 	ctags = !.git/hooks/ctags
 ;	pull-all = "!git refs refs/heads | while read item ; do git fetch origin $item:$item & done ; wait"
+	logdiff = "log --decorate --date-order --format=myline --date=relative --reverse --patch"
+	logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
+	fixup = "commit -n --amend --no-edit"
 [pull]
 	ff = only
 [rerere]
 	enabled = true
-[url "ssh://git@momcode.cgifederal.com:7999/"]
-	insteadOf = https://momcode.cgifederal.com/scm/
-[url "ssh://git@alm.cgifederal.com/"]
-	insteadOf = https://alm.cgifederal.com/scm/scm/
-[init]
-	templatedir = ~/.git_template
+; [init]
+; 	templatedir = ~/.git_template
+[rebase]
+	autoStash = true

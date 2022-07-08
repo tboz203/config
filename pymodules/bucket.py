@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # 2013-05-15
 # Tommy Bozeman (tboz203)
 # refactor of an earlier script

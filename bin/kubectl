@@ -1,0 +1,13 @@
+#!/bin/bash
+
+args=
+
+if [[ -v KUBE_CONTEXT ]]; then
+    args+=" --context=$KUBE_CONTEXT"
+fi
+
+if [[ -v KUBE_NAMESPACE ]]; then
+    args+=" --namespace=$KUBE_NAMESPACE"
+fi
+
+exec $HOME/.local/bin/kubectl $args "$@"

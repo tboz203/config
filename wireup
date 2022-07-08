@@ -29,6 +29,7 @@ ln -s "$CONFIG_ROOT/htop"                 ~/.config/
 ln -s "$CONFIG_ROOT/powerline"            ~/.config/
 ln -s "$CONFIG_ROOT/pymodules"            ~/.pymodules
 ln -s "$CONFIG_ROOT/pythonrc.py"          ~/.pythonrc.py
+ln -s "$CONFIG_ROOT/pretty_prompt.sh"     ~/.pretty_prompt.sh
 
 [[ -d ~/.ssh ]] || mkdir ~/.ssh
 ln -s "$CONFIG_ROOT/sshconfig"                ~/.ssh/config

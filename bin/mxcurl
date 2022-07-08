@@ -1,0 +1,3 @@
+#!/bin/bash
+
+curl -w "\n" -s -S -H "Authorization: $(token)" -H "Accept: application/json, */*" "$@"

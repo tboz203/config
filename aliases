@@ -4,9 +4,10 @@ alias ls='ls --color=auto --hide=*~ --hide=.*~ --group-directories-first'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-alias tree='tree -C'
+alias tree='tree -C --dirsfirst'
 
 # some aliases based off ls
+alias ls='ls --color=auto --hide=*~ --hide=.*~ --group-directories-first'
 alias ll='ls -lhF'
 alias la='ls -A'
 alias lf='ll -S'
@@ -15,9 +16,21 @@ alias l='ls -CF'
 alias lla='ll -A'
 alias lt='ll --sort=t'
 
-alias ...='../..'
-alias ....='../../..'
-alias .....='../../../..'
+repeat() {
+    local text="$1"
+    local count="$2"
+    printf "${text}%.0s" $(seq 1 $count)
+}
+
+# alias ...='../..'
+# alias ....='../../..'
+# alias .....='../../../..'
+for i in $(seq 1 20); do
+    command="..$( repeat . $i )"
+    directory="..$( repeat /.. $i )"
+    alias $command=$directory
+done
+unset command directory repeat
 
 # some git commands
 # start using the built-in git alias stuff!
@@ -36,6 +49,7 @@ alias qgit='git'
 # open each file in its own tab
 # alias vim='vim -Xp'
 alias vim='vim -p'
+alias view='view -p'
 
 # common misspellings
 alias sl=ls
@@ -67,7 +81,7 @@ alias wc='wc -cmlLw'
 alias tidy='tidy -f /dev/null -iqmw'
 alias astyle='astyle -sajcn'
 alias find='find 2>/dev/null'
-alias less='less -SR'
+alias nl='nl -ba'
 
 # misc
 alias rgrep='grep -r'
@@ -79,11 +93,9 @@ alias rmf='rm -rf'
 alias ps='ps -H'
 alias listening='lsof -i -s TCP:Listen'
 alias docker-prune='docker system prune -f'
+alias loud='BASH_ENV=~/.bash_loud'
 
 alias svim='sudo vim "+set nu bg=dark ls=2 so=3" -p'
-
-# find files below current directory that are not in hidden directories (work in progress)
-alias files='find -iregex ".*/\.[^/].*" -prune -o -type f -print'
 
 alias curl='curl -w "\n"'
 
@@ -94,3 +106,13 @@ alias figlet='figlet -w $(tput cols)'
 alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.9-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
 # alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.8-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
 # alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.7-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
+
+# resolve symlinks
+alias cd='cd -P'
+
+# maxar specific
+
+# this is a script now
+# alias mxcurl='curl -s -H "Authorization: $(token)" -H "Accept: application/json, */*"'
+# bootstrap depends on an old version of yq, so i've installed yq 4 as "yq-4"
+alias yq='yq-4'

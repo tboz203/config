@@ -5,16 +5,17 @@ cat $0 | tee conf.out
 ./configure \
     --enable-fail-if-missing \
     --prefix=$HOME/.local \
-    --enable-pythoninterp=yes \
-    --enable-rubyinterp=yes \
     --enable-gui \
     --with-features=huge \
-    --with-python-config-dir=/usr/lib64/python2.7/config \
     --with-x \
+    --enable-python3interp=yes \
+    LDFLAGS="-rdynamic" \
     | tee -a conf.out
 
-    # --enable-python3interp=yes \
     # --with-python3-config-dir=/usr/lib64/python3.6/config-3.6m-x86_64-linux-gnu \
+    # --enable-pythoninterp=yes \
+    # --with-python-config-dir=/usr/lib64/python2.7/config \
+
 
 # have most recently had an issue where `./configure ... LDFLAGS="-rdynamic"` is required for particular python
 # commands to work, notably `python3 import math`

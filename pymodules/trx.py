@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # 2012/12/05 - tboz203
 
 # going back through this script, trying to figure out what it does. I feel

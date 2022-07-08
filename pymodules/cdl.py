@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 # I just realized that this makes no guarantee that it doesn't overwrite files
 # i'm going to have to go through this and set it up to re-name files that

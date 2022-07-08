@@ -73,10 +73,11 @@ output="$( eval "${COMMAND[@]}" 2>&1 )"
 status=$?
 
 if [[ ! $QUIET || $status -ne 0 ]]; then
-    echo "$output"
+    [[ $output ]] && echo "$output"
 fi
 
 if [[ $LOG ]]; then
+    [[ $output ]] || output='(no output)'
     {
         date
         echo "$output"

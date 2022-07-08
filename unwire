@@ -33,6 +33,7 @@ maybe_delete ~/.tmux.conf
 maybe_delete ~/.tmux-powerline.conf
 maybe_delete ~/.ssh/config
 maybe_delete ~/.pythonrc.py
+maybe_delete ~/.pretty_prompt.sh
 
 # directories
 maybe_delete ~/.bin

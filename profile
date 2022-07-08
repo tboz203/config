@@ -5,10 +5,6 @@
 # see /usr/share/doc/bash/examples/startup-files for examples.
 # the files are located in the bash-doc package.
 
-# the default umask is set in /etc/profile; for setting the umask
-# for ssh logins, install and configure the libpam-umask package.
-umask 022
-
 # add a personal module directory for python
 if [ -d "$HOME/.pymodules" ]; then
     case ":${PYTHONPATH}:" in
@@ -23,18 +19,14 @@ if ( fc-list | grep -iq powerline ) && [ -z "$SSH_CONNECTION" ] ; then
     export HAS_POWERLINE_FONTS=1
 fi
 
-export EDITOR=/usr/local/bin/vim
-export PAGER="/usr/bin/less -SR"
+export EDITOR=$HOME/.local/bin/vim
+export PAGER="/usr/local/bin/less"
 export MAILTO=thomas.bozeman@cgifederal.com
 export PYTHONSTARTUP=$HOME/.pythonrc.py
 export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
 export ORACLE_HOME=/opt/apps/oracle/oracle12.1.0.2/product/12.1.0.2/client_1
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
-
-if [ -d $HOME/.local/share/man ]; then
-    export MANPATH=$HOME/.local/share/man:/usr/share/man
-fi
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
@@ -43,4 +35,3 @@ if [ -n "$BASH_VERSION" ]; then
         . "$HOME/.bashrc"
     fi
 fi
-

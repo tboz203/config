@@ -85,9 +85,7 @@ def color_time_since(timestamp, utc=True):
 
     return colorfunc(format_timedelta(delta))
 
-# these next two functions use "1 kilobyte == 1024 bytes, etc." i think that's
-# actually incorrect (1 kilobyte == 1000 bytes, etc.), but i don't care.
-
+# we're using base 2 units (e.g. kibibyte, mebibyte)
 def humanize(num):
     # uses side-effects of iterating through a collection to select the
     # correct suffix
@@ -246,3 +244,45 @@ def depthwalk(top, depth=0, **kwargs):
         for dir in dirs:
             child = os.path.join(path, dir)
             depthmap[child] = here + 1
+
+
+def format_seconds(seconds):
+    if seconds > 120:
+        from datetime import timedelta
+        return str(timedelta(seconds=seconds))
+
+    value = abs(seconds)
+    unit = "s"
+    if value != 0:
+        if value < 1:
+            unit = "ms"
+            value *= 1000
+        if value < 1:
+            unit = "μs"
+            value *= 1000
+        if value < 1:
+            unit = "ns"
+            value *= 1000
+        if value < 1:
+            unit = "ns, please stop"
+    return f'{value:.6g}{unit}'
+
+
+def just_timeit(*args, **kwargs):
+    """
+    just_timeit(stmt, setup)
+
+    wrapper around timeit.Timer that has all the convenience of the cmdline interface
+    """
+    import timeit
+
+    timer = timeit.Timer(*args, **kwargs)
+    n, _ = timer.autorange()
+    results = timer.repeat(number=n)
+    return {
+        "min": format_seconds(min(results) / n),
+        "max": format_seconds(max(results) / n),
+        "avg": format_seconds((sum(results) / len(results)) / n),
+    }
+
+

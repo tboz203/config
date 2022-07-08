@@ -1,3 +1,0 @@
-#!/usr/bin/bash -ex
-sudo echo hi
-exec rsync -a --exclude .git --force --delete /mnt/vagrant/ /home/tbozeman@cgifederal.com/vagrant-copy/

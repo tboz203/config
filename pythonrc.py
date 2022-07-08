@@ -59,3 +59,10 @@ def _excepthook(exc_type, exc_value, exc_traceback):
 
 sys.displayhook = _displayhook
 sys.excepthook = _excepthook
+
+# try:
+#     from dotenv import load_dotenv
+#     load_dotenv('/home/tbozeman/.ssh/P2020')
+#     load_dotenv()
+# except Exception:
+#     pass

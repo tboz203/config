@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 '''
 watch the output of a job running in jenkins, because in old enough versions of

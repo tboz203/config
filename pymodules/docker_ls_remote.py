@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 import argparse
 import datetime
@@ -21,16 +21,23 @@ def urljoin(head, *parts):
 
 class Connection:
     DATEFORMAT = '%Y-%m-%dT%H:%M:%S.%f'
+    MAX_ATTEMPTS = 3
 
-    def _request(self, method, url, headers={}, check_status=True):
+    def _request(self, method, url, headers={}, check_status=True, attempt=0):
         for i in range(self._retries):
             try:
                 resp = self._sesh.request(method, url, headers=headers)
                 if check_status:
                     resp.raise_for_status()
                 break
-            except requests.HTTPError:
-                raise
+            except requests.HTTPError as exc:
+                if attempt < self.MAX_ATTEMPTS and exc.response.reason == "Unauthorized":
+                    print('Request failed: Unauthorized')
+                    username = input('Username: ')
+                    self._sesh.auth = get_credentials(username)
+                    return self._request(method, url, headers, check_status, attempt+1)
+                else:
+                    raise
             except OSError as exc:
                 exception = exc
                 print(f'request: trapped exec (attempt {i}): {exc}')
@@ -57,7 +64,10 @@ class Connection:
         self._url = url
 
         self._sesh = requests.Session()
-        self._sesh.headers = {'Accept': 'application/vnd.docker.distribution.manifest.v2+json'}
+        self._sesh.headers = {
+            'Accept': 'application/vnd.docker.distribution.manifest.v2+json, application/json',
+            'User-Agent': "docker or something",
+        }
 
         if credentials:
             self._sesh.auth = credentials
@@ -105,7 +115,7 @@ class Connection:
         return data
 
     def get_digest(self, name, tag):
-        return self.get_manifest(name, tag)['config']['digest']
+        return self.get_manifest(name, tag).get('config', {}).get('digest', '?????')
 
     def get_created_date(self, name, tag):
         try:
@@ -196,11 +206,11 @@ def get_credentials(user):
 def main():
     parser = argparse.ArgumentParser(description='list stuff from docker registry')
     # parser.add_argument('-r', '--registry', default='https://gntbuild.cgifederal.com:5000', help='the registry to list')
-    parser.add_argument('-r', '--registry', default='https://artifacts.cgifederal.com:30100', help='the registry to list')
-    parser.add_argument('names', nargs='+',
-                        help='The name(s) of the repos to list. Accepts shell wildcards. (remember to quote them!)')
-    parser.add_argument('-t', '--tag-pattern', default=None,
-                        help='Shell wildcard pattern to match tags against. (remember to quote them!)')
+    # parser.add_argument('-r', '--registry', default='https://artifacts.cgifederal.com:30100', help='the registry to list')
+    # parser.add_argument('-r', '--registry', default='https://docker-approved.artpro.digitalglobe.com:443', help='the registry to list')
+    parser.add_argument('-r', '--registry', default='https://docker.artpro.digitalglobe.com:443', help='the registry to list')
+    parser.add_argument('names', nargs='+', help='The name(s) of the repos to list. Accepts shell wildcards. (remember to quote them!)')
+    parser.add_argument('-t', '--tag-pattern', default=None, help='Shell wildcard pattern to match tags against. (remember to quote them!)')
     parser.add_argument('-u', '--user', help='user[:password] - credentials for the given repository')
     parser.add_argument('--fast', action='store_true', help='just list repos and tags')
 

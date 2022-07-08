@@ -1,9 +1,7 @@
 # vim: ft=sshconfig
 
 ServerAliveInterval 60
-SendEnv TERM
-SendEnv COLORTERM
-SendEnv HAS_POWERLINE_FONTS
+SendEnv TERM COLORTERM HAS_POWERLINE_FONTS TURBO_MODE
 AddKeysToAgent yes
 Host github.com
   IdentityFile /home/tbozeman/.ssh/git_key

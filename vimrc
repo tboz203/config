@@ -25,10 +25,10 @@ map Q gq
 " so that you can undo CTRL-U after inserting a line break.
 inoremap <C-U> <C-G>u<C-U>
 
-" " In many terminal emulators the mouse works just fine, thus enable it.
-" if has('mouse')
-"     set mouse=a
-" endif
+" In many terminal emulators the mouse works just fine, thus enable it.
+if has('mouse')
+    set mouse=a
+endif
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -53,6 +53,9 @@ if has("autocmd")
 
   " For all text files set 'textwidth' to 78 characters.
   autocmd FileType text setlocal textwidth=78
+
+  " set comments properly
+  autocmd FileType helm setlocal commentstring=#\ %s
 
   " When editing a file, always jump to the last known cursor position.
   " Don't do it when the position is invalid or when inside an event handler
@@ -86,8 +89,8 @@ set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
 set list
-" let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
-set listchars=tab:>-,trail:-,extends:$,precedes:$
+let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
+" set listchars=tab:>-,trail:-,extends:$,precedes:$
 set background=dark     " make the text easier to read on a dark background
 set modeline            " if a file has a modeline, use it
 set splitbelow          " put new windows to the right or below
@@ -101,15 +104,35 @@ set textwidth=119
 set ignorecase
 set smartcase
 set shiftround
+set cursorline
+
+set sidescroll=20
+set sidescrolloff=20
 
 set undofile
 set undodir=$HOME/.vim/undodir
 
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+
 set tags=./tags;,./.tags;
+
+set directory=~/.vim/swap//,.
 
 set history=10000
 
-set nofixeol
+set wildmode=longest,list
+
+let python_highlight_all = 1
+
+" let g:zipPlugin_ext= '*.zip,*.jar,*.xpi,*.ja,*.war,*.ear,*.celzip,*.oxt,*.kmz,
+"     \ *.wsz,*.xap,*.docx,*.docm,*.dotx,*.dotm,*.potx,*.potm,*.ppsx,*.ppsm,
+"     \ *.pptx,*.pptm,*.ppam,*.sldx,*.thmx,*.xlam,*.xlsx,*.xlsm,*.xlsb,*.xltx,
+"     \ *.xltm,*.xlam,*.crtx,*.vdw,*.glox,*.gcsx,*.gqsx,*.epub,*.whl'
+
+" set nofixeol
 
 " set spellfile=~/.vim/spell/en.utf-8.add
 
@@ -117,7 +140,9 @@ set nofixeol
 
 if version > "500"
 
-    set diffopt+=iwhite,algorithm:patience
+    if version > "800"
+        set diffopt+=iwhite,algorithm:patience
+    endif
 
     " messing around with mappings {{{
     let mapleader = '-'
@@ -152,9 +177,6 @@ if version > "500"
     noremap <leader>ts :set tw=79<cr>
 
     " default to using the command window
-    " noremap : q:a
-    " noremap / q/a
-    " noremap ? q?a
     noremap : :<c-f>a
     noremap / /<c-f>a
     noremap ? ?<c-f>a
@@ -170,6 +192,9 @@ if version > "500"
     " ... and decrement
     noremap <c-c> <c-x>
 
+    " create folds for block under cursor
+    noremap <leader>c V%zf
+
     " visual mode
     vnoremap <leader>" di""<esc>hp
 
@@ -178,6 +203,13 @@ if version > "500"
     inoremap jk <esc>
     " nerdtree overwrites the digraph binding, so we'll use <c-h> instead.
     inoremap <c-h> <c-k>
+
+    " make ZQ quit harder
+    noremap ZQ :cq!<cr>
+
+    " let's make searching always center the cursor
+    noremap n nzz
+    noremap N Nzz
 
     " end messing around with mappings }}}
 
@@ -229,8 +261,8 @@ if version > "500"
         Bundle 'tpope/vim-surround'
         " add repeat (.) support to (some) plugins
         Bundle 'tpope/vim-repeat'
-        " tag support
-        Bundle 'majutsushi/tagbar'
+        " tag window
+        Bundle 'preservim/tagbar'
         " auto-set indentation variables
         Bundle 'tpope/vim-sleuth'
 
@@ -238,37 +270,46 @@ if version > "500"
 
         " 'Tabularize' alignment
         Bundle 'godlygeek/tabular'
-        " external syntax checking (?)
-        Bundle 'scrooloose/syntastic'
+        " " external syntax checking (?)
+        " Bundle 'scrooloose/syntastic'
 
         Bundle 'vim-scripts/AnsiEsc.vim'
-
-        Bundle 'zaiste/tmux.vim'
-        Bundle 'pangloss/vim-javascript'
-        Bundle 'mxw/vim-jsx'
-        Bundle 'leafgarland/typescript-vim'
-        Bundle 'fatih/vim-go'
-        Bundle 'ekalinin/Dockerfile.vim'
-        Bundle 'hashivim/vim-vagrant'
-        Bundle 'hashivim/vim-terraform'
-        Bundle 'chr4/nginx.vim'
-        Bundle 'PProvost/vim-ps1'
-        Bundle 'rodjek/vim-puppet'
-        Bundle 'robbles/logstash.vim'
-        Bundle 'martinda/Jenkinsfile-vim-syntax'
-
-        Bundle 'mustache/vim-mustache-handlebars'
-
-        Bundle 'dylon/vim-antlr'
-        Bundle 'RobRoseKnows/lark-vim'
 
         Bundle 'sheerun/vim-polyglot'
 
         Bundle 'noah/vim256-color'
 
-        " {{{
-        " " a 'fuzzy' code-completion engine
-        " Bundle 'Valloric/YouCompleteMe'
+        Bundle 'editorconfig/editorconfig-vim'
+
+        " code completion + goto support
+        Bundle 'ycm-core/YouCompleteMe'
+
+        " file-system browser
+        Bundle 'scrooloose/nerdtree'
+        " tab-support for nerdtree
+        Bundle 'jistr/vim-nerdtree-tabs'
+
+        Bundle 'keepcase.vim'
+
+        " Bundle 'zaiste/tmux.vim'
+        " Bundle 'pangloss/vim-javascript'
+        " Bundle 'mxw/vim-jsx'
+        " Bundle 'leafgarland/typescript-vim'
+        " Bundle 'fatih/vim-go'
+        " Bundle 'ekalinin/Dockerfile.vim'
+        " Bundle 'hashivim/vim-vagrant'
+        " Bundle 'hashivim/vim-terraform'
+        " Bundle 'chr4/nginx.vim'
+        " Bundle 'PProvost/vim-ps1'
+        " Bundle 'rodjek/vim-puppet'
+        " Bundle 'robbles/logstash.vim'
+        " Bundle 'martinda/Jenkinsfile-vim-syntax'
+
+        " Bundle 'mustache/vim-mustache-handlebars'
+
+        " Bundle 'dylon/vim-antlr'
+        " Bundle 'RobRoseKnows/lark-vim'
+
         " " adding gpg symmetric support
         " Bundle 'vim-scripts/gnupg.vim'
         "
@@ -286,17 +327,12 @@ if version > "500"
         " Bundle 'tpope/vim-speeddating'
         " " snippet insertion (for boilerplate code)
         " Bundle 'SirVer/ultisnips'
-        " " file-system browser
-        " Bundle 'scrooloose/nerdtree'
-        " " tab-support for nerdtree
-        " Bundle 'jistr/vim-nerdtree-tabs'
         " " javascript helpers
         " Bundle 'Shutnik/jshint2.vim'
         " Bundle 'walm/jshint.vim'
         " Bundle 'vim-scripts/TabBar'
         " " ctags from some other place, lol
         " Bundle 'clausreinke/scoped_tags'
-        " " }}}
 
         filetype plugin indent on
         " end Vundle }}}
@@ -335,6 +371,31 @@ if version > "500"
         let g:syntastic_python_python_exec = 'python3'
         let g:syntastic_python_checkers = ['python', 'flake8']
 
+        let g:ycm_goto_buffer_command = 'split-or-existing-window'
+        let g:ycm_confirm_extra_conf = 0
+        let g:ycm_python_interpreter_path = ''
+        let g:ycm_python_sys_path = []
+        let g:ycm_disable_for_files_larger_than_kb = 1000
+        let g:ycm_extra_conf_vim_data = [
+            \   'g:ycm_python_interpreter_path',
+            \   'g:ycm_python_sys_path'
+            \ ]
+        " let g:ycm_filetype_blacklist = {
+        "     \   'sql': 1,
+        "     \   'log': 1,
+        "     \   'json': 1
+        "     \ }
+        let g:ycm_language_server =
+            \ [
+            \   {
+            \     'name': 'ruby',
+            \     'cmdline': ['solargraph', 'stdio'],
+            \     'filetypes': ['ruby']
+            \   }
+            \ ]
+        let g:ycm_keep_logfiles = 1
+
+
         " mappings for plugins that don't have these nice settings
         noremap <silent> <leader>u :MundoToggle<cr>
         noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
@@ -351,6 +412,18 @@ if version > "500"
         noremap <silent> <leader>si :SyntasticInfo<cr>
         noremap <silent> <leader>sr :SyntasticReset<cr>
 
+        noremap <leader>D :YcmCompleter GetDoc<cr>
+        noremap <leader>R :YcmCompleter GoToReferences<cr>
+        noremap <leader>GG :YcmCompleter GoTo<cr>
+        noremap <leader>GS :vsplit<cr>:YcmCompleter GoTo<cr>
+        noremap <leader>GT :tab YcmCompleter GoTo<cr>
+
+        noremap <leader>gd :Gvdiffsplit<cr>
+        noremap <leader>gb :Git blame<cr>
+
+        " align vim-commentary w/ other comment bindings
+        vnoremap <C-_> :'<,'>Commentary<cr>
+
         colorscheme babymate256
 
         filetype indent on
@@ -360,19 +433,24 @@ if version > "500"
     " }}}
 
     " " tabs {{{
-    set shiftwidth=4
-    set softtabstop=4
-    set expandtab
-    set smarttab
+    " set shiftwidth=4
+    " set softtabstop=4
+    " set expandtab
+    " set smarttab
     " " end tabs }}}
 
     " powerline {{{
-    " if $HAS_POWERLINE
-    "     " python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
-    "     python3 from powerline.vim import setup as powerline_setup
-    "     python3 powerline_setup()
-    "     python3 del powerline_setup
-    " endif
+    if $HAS_POWERLINE
+        " python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
+        " python3 << trim endpython
+        "     try:
+        "         from powerline.vim import setup as powerline_setup
+        "         powerline_setup()
+        "         del powerline_setup
+        "     except ImportError:
+        "         pass
+        " endpython
+    endif
     " }}}
 
 endif

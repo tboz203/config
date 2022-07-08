@@ -1,10 +1,10 @@
-# things to ignore
-*~
 .*
-*.pyc
-*.pyo
+*.swp
+*.swo
 
-# gonna try this:
-vim/bundle/*
-vim/undodir/*
-vim/.netrwhist
+__pycache__
+
+/vim/undodir
+/vim/bundle/*
+
+!.gitignore
