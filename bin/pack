@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+echo Nobody home, thank you have a nice day
+exit 0
+
+#!/bin/bash
+
+set -euo pipefail
+trap 'echo "err ($?) on line ($LINENO): $BASH_COMMAND"' ERR
+
+NFS_ROOT=/nfshome/testdev/$USER
+
+INPUT=$HOME
+OUTPUT=$NFS_ROOT/backups/backup-$(date +%Y-%m-%d).tar.zst.aes
+
+if [[ $@ ]]; then
+    echo >&2 "$0: create local backups; prompts for a password, takes no arguments"
+    echo >&2 "the source directory is $INPUT"
+    echo >&2 "the output archive would be $OUTPUT"
+    exit 1
+fi
+
+for i in {1..3}; do
+    read -sp "[>] choose a password: " PASSWORD ; echo
+    read -sp "[>] confirm password: " CONFIRM ; echo
+    [[ $PASSWORD = $CONFIRM ]] && break
+    echo "[!] passwords did not match"
+done
+[[ $PASSWORD = $CONFIRM ]] || { echo "[X] go get some coffee..." ; exit 1 ;}
+
+echo "[.] starting: $(date)"
+
+# make a local copy of these scripts
+rm $INPUT/backup-bin.tgz || true
+tar -czf $INPUT/backup-bin.tgz -C $NFS_ROOT bin
+
+# make a local copy of all yum installs
+rm $INPUT/installs.txt || true
+yumdb search command_line '*' > $INPUT/installs.txt
+( yum history info '*' || echo "[X] could not read history" ) &> $INPUT/yum-history.txt
+
+# grab crontab
+crontab -l > $INPUT/$USER.crontab || true
+
+# backup our input directory, with compression & encryption
+tar --exclude-caches --warning=none -P -c "$INPUT" \
+    | zstd \
+    | PASSWORD="$PASSWORD" openssl aes-256-cbc -e -pbkdf2 -pass env:PASSWORD -out "$OUTPUT"
+
+ls -lhF "$OUTPUT"
+echo "[.] complete: $(date)"
+
+#!/bin/bash
+
+set +x -euo pipefail
+trap 'echo "err ($?) on line ($LINENO): $BASH_COMMAND"' ERR
+
+: ${NFS_ROOT:=/nfshome/testdev/$USER}
+
+INPUT=$(find $NFS_ROOT/backups -type f -name '*.tar.zst.aes'| sort | tail -n 1)
+
+read -sp "password: " PASSWORD
+echo
+
+echo "starting: $(date)"
+
+PASSWORD="$PASSWORD" $NFS_ROOT/bin/openssl aes-256-cbc -d -pbkdf2 -pass env:PASSWORD -in "$INPUT" \
+    | $NFS_ROOT/bin/zstd -d \
+    | tar -C / -x --overwrite
+    # > $HOME/restore.tar
+    # | tar -C / -t
+
+echo "complete: $(date)"

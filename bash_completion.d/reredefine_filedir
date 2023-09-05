@@ -1,0 +1,66 @@
+# there was at one time a script in the bash completion compat dir that
+# attempted to un-break the _filedir function in the event that another package
+# had overwritten it. the problem is that the script comes from an older
+# version of bash-completion (and hence has an older version of the function
+# definition), and that the package it's cleaning up after isn't installed.
+
+[[ -f /etc/bash_completion.d/redefine_filedir ]] || return
+
+_filedir()
+{
+    local IFS=$'\n'
+
+    _tilde "${cur-}" || return
+
+    local -a toks
+    local reset arg=${1-}
+
+    if [[ $arg == -d ]]; then
+        reset=$(shopt -po noglob)
+        set -o noglob
+        toks=($(compgen -d -- "${cur-}"))
+        IFS=' '
+        $reset
+        IFS=$'\n'
+    else
+        local quoted
+        _quote_readline_by_ref "${cur-}" quoted
+
+        # Munge xspec to contain uppercase version too
+        # https://lists.gnu.org/archive/html/bug-bash/2010-09/msg00036.html
+        # news://news.gmane.io/4C940E1C.1010304@case.edu
+        local xspec=${arg:+"!*.@($arg|${arg^^})"} plusdirs=()
+
+        # Use plusdirs to get dir completions if we have a xspec; if we don't,
+        # there's no need, dirs come along with other completions. Don't use
+        # plusdirs quite yet if fallback is in use though, in order to not ruin
+        # the fallback condition with the "plus" dirs.
+        local opts=(-f -X "$xspec")
+        [[ $xspec ]] && plusdirs=(-o plusdirs)
+        [[ ${COMP_FILEDIR_FALLBACK-} || -z ${plusdirs-} ]] ||
+            opts+=("${plusdirs[@]}")
+
+        reset=$(shopt -po noglob)
+        set -o noglob
+        toks+=($(compgen "${opts[@]}" -- $quoted))
+        IFS=' '
+        $reset
+        IFS=$'\n'
+
+        # Try without filter if it failed to produce anything and configured to
+        [[ -n ${COMP_FILEDIR_FALLBACK-} && -n $arg && ${#toks[@]} -lt 1 ]] && {
+            reset=$(shopt -po noglob)
+            set -o noglob
+            toks+=($(compgen -f ${plusdirs+"${plusdirs[@]}"} -- $quoted))
+            IFS=' '
+            $reset
+            IFS=$'\n'
+        }
+    fi
+
+    if ((${#toks[@]} != 0)); then
+        # 2>/dev/null for direct invocation, e.g. in the _filedir unit test
+        compopt -o filenames 2>/dev/null
+        COMPREPLY+=("${toks[@]}")
+    fi
+} # _filedir()

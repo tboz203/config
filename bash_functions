@@ -22,7 +22,7 @@ files() {
 
 # alias vimfiles='vim $(files)'
 vimfiles() {
-    vim $( files "$@" )
+    vim -p $( files "$@" )
 }
 
 # mnemonic "move with"
