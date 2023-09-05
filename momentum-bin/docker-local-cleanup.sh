@@ -6,7 +6,10 @@
 
 export DOCKER_CONTEXT=local
 
-docker image ls --format='{{.Repository}}:{{.Tag}}' | grep -E 'cgifederal.com|^[[:alnum:]]{8,16}_config-svcs' | grep -v "<none>" | xargs -r docker image rm
+docker image ls --format='{{.Repository}}:{{.Tag}}' \
+    | grep -E 'cgifederal.com|^[[:alnum:]]{8,16}_config-svcs' \
+    | grep -v "<none>" \
+    | xargs -r docker image rm
 docker system prune -f
 
 # export DOCKER_CONTEXT=builder

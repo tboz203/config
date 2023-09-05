@@ -1,0 +1,7 @@
+--type-set=gherkin:ext:feature
+--ignore-dir=.mypy_cache
+--ignore-dir=venv
+--ignore-dir=node_modules
+--ignore-dir=coverage
+--ignore-dir=__pycache__
+--ignore-dir=untracked

@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # vim: tw=0
 
-trap 'echo "got ($?) on line ($LINENO): $BASH_COMMAND"' ERR
-
 set -eEuo pipefail
+trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
 
 while [[ $# -gt 0 ]]; do
     arg="$1"; shift
     case $arg in
+        (-*=*)
+            # split --var=value pairs into separate tokens
+            # but only replacing the first '='!
+            set -- $(echo $arg | sed 's/=/ /' ) "$@" ;;
         (-d|--dump)
-            DUMP=1
-            ;;
+            DUMP=1 ;;
         (-v|--verbose)
             VERBOSE=1
             unset DUMP NAMES LINKS
@@ -57,15 +59,16 @@ if [[ -v HELP ]]; then
 
 Options:
 
--h|--help           Print this text and exit.
--q|--quiet          Suppress the informational output displayed when no services are matched
--d|--dump           Don't attempt to match against anything; dump all subscription json
--v|--verbose        Dump the full subscription json
--n|--names          Output names instead of links
--m|--match-name     Match the subscription name against this (jq) regex
--i|--identity       match based on this P2020 client identity
+-h|--help       Print this text and exit.
+-q|--quiet      Suppress the informational output displayed when no services are matched
+-d|--dump       Don't attempt to match against anything; dump all subscription json
+-v|--verbose    Dump the full subscription json
+-n|--names      Output names instead of links
 
---delete            after printing, delete matched subscriptions (be careful!)
+-m|--match-name=NAME    Match the subscription name against this (jq) regex
+-i|--identity=PATH      Match based on this P2020 client identity
+
+--delete        after displaying, delete matched subscriptions (be careful!)
 
 In the case of conflicting options, the last option specified on the command
 line takes precedence.
@@ -86,7 +89,7 @@ envs=(
 )
 
 for env in "${envs[@]}"; do
-    url=$(eureka -e $env event-service-consumer-proxy | sed 's:/$::')
+    url=$(eureka -e $env event-service-consumer-proxy | sed 's:/$::') || { echo "[!] event-service-consumer-proxy not found..." ; continue ; }
 
     if [[ -v DUMP ]]; then
         mxcurl $url/subscriptions | jq .
@@ -117,7 +120,7 @@ for env in "${envs[@]}"; do
                 jq -r '.id.href' <<< "$body"
             fi
             if [[ -v DELETE ]]; then
-                mxcurl -X DELETE $( jq -r '.id.href' <<< "$body" )
+                mxcurl -X DELETE $( jq -r '.id.href' <<< "$body" ) | sed 's/^$/deleted/'
             fi
         done
     fi

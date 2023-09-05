@@ -18,7 +18,7 @@ function maybe_delete {
 }
 
 # regular files
-maybe_delete ~/.profile
+maybe_delete ~/.bash_profile
 maybe_delete ~/.bashrc
 maybe_delete ~/.vimrc
 maybe_delete ~/.gvimrc
@@ -34,9 +34,11 @@ maybe_delete ~/.tmux-powerline.conf
 maybe_delete ~/.ssh/config
 maybe_delete ~/.pythonrc.py
 maybe_delete ~/.pretty_prompt.sh
+maybe_delete ~/.ackrc
 
 # directories
 maybe_delete ~/.bin
+maybe_delete ~/.maxar-bin
 maybe_delete ~/.config/htop
 maybe_delete ~/.config/powerline
 maybe_delete ~/.pymodules

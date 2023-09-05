@@ -7,3 +7,5 @@ Host github.com
   IdentityFile /home/tbozeman/.ssh/git_key
 Host github.digitalglobe.com
   IdentityFile /home/tbozeman/.ssh/git_key
+Host localhost
+  SendEnv DBUS_SESSION_BUS_ADDRESS DISPLAY TMUX

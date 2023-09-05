@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+'''
+teeny tiny script to check and see whether keyrings are available
+'''
 
 import keyring
 

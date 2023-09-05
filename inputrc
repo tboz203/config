@@ -1,7 +1,19 @@
+# inputrc - readline rc file
+
+$include /etc/inputrc
+
+# this is a great idea, but 1) it gets lots of false positives (thinking things
+# are files that are not files), and 2) anything that's *not* a file gets the
+# `MISSING` ls color, which by default, ... is *blinking*
+set colored-stats on
+
+set completion-ignore-case on
+
 set editing-mode vi
-"\C-l" clear-screen
-"\e[Z" menu-complete
-"jk" vi-movement-mode
+
+"\C-l": clear-screen
+"\e[Z": menu-complete
+"jk": vi-movement-mode
 
 # Tab tab-insert
 # $if Bash

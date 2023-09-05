@@ -11,7 +11,7 @@ CONFIG_ROOT=$(pwd)
 # link up each item
 # (we would do this as a loop, except that the names aren't a consistent
 # transformation)
-ln -s "$CONFIG_ROOT/profile"              ~/.profile
+ln -s "$CONFIG_ROOT/bash_profile"         ~/.bash_profile
 ln -s "$CONFIG_ROOT/bashrc"               ~/.bashrc
 ln -s "$CONFIG_ROOT/vimrc"                ~/.vimrc
 ln -s "$CONFIG_ROOT/gvimrc"               ~/.gvimrc
@@ -19,9 +19,10 @@ ln -s "$CONFIG_ROOT/inputrc"              ~/.inputrc
 ln -s "$CONFIG_ROOT/aliases"              ~/.bash_aliases
 ln -s "$CONFIG_ROOT/bash_functions"       ~/.bash_functions
 ln -s "$CONFIG_ROOT/bin"                  ~/.bin
+ln -s "$CONFIG_ROOT/maxar-bin"            ~/.maxar-bin
 ln -s "$CONFIG_ROOT/logout"               ~/.bash_logout
 ln -s "$CONFIG_ROOT/gitconfig"            ~/.gitconfig
-ln -s "$CONFIG_ROOT/git-prompt"           ~/.git-prompt
+ln -s "$CONFIG_ROOT/git-prompt.sh"        ~/.git-prompt
 ln -s "$CONFIG_ROOT/vim"                  ~/.vim
 ln -s "$CONFIG_ROOT/tmux.conf"            ~/.tmux.conf
 ln -s "$CONFIG_ROOT/tmux-powerline.conf"  ~/.tmux-powerline.conf
@@ -30,6 +31,7 @@ ln -s "$CONFIG_ROOT/powerline"            ~/.config/
 ln -s "$CONFIG_ROOT/pymodules"            ~/.pymodules
 ln -s "$CONFIG_ROOT/pythonrc.py"          ~/.pythonrc.py
 ln -s "$CONFIG_ROOT/pretty_prompt.sh"     ~/.pretty_prompt.sh
+ln -s "$CONFIG_ROOT/ackrc"                ~/.ackrc
 
 [[ -d ~/.ssh ]] || mkdir ~/.ssh
 ln -s "$CONFIG_ROOT/sshconfig"                ~/.ssh/config

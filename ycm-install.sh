@@ -4,6 +4,10 @@
 # # specify our new gcc installation
 # export CC=$(which gcc) CXX=$(which g++)
 
-pyenv shell system
+# pyenv shell system
+# rbenv shell system
 
-./install.py --all
+# using `--system-libclang` is "not recommended or supported", but the
+# downloaded most-recent libclang seems to require a GLIBC that we don't have
+# and can't use; all manner of things catch fire if I try to update that
+./install.py --all --system-libclang

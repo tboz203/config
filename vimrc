@@ -127,18 +127,13 @@ set wildmode=longest,list
 
 let python_highlight_all = 1
 
-" let g:zipPlugin_ext= '*.zip,*.jar,*.xpi,*.ja,*.war,*.ear,*.celzip,*.oxt,*.kmz,
-"     \ *.wsz,*.xap,*.docx,*.docm,*.dotx,*.dotm,*.potx,*.potm,*.ppsx,*.ppsm,
-"     \ *.pptx,*.pptm,*.ppam,*.sldx,*.thmx,*.xlam,*.xlsx,*.xlsm,*.xlsb,*.xltx,
-"     \ *.xltm,*.xlam,*.crtx,*.vdw,*.glox,*.gcsx,*.gqsx,*.epub,*.whl'
-
 " set nofixeol
 
 " set spellfile=~/.vim/spell/en.utf-8.add
 
 " end basic options }}}
 
-if version > "500"
+" if version > "500"
 
     if version > "800"
         set diffopt+=iwhite,algorithm:patience
@@ -157,6 +152,8 @@ if version > "500"
     noremap <silent> <leader>rn :%s/\r$//<cr><C-o>
     " do all
     noremap <silent> <leader>rr :retab<cr>:%s/\s*\r\?$//<cr>:noh<cr><C-o>
+    " toggle line wrapping
+    noremap <silent> <leader>w :set wrap!<cr>
     " easy edit/source of my vimrc (this file)
     noremap <leader>ev :vsplit $MYVIMRC<cr>
     noremap <leader>sv :source $MYVIMRC<cr>
@@ -175,11 +172,13 @@ if version > "500"
     noremap <leader>tl :set tw=119<cr>
     " mnemonic: 'text short'
     noremap <leader>ts :set tw=79<cr>
+    " mnemonic: 'text zero'
+    noremap <leader>tz :set tw=0<cr>
 
     " default to using the command window
     noremap : :<c-f>a
-    noremap / /<c-f>a
-    noremap ? ?<c-f>a
+    " noremap / /<c-f>a
+    " noremap ? ?<c-f>a
     " a quick mapping for JSHint
     noremap <leader>j :JSHint<cr><cr>
     " make a mapping for traditional ex binding
@@ -187,10 +186,10 @@ if version > "500"
 
     noremap gl :set list!<cr>
     noremap gs :set spell!<cr>
-    " b/c we use screen so much, give us a mapping to increment
-    noremap <c-s> <c-a>
-    " ... and decrement
-    noremap <c-c> <c-x>
+    " " b/c we use screen so much, give us a mapping to increment
+    " noremap <c-s> <c-a>
+    " " ... and decrement
+    " noremap <c-c> <c-x>
 
     " create folds for block under cursor
     noremap <leader>c V%zf
@@ -291,6 +290,9 @@ if version > "500"
 
         Bundle 'keepcase.vim'
 
+        " cucumber step jump
+        Bundle 'tpope/vim-cucumber'
+
         " Bundle 'zaiste/tmux.vim'
         " Bundle 'pangloss/vim-javascript'
         " Bundle 'mxw/vim-jsx'
@@ -385,12 +387,14 @@ if version > "500"
         "     \   'log': 1,
         "     \   'json': 1
         "     \ }
+            " \     'cmdline': ['bundle', 'exec', 'solargraph', 'stdio'],
         let g:ycm_language_server =
             \ [
             \   {
             \     'name': 'ruby',
-            \     'cmdline': ['solargraph', 'stdio'],
-            \     'filetypes': ['ruby']
+            \     'filetypes': ['ruby'],
+            \     'cmdline': ['env', 'RBENV_VERSION=3.1.2', 'solargraph', 'stdio'],
+            \     'project_root_files': ['Rakefile', 'Gemfile', '.solargraph.yml']
             \   }
             \ ]
         let g:ycm_keep_logfiles = 1
@@ -413,10 +417,12 @@ if version > "500"
         noremap <silent> <leader>sr :SyntasticReset<cr>
 
         noremap <leader>D :YcmCompleter GetDoc<cr>
-        noremap <leader>R :YcmCompleter GoToReferences<cr>
+        noremap <leader>GR :YcmCompleter GoToReferences<cr>
         noremap <leader>GG :YcmCompleter GoTo<cr>
         noremap <leader>GS :vsplit<cr>:YcmCompleter GoTo<cr>
         noremap <leader>GT :tab YcmCompleter GoTo<cr>
+        " need to type a new name, so trailing space instead of <cr>,
+        exec "noremap <leader>RR :YcmCompleter RefactorRename\x20"
 
         noremap <leader>gd :Gvdiffsplit<cr>
         noremap <leader>gb :Git blame<cr>
@@ -424,7 +430,25 @@ if version > "500"
         " align vim-commentary w/ other comment bindings
         vnoremap <C-_> :'<,'>Commentary<cr>
 
-        colorscheme babymate256
+        " colorscheme babymate256
+        " colorscheme Chasing_Logic
+        " colorscheme Tomorrow-Night
+        " colorscheme Tomorrow-Night-Eighties
+        colorscheme apprentice
+        " colorscheme atom-dark-256
+        " colorscheme badwolf
+        " colorscheme bubblegum-256-dark
+        " colorscheme darkula
+        " colorscheme desert
+        " colorscheme iceberg
+        " colorscheme kolor
+        " colorscheme lilypink
+        " colorscheme molokai
+        " colorscheme muon
+        " colorscheme neverland
+        " colorscheme neverland2
+        " colorscheme slate
+        " colorscheme wombat256mod
 
         filetype indent on
 
@@ -441,17 +465,20 @@ if version > "500"
 
     " powerline {{{
     if $HAS_POWERLINE
-        " python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
-        " python3 << trim endpython
-        "     try:
-        "         from powerline.vim import setup as powerline_setup
-        "         powerline_setup()
-        "         del powerline_setup
-        "     except ImportError:
-        "         pass
-        " endpython
+        python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
+        python3 << trim endpython
+            try:
+                from powerline.vim import setup as powerline_setup
+                powerline_setup()
+                del powerline_setup
+            except ImportError:
+                pass
+        endpython
     endif
     " }}}
 
-endif
+" endif
 " vim: sw=4 sts=4 et fdm=marker
+
+
+" let b:cucumber_steps_glob = '%:p:h:s?.*[\/].*step.*\zs[\/].*??'

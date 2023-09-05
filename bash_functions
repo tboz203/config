@@ -1,6 +1,13 @@
 #!/bin/bash
 
+doihave () {
+     /usr/bin/which &> /dev/null "$@"
+}
+# so i can type `if ihave program; ...`
+alias ihave=doihave
+
 heregit() {
+    # execute a git command in every child directory
     for item in *; do
         echo -e "\e[30;43m> $item\e[0m"
         git -C $item "$@"
@@ -9,6 +16,7 @@ heregit() {
 }
 
 files() {
+    # like `find -type f`, but exclude hidden files
     find "$@" -iregex ".*/\.[^/].*" -prune -o -type f -print
 }
 
@@ -33,10 +41,19 @@ mw() {
 }
 
 realwhich() {
-    realpath $(which "$@")
+    realpath $(/usr/bin/which "$@")
+}
+
+repeat() {
+    # usage: repeat TEXT COUNT
+    # does something a bit like `TEXT * COUNT`
+    local text="$1"
+    local count="$2"
+    printf "${text}%.0s" $(seq 1 $count)
 }
 
 pathmunge () {
+    # add a directory to the PATH if not already present
     case ":${PATH}:" in
         *:"$1":*)
             ;;
@@ -52,6 +69,7 @@ pathmunge () {
 }
 
 pathmungex () {
+    # like pathmunge, but better
     local PATHVAR DIR EXPORT AFTER HELP
     params=( PATHVAR DIR )
     while [[ $# -gt 0 ]]; do
@@ -96,10 +114,12 @@ pathmungex () {
         return 1
     fi
 
-    DIR=$( realpath -msq "$DIR")
+    # DIR=$( realpath -msq "$DIR")
 
     if [[ ! (:${!PATHVAR}: =~ :$DIR:) && -d $DIR ]]; then
-        if [[ -v AFTER ]]; then
+        if [[ ! -v $PATHVAR ]]; then
+            declare -g "$PATHVAR=$DIR"
+        elif [[ -v AFTER ]]; then
             declare -g "$PATHVAR=${!PATHVAR}:$DIR"
         else
             declare -g "$PATHVAR=$DIR:${!PATHVAR}"
@@ -108,5 +128,10 @@ pathmungex () {
             export $PATHVAR
         fi
     fi
+}
+
+showmounts() {
+    # list mounts in a table, and cut off the options
+    mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
 }
 

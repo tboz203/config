@@ -12,6 +12,9 @@ import requests
 
 # import dateutil.parser
 
+from pathlib import Path
+from base64 import b64decode
+
 
 def urljoin(head, *parts):
     url = head
@@ -31,7 +34,7 @@ class Connection:
                     resp.raise_for_status()
                 break
             except requests.HTTPError as exc:
-                if attempt < self.MAX_ATTEMPTS and exc.response.reason == "Unauthorized":
+                if attempt < self.MAX_ATTEMPTS and exc.response.status_code == 401:
                     print('Request failed: Unauthorized')
                     username = input('Username: ')
                     self._sesh.auth = get_credentials(username)
@@ -58,12 +61,13 @@ class Connection:
         self._request('delete', url)
 
 
-    def __init__(self, url, credentials, retries=3):
+    def __init__(self, url, credentials, retries=3, tls_verify=True):
         if not '://' in url:
             url = 'https://' + url
         self._url = url
 
         self._sesh = requests.Session()
+        self._sesh.verify = tls_verify
         self._sesh.headers = {
             'Accept': 'application/vnd.docker.distribution.manifest.v2+json, application/json',
             'User-Agent': "docker or something",
@@ -123,13 +127,15 @@ class Connection:
         except OSError:
             return None
         blob = self.get_blob(name, digest)
+        if not 'created' in blob:
+            return None
         # cutting off the last few digits b/c python can't natively handle nanoseconds
         timestamp = blob['created'][:-4]
         return datetime.datetime.strptime(timestamp, self.DATEFORMAT)
 
 
-def collect(registry, names, tag_pattern=None, fast=False, credentials=None):
-    con = Connection(registry, credentials)
+def collect(registry, names, tag_pattern=None, fast=False, credentials=None, tls_verify=True):
+    con = Connection(registry, credentials, tls_verify=tls_verify)
 
     catalog = con.get_catalog()
     matches = list()
@@ -187,6 +193,46 @@ def display_images(lines):
             print(f'{repo}:{tag}')
 
 
+def get_docker_config_auth(filename=None) -> dict:
+    if not filename:
+        filename = Path('~/.docker/config.json').expanduser()
+
+    with open(filename) as fin:
+        config_data = json.load(fin)
+
+    if 'auth' not in config_data:
+        return {}
+
+    # return {f'https://{host}': hostdict['auth'] for host, hostdict in config_data.get('auth', {}).items()}
+    config_dict = {}
+    for host, hostdict in config_data['auth']:
+        host = f'https://{host}'
+        auth = hostdict.get('auth')
+        try:
+            # undo http basic auth encoding so we can compare usernames later
+            auth = b64decode(auth).split(':', 1)
+        except Exception:
+            pass
+        config_dict[host] = auth
+    return config_dict
+
+
+def pick_registry_and_credentials(registry=None, user=None):
+    """returns a 2-tuple of (registry, credentials)"""
+
+    # registry passed or not
+    # passed registry in config or not
+    # user passed or not
+    # passed user in config or not
+
+    config_auth = get_docker_config_auth()
+    if not registry:
+        if config_auth:
+            registry, auth = config_auth.popitem()
+
+    credentials = get_credentials(args.user)
+
+
 def get_credentials(user):
     '''
     given a string in the form `user[:password]`, extract username and
@@ -197,7 +243,7 @@ def get_credentials(user):
     if user is None:
         return None
 
-    user, _, password = user.partition(':')
+    user, password = user.split(':', 1)
     if not password:
         password = getpass.getpass()
     return user, password
@@ -208,11 +254,13 @@ def main():
     # parser.add_argument('-r', '--registry', default='https://gntbuild.cgifederal.com:5000', help='the registry to list')
     # parser.add_argument('-r', '--registry', default='https://artifacts.cgifederal.com:30100', help='the registry to list')
     # parser.add_argument('-r', '--registry', default='https://docker-approved.artpro.digitalglobe.com:443', help='the registry to list')
-    parser.add_argument('-r', '--registry', default='https://docker.artpro.digitalglobe.com:443', help='the registry to list')
+    # parser.add_argument('-r', '--registry', default='https://docker.artpro.digitalglobe.com:443', help='the registry to list')
+    parser.add_argument('-r', '--registry', help='the registry to list')
     parser.add_argument('names', nargs='+', help='The name(s) of the repos to list. Accepts shell wildcards. (remember to quote them!)')
     parser.add_argument('-t', '--tag-pattern', default=None, help='Shell wildcard pattern to match tags against. (remember to quote them!)')
     parser.add_argument('-u', '--user', help='user[:password] - credentials for the given repository')
     parser.add_argument('--fast', action='store_true', help='just list repos and tags')
+    parser.add_argument('-k', '--insecure', action='store_true', help='ignore TLS certificate errors')
 
     output_group = parser.add_mutually_exclusive_group()
     output_group.add_argument('-j', '--json', action='store_true', help='output in json format')
@@ -223,9 +271,9 @@ def main():
     args.fast |= args.images
 
     try:
-        credentials = get_credentials(args.user)
+        registry, credentials = pick_registry_and_credentials(args.registry, args.user)
 
-        lines = collect(args.registry, args.names, args.tag_pattern, args.fast, credentials)
+        lines = collect(registry, args.names, args.tag_pattern, args.fast, credentials, not args.insecure)
 
         if args.json:
             display_json(lines)

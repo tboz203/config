@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
 
+# import java.security.Provider;
+# import java.security.Security;
+# import java.util.Enumeration;
+
+# public class ListSecurityProviders {
+#   public static void main(String[] args) throws Exception {
+#     try {
+#       Provider p[] = Security.getProviders();
+#       for (int i = 0; i < p.length; i++) {
+#           System.out.println(p[i]);
+#           for (Enumeration e = p[i].keys(); e.hasMoreElements();)
+#               System.out.println("\t" + e.nextElement());
+#       }
+#     } catch (Exception e) {
+#       System.out.println(e);
+#     }
+#   }
+# }
+
 FILE=$( mktemp )
 trap 'rm $FILE' EXIT
 
@@ -35,6 +54,6 @@ AAAAAAAAAAA4AgAATGlzdFNlY3VyaXR5UHJvdmlkZXJzLmNsYXNzUEsFBgAAAAAEAAQADgEAABwF
 AAAAAA==
 EOF
 
-cp $FILE ~/what.jar
-
 java -jar $FILE
+
+# cp $FILE ~/list-java-security-providers.jar

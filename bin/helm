@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# wrapper around kubectl to allow setting context and namespace via environment variable
+# wrapper around helm to allow setting context and namespace via environment variable
 
-# first, find the real kubectl executable
+# first, find the real helm executable
 this_file=$(readlink -f $0)
-outer_kubectl=
+outer_helm=
 
-for item in $( whereis -b kubectl | cut -d' ' -f2- ); do
+for item in $( whereis -b helm | cut -d' ' -f2- ); do
     full_item=$( readlink -f $item )
     if [[ $full_item != $this_file ]]; then
-        outer_kubectl=$full_item
+        outer_helm=$full_item
         break
     fi
 done
@@ -18,11 +18,11 @@ done
 args=
 
 if [[ -v KUBE_CONTEXT ]]; then
-    args+=" --context=$KUBE_CONTEXT"
+    args+=" --kube-context=$KUBE_CONTEXT"
 fi
 
 if [[ -v KUBE_NAMESPACE ]]; then
     args+=" --namespace=$KUBE_NAMESPACE"
 fi
 
-exec $outer_kubectl $args "$@"
+exec $outer_helm $args "$@"

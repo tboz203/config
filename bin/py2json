@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+import ast
+import fileinput
+import json
+import traceback
+
+try:
+    for line in fileinput.input():
+        try:
+            item_literal = ast.literal_eval(line.strip())
+            item_json = json.dumps(item_literal, indent=2)
+            print(item_json)
+        except (ValueError, TypeError, KeyboardInterrupt):
+            break
+except OSError as exc:
+    print(f"Stopping: {exc}")
+    exit(1)
+except Exception as exc:
+    traceback.print_exc()
+    exit(1)

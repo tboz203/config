@@ -1,3 +1,71 @@
-#!/bin/bash
-[[ $1 ]] && export DOCKER_HOST="$1"
-docker container ls -a --format="{{.Image}} % {{.Names}} % {{.Status}}" | column -t -s %
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PATTERNS=()
+OPTIONS=()
+while [[ $# -gt 0 ]]; do
+    arg="$1"; shift
+    case $arg in
+        (--)
+            # all remaining arguments are passed to `docker container ls`
+            OPTIONS+=( "$@" )
+            break ;;
+        (-*=*)
+            # split --var=value pairs into separate tokens
+            # but only replacing the first '='!
+            set -- $(echo $arg | sed 's/=/ /' ) "$@" ;;
+        (--host)
+            HOST="$1"; shift ;;
+        (-a|--all)
+            ALL=1 ;;
+        (-j|--json)
+            JSON=1 ;;
+        (-h|--help)
+            HELP=1 ;;
+        (*)
+            PATTERNS+=( $arg ) ;;
+    esac
+done
+
+if [[ -v HELP ]]; then
+    cat <<EOF
+$0: print abbreviated docker containers
+Usage: $0 [-h|--host HOST] [PATTERN ...] [-- OPTIONS ...]
+
+Options:
+
+-h|--help       Print this text and exit.
+-a|--all        include stopped containers
+-j|--json       output containers in JSON format (via jq)
+--host HOST     use HOST as docker host
+
+PATTERN         only list containers whose names contain one or more pattern as
+                a substring
+
+additionally, you may include options and arguments intended for docker itself
+by separating them from the options and arguments listed above with '--'.
+
+EOF
+    exit 0
+fi
+
+TABLE_FORMAT="table {{.Image}}\t{{.Names}}\t{{.Status}}"
+JSON_FORMAT="{{. | json}}"
+JQ_FILTER='.Labels |= ( split(",") | .[] |= ( split("=") | {(.[0]): .[1]}) | add )'
+
+[[ -v HOST ]] && export DOCKER_HOST=$HOST
+
+[[ -v ALL ]] && OPTIONS+=( --all )
+
+for pattern in "${PATTERNS[@]}"; do
+    OPTIONS+=( --filter "name=$pattern" )
+done
+
+
+if [[ -v JSON ]]; then
+    docker container ls "${OPTIONS[@]}" --no-trunc --format "$JSON_FORMAT" |
+        jq "$JQ_FILTER"
+else
+    docker container ls "${OPTIONS[@]}" --format "$TABLE_FORMAT"
+fi

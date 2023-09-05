@@ -13,19 +13,28 @@
 # - logrotate?
 
 
+die() {
+    echo "taskify: $@"
+    [[ $LOG ]] && echo "taskify: $@" >> $LOG
+    exit 1
+}
+
 while [[ $# -gt 0 ]]; do
     arg="$1" ; shift
     case $arg in
         --) break ;;
         -h|--help)
             HELP=1 ;;
-        -s|--sleep)
+        -s|--random-sleep)
             TIMEOUT="$1"
             shift ;;
         -q|--quiet)
             QUIET=1 ;;
         -l|--log)
             LOG="$1"
+            shift ;;
+        -d|--directory)
+            DIRECTORY="$1"
             shift ;;
         -*)
             echo "[X] I don't understand this argument: ($arg)"
@@ -46,7 +55,7 @@ fi
 
 if [[ $HELP ]]; then
     cat <<EOF
-Usage: $0 [-h|--help] [-s|--sleep TIMEOUT] [-q|--quiet] [--] COMMAND ...
+Usage: $(basename $0) [OPTIONS] [--] COMMAND ...
 
 Sanitize commands for cron.
 
@@ -54,12 +63,17 @@ Arguments:
 COMMAND                 The command to run, with arguments
 
 Options:
--h|--help               Print out this message.
--s|--sleep TIMEOUT      Sleep for a random duration up to TIMEOUT seconds before executing the command (to prevent load
-                        spikes at midnight, etc).
--q|--quiet              Silence the command, unless it exits with an error (to prevent useless cron emails from chatty
-                        programs).
--l|--log LOG            Append any output to LOG as well (includes timestamp & exit code)
+-h|--help       Print out this message.
+-q|--quiet      Silence the command, unless it exits with an error (to prevent
+                useless cron emails from chatty programs).
+-l|--log LOG    Append any output to LOG as well (includes timestamp & exit
+                code; path LOG is *not* relative to --directory argument)
+-s|--random-sleep TIMEOUT
+                Sleep for a random duration up to TIMEOUT seconds before
+                executing the command (to prevent load spikes at midnight,
+                etc).
+-d|--directory DIRECTORY
+                change to DIRECTORY before executing command
 EOF
 
     exit 1
@@ -69,8 +83,16 @@ if [[ $TIMEOUT ]]; then
     sleep $(( RANDOM % TIMEOUT ))
 fi
 
+if [[ $DIRECTORY ]]; then
+    pushd $DIRECTORY &> /dev/null || die "could not change directory to ($DIRECTORY)"
+fi
+
 output="$( eval "${COMMAND[@]}" 2>&1 )"
 status=$?
+
+if [[ $DIRECTORY ]]; then
+    popd &> /dev/null
+fi
 
 if [[ ! $QUIET || $status -ne 0 ]]; then
     [[ $output ]] && echo "$output"

@@ -1,13 +1,13 @@
 #!/bin/bash
 # color aliases
-alias ls='ls --color=auto --hide=*~ --hide=.*~ --group-directories-first'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 alias tree='tree -C --dirsfirst'
+alias diff='diff --color=auto'
 
 # some aliases based off ls
-alias ls='ls --color=auto --hide=*~ --hide=.*~ --group-directories-first'
+alias ls='ls --color=auto --ignore-backups --group-directories-first'
 alias ll='ls -lhF'
 alias la='ls -A'
 alias lf='ll -S'
@@ -16,21 +16,25 @@ alias l='ls -CF'
 alias lla='ll -A'
 alias lt='ll --sort=t'
 
-repeat() {
-    local text="$1"
-    local count="$2"
-    printf "${text}%.0s" $(seq 1 $count)
-}
-
+# these are most useful with `shopt -s autocd`
 # alias ...='../..'
 # alias ....='../../..'
 # alias .....='../../../..'
-for i in $(seq 1 20); do
-    command="..$( repeat . $i )"
-    directory="..$( repeat /.. $i )"
-    alias $command=$directory
+# for i in $(seq 1 20); do
+#     dotalias="..$( repeat . $i )"
+#     dotdir="..$( repeat /.. $i )"
+#     alias $dotalias=$dotdir
+# done
+# unset dotalias dotdir
+
+_dots=..
+_dirs=..
+for x in $(seq 1 20); do
+    _dots+=.
+    _dirs+=/..
+    alias $_dots=$_dirs
 done
-unset command directory repeat
+unset _dots _dirs
 
 # some git commands
 # start using the built-in git alias stuff!
@@ -59,10 +63,11 @@ alias f=lf
 alias ivm=vim
 alias vmi=vim
 alias cdd=cd
+alias dfn=dnf
 
 # make du and df a bit more readable
 alias df='df -h'
-alias du='du -hc 2>/dev/null'
+alias du='du -shc'
 
 alias dfx='df -h -t xfs'
 
@@ -77,7 +82,6 @@ alias day='date +%Y-%m-%d'
 alias full='date "+%Y.%m.%d-%H.%M.%S"'
 
 # set some default flags
-alias wc='wc -cmlLw'
 alias tidy='tidy -f /dev/null -iqmw'
 alias astyle='astyle -sajcn'
 alias find='find 2>/dev/null'
@@ -91,9 +95,14 @@ alias aliases='vim ~/.bash_aliases'
 alias bashrc='vim ~/.bashrc'
 alias rmf='rm -rf'
 alias ps='ps -H'
-alias listening='lsof -i -s TCP:Listen'
-alias docker-prune='docker system prune -f'
+# alias listening='lsof -i -s TCP:Listen'
+alias ports='sudo ss -tlnp | column -t'
+alias docker-prune='docker system prune -f --volumes'
+alias docker-halt='docker container ls -a --format "{{.Names}}" | xargs -r docker container rm -f'
+alias docker-scrub='docker-halt && docker-prune'
+alias docker-purge='docker-halt && docker-prune -a'
 alias loud='BASH_ENV=~/.bash_loud'
+alias xclip='xclip -selection clipboard'
 
 alias svim='sudo vim "+set nu bg=dark ls=2 so=3" -p'
 
@@ -116,3 +125,8 @@ alias cd='cd -P'
 # alias mxcurl='curl -s -H "Authorization: $(token)" -H "Accept: application/json, */*"'
 # bootstrap depends on an old version of yq, so i've installed yq 4 as "yq-4"
 alias yq='yq-4'
+
+alias eureka='eureka -s'
+
+# print out all variables, even if not exported
+alias xenv='compgen -v | grep -v "^_" | sort | while read item; do declare -p $item ; done'
