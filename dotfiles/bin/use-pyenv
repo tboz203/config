@@ -1,0 +1,98 @@
+#!/usr/bin/bash
+
+# a personal shim for pyenv
+
+# usage: use-pyenv (VERSION...|--latest|--default) -- COMMAND
+# e.g. `use-pyenv 3.9.7 -- pip list`
+# would result in something like `env PYENV_VERSION=3.9.7 pyenv exec pip list`
+# as would `use-pyenv --latest -- ...` and `use-pyenv --default -- ...`
+
+VERSIONS=()
+COMMAND=()
+
+while [[ $# -gt 0 ]]; do
+	arg="$1"
+	shift
+	case $arg in
+	--)
+		COMMAND=("$@")
+		break
+		;;
+	-d | --default)
+		DEFAULT=1
+		unset LATEST
+		;;
+	-l | --latest)
+		LATEST=1
+		unset DEFAULT
+		;;
+	-*)
+		echo >&2 "[X] Unrecognized argument: $arg"
+		HELP=1
+		break
+		;;
+	*)
+		VERSIONS+=("$arg")
+		;;
+	esac
+done
+
+if [[ ${#VERSIONS[@]} -eq 0 && ! -v LATEST && ! -v DEFAULT ]]; then
+	echo >&2 "[X] No version given"
+	HELP=1
+fi
+
+if [[ ${#COMMAND[@]} -eq 0 && ! -v HELP ]]; then
+	echo >&2 "[X] No command given"
+	HELP=1
+fi
+
+if [[ -v HELP ]]; then
+	echo <<EOF
+$(basename $0): execute a command with a particular pyenv VERSION
+
+Usage: $(basename $0) (VERSION...|--latest|--default) -- COMMAND...
+
+Options:
+
+VERSION         one or more python version numbers, in order of preference
+-l, --latest    use the latest version pyenv has, by semver
+-d, --default   let pyenv select a version
+COMMAND         a command to be executed in the context of a given python version
+EOF
+	exit 1
+fi
+
+: ${PYENV_ROOT:=$HOME/.pyenv}
+[[ :$PATH: == *:$PYENV_ROOT/bin:* ]] || PATH=$PYENV_ROOT/bin:$PATH
+[[ :$PATH: == *:$PYENV_ROOT/shims:* ]] || PATH=$PYENV_ROOT/shims:$PATH
+
+if (! command -v pyenv &>/dev/null); then
+	echo >&2 "[X] pyenv not found"
+	echo $PATH | tr : "\n"
+	exit 1
+fi
+
+if [[ -v LATEST ]]; then
+	VERSIONS=(
+		$(
+			pyenv versions --bare --skip-envs --skip-aliases |
+				grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' |
+				sort -Vr |
+				head -n 1
+		)
+		"${VERSIONS[@]}"
+	)
+elif [[ -v DEFAULT ]]; then
+	VERSIONS=(${PYENV_VERSION:-} "${VERSIONS[@]}")
+fi
+
+VERSION_STRING=$(
+	IFS=:
+	echo "${VERSIONS[*]}"
+)
+
+exec env PYENV_VERSION=$VERSION_STRING pyenv exec "${COMMAND[@]}"
+
+# export PYENV_VERSION=$VERSION_STRING
+# exec pyenv exec "${COMMAND[@]}"

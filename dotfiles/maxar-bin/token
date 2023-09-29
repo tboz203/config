@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# shamelessly stolen from do-dev
+# ==============================
+
+load_client_token() {
+  >&2 echo "Loading client token to $P2020_IDENTITY_TOKEN_FILE"
+
+  token_server_hostname=$(sed 's#https://##' <<< ${P2020_IDENTITY_TOKEN_SERVER})
+  token_endpoint="https://${P2020_IDENTITY_CLIENT_ID}:${P2020_IDENTITY_CLIENT_SECRET}@${token_server_hostname}/oauth/token"
+
+  code=$(curl -w "%{http_code}" -o ${P2020_IDENTITY_TOKEN_FILE}.raw -s -X POST -H "Accept: application/json" \
+    -d "grant_type=client_credentials" ${token_endpoint})
+  if [ $code -ne 200 ]; then
+    >&2 echo "Received [$code] code from identity server ${token_server_hostname} trying to get a token!"
+    >&2 echo "Check your creds in $P2020_IDENTITY_CLIENT_LOCATION"
+    exit 1
+  fi
+
+  chmod 600 ${P2020_IDENTITY_TOKEN_FILE}.raw
+  token=$(jq -r .access_token < ${P2020_IDENTITY_TOKEN_FILE}.raw)
+  scopes=$(jq -r .scope < ${P2020_IDENTITY_TOKEN_FILE}.raw)
+
+  echo $token > ${P2020_IDENTITY_TOKEN_FILE}
+  chmod 600 $P2020_IDENTITY_TOKEN_FILE
+  echo $scopes > ${P2020_IDENTITY_TOKEN_FILE}.scopes
+  chmod 600 ${P2020_IDENTITY_TOKEN_FILE}.scopes
+}
+
+check_token_expiration() {
+  now=$(date -u +'%s')
+
+  expires=0
+  if [ -e $P2020_IDENTITY_TOKEN_FILE ]; then
+    expires=$(decode_base64_url $(cat $P2020_IDENTITY_TOKEN_FILE | cut -d "." -f 2) | jq .exp)
+  fi
+
+  if [ $(($expires - $now)) -lt 0 ]; then
+    load_client_token
+    expires=$(decode_base64_url $(cat $P2020_IDENTITY_TOKEN_FILE | cut -d "." -f 2) | jq .exp)
+  fi
+
+  >&2 echo "Token has $(($expires - $now)) seconds to live."
+}
+
+### cruft picked up in a gist...
+
+decode_base64_url() {
+  local len=$((${#1} % 4))
+  local result="$1"
+  if [ $len -eq 2 ]; then
+    result="$1"'=='
+  elif [ $len -eq 3 ]; then
+    result="$1"'='
+  fi
+  echo "$result" | tr '_-' '/+' | base64 -d
+}
+
+# --------------------
+
+export DOTENV_FILE_LOCATION=~/.ssh/P2020
+export P2020_IDENTITY_CLIENT_LOCATION=~/.ssh/P2020
+export P2020_IDENTITY_TOKEN_FILE=${P2020_IDENTITY_CLIENT_LOCATION}.token
+source $DOTENV_FILE_LOCATION
+check_token_expiration >& /dev/null
+echo "Bearer $(cat ${P2020_IDENTITY_CLIENT_LOCATION}.token)"

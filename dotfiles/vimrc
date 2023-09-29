@@ -1,0 +1,400 @@
+
+" Tommy Bozeman
+" my personal additions
+
+" basic options {{{
+set scrolloff=3         " set minimum number of screen lines to show to three
+set cmdheight=1         " set the command area hight to two
+set laststatus=2        " set the status-line to always showing
+set list
+let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
+" set listchars=tab:>-,trail:-,extends:$,precedes:$
+set background=dark     " make the text easier to read on a dark background
+set modeline            " if a file has a modeline, use it
+set splitbelow          " put new windows to the right or below
+set splitright
+set number              " do line numbering
+set numberwidth=5
+set foldcolumn=1
+set nowrap              " set linewrapping to behave in an intelligent manner
+set linebreak
+set textwidth=119
+set ignorecase
+set smartcase
+set shiftround
+set cursorline
+
+set sidescroll=20
+set sidescrolloff=20
+
+set undofile
+set undodir=$HOME/.vim/undodir
+
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set formatoptions=tcqnj
+
+set tags=./tags;,./.tags;
+
+silent !mkdir -p ~/.vim/swap
+set directory=~/.vim/swap//
+
+set history=10000
+
+set wildmode=longest,list
+
+let python_highlight_all = 1
+
+" set nofixeol
+
+" set spellfile=~/.vim/spell/en.utf-8.add
+
+" end basic options }}}
+
+if version > "500"
+
+    if version > "800"
+        set diffopt+=iwhite,algorithm:patience
+    endif
+
+    " messing around with mappings {{{
+    let mapleader = '-'
+    let maplocalleader = ','
+
+    " normal mode
+    " remove whitespace at end of line
+    noremap <silent> <leader>rs :%s/\s\+$//<cr>:noh<cr><C-o>
+    " retab the file
+    noremap <silent> <leader>rt :retab<cr><C-o>
+    " remove extra <CR> characters
+    noremap <silent> <leader>rn :%s/\r$//<cr><C-o>
+    " do all
+    noremap <silent> <leader>rr :retab<cr>:%s/\s*\r\?$//<cr>:noh<cr><C-o>
+    " toggle line wrapping
+    noremap <silent> <leader>w :set wrap!<cr>
+    " easy edit/source of my vimrc (this file)
+    noremap <leader>ev :vsplit $MYVIMRC<cr>
+    noremap <leader>sv :source $MYVIMRC<cr>
+    " quick mapping to get rid of search highlighting
+    noremap <silent> <leader>h :nohlsearch<cr>
+    " copy to clipboard
+    noremap <silent> <leader>c "+y
+    " paste from clipboard
+    noremap <silent> <leader>p o<esc>"+p
+    " insert the current date or date and time
+    noremap <silent> <leader>d :r !day<cr>kJ
+    noremap <silent> <leader>f :r !full<cr>kJ
+
+    " noremap <leader>p :set paste!<cr>
+    " mnemonic: 'text long'
+    noremap <leader>tl :set tw=119<cr>
+    " mnemonic: 'text short'
+    noremap <leader>ts :set tw=79<cr>
+    " mnemonic: 'text zero'
+    noremap <leader>tz :set tw=0<cr>
+
+    " default to using the command window
+    noremap : :<c-f>a
+    " noremap / /<c-f>a
+    " noremap ? ?<c-f>a
+    " a quick mapping for JSHint
+    noremap <leader>j :JSHint<cr><cr>
+    " make a mapping for traditional ex binding
+    noremap ; :
+
+    noremap gl :set list!<cr>
+    noremap gs :set spell!<cr>
+    " " b/c we use screen so much, give us a mapping to increment
+    " noremap <c-s> <c-a>
+    " " ... and decrement
+    " noremap <c-c> <c-x>
+
+    " create folds for block under cursor
+    noremap <leader>c V%zf
+
+    " visual mode
+    vnoremap <leader>" di""<esc>hp
+
+    " insert mode
+    inoremap <c-u> <esc>vbUea
+    inoremap jk <esc>
+    " nerdtree overwrites the digraph binding, so we'll use <c-h> instead.
+    inoremap <c-h> <c-k>
+
+    " make ZQ quit harder
+    noremap ZQ :cq!<cr>
+
+    " let's make searching always center the cursor
+    noremap n nzz
+    noremap N Nzz
+
+    " end messing around with mappings }}}
+
+    " Vimscript file settings {{{
+    augroup filetype_vim
+        autocmd!
+        autocmd Filetype vim setlocal foldmethod=marker
+    augroup END
+    " }}}
+
+    " notes files settings {{{
+    augroup filetype_notes
+        autocmd!
+    augroup END
+    " }}}
+
+    " custom movements {{{
+    " next/last parentheses movement
+    onoremap in( :<c-u>normal! f(vi(<cr>
+    onoremap il( :<c-u>normal! F)vi(<cr>
+
+    " markdown header movements
+    onoremap ih :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rkvg_"<cr>
+    onoremap ah :<c-u>execute "normal! ?^==\\+\r:nohlsearch\rg_vk0"<cr>
+
+    " next/last email movement
+    onoremap in@ :<c-u>execute "normal! /\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
+    onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
+    " }}}
+
+    " plugins {{{
+    call plug#begin("~/.vim/plugged")
+
+    " a vimrc starting point
+    Plug 'tpope/vim-sensible'
+    " graphical undo tree
+    Plug 'dsummersl/gundo.vim'
+    " integration w/ git
+    Plug 'tpope/vim-fugitive'
+    " multi-language block commenting
+    Plug 'tpope/vim-commentary'
+    " quick manipulation of wrapping elements
+    Plug 'tpope/vim-surround'
+    " add repeat (.) support to (some) plugins
+    Plug 'tpope/vim-repeat'
+    " tag window
+    Plug 'preservim/tagbar'
+    " auto-set indentation variables
+    Plug 'tpope/vim-sleuth'
+
+    Plug 'nathanaelkane/vim-indent-guides'
+
+    " 'Tabularize' alignment
+    Plug 'godlygeek/tabular'
+    " " external syntax checking (?)
+    " Plug 'scrooloose/syntastic'
+
+    Plug 'vim-scripts/AnsiEsc.vim'
+
+    Plug 'sheerun/vim-polyglot'
+
+    " Plug 'noah/vim256-color'
+    Plug 'tboz203/vim256-color'
+    Plug 'rafi/awesome-vim-colorschemes'
+
+    Plug 'editorconfig/editorconfig-vim'
+
+    " " code completion + goto support
+    " Plug 'ycm-core/YouCompleteMe'
+
+    " file-system browser
+    Plug 'scrooloose/nerdtree'
+    " tab-support for nerdtree
+    Plug 'jistr/vim-nerdtree-tabs'
+
+    " Plug 'keepcase.vim'
+
+    " cucumber step jump
+    Plug 'tpope/vim-cucumber'
+
+    " Plug 'zaiste/tmux.vim'
+    " Plug 'pangloss/vim-javascript'
+    " Plug 'mxw/vim-jsx'
+    " Plug 'leafgarland/typescript-vim'
+    " Plug 'fatih/vim-go'
+    " Plug 'ekalinin/Dockerfile.vim'
+    " Plug 'hashivim/vim-vagrant'
+    " Plug 'hashivim/vim-terraform'
+    " Plug 'chr4/nginx.vim'
+    " Plug 'PProvost/vim-ps1'
+    " Plug 'rodjek/vim-puppet'
+    " Plug 'robbles/logstash.vim'
+    " Plug 'martinda/Jenkinsfile-vim-syntax'
+
+    " Plug 'mustache/vim-mustache-handlebars'
+
+    " Plug 'dylon/vim-antlr'
+    " Plug 'RobRoseKnows/lark-vim'
+
+    " " adding gpg symmetric support
+    " Plug 'vim-scripts/gnupg.vim'
+    "
+    " " rudimentary image editing
+    " Plug 'tpope/vim-afterimage'
+    " " tern support
+    " Plug 'marijnh/tern_for_vim'
+    " " tag generator using tern
+    " Plug 'ramitos/jsctags'
+    " " powerful file-system searching
+    " Plug 'kien/ctrlp.vim'
+    " " buffer explorer
+    " Plug 'corntrace/bufexplorer'
+    " " increment/decrement dates w/ <c-a>/<c-x>
+    " Plug 'tpope/vim-speeddating'
+    " " snippet insertion (for boilerplate code)
+    " Plug 'SirVer/ultisnips'
+    " " javascript helpers
+    " Plug 'Shutnik/jshint2.vim'
+    " Plug 'walm/jshint.vim'
+    " Plug 'vim-scripts/TabBar'
+    " " ctags from some other place, lol
+    " Plug 'clausreinke/scoped_tags'
+
+    call plug#end()
+    " end plugins }}}
+
+        " plugin settings {{{
+        " " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
+        " " expansion/jumping
+        " let g:UltiSnipsExpandTrigger = '<c-l>'
+        " let g:UltiSnipsJumpForwardTrigger = '<c-j>'
+        " let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
+
+        " " indent guide settings
+        " let g:indent_guides_enable_on_vim_startup = 0
+        " let g:indent_guides_auto_colors = 0
+        " autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
+        " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
+        " autocmd VimEnter,Colorscheme * :hi Normal NONE
+
+        " mundo setting(s)
+        let g:mundo_right = 1
+
+        " vim-surround settings
+        " instead of surrounding with 'p' use value from prompt
+        let g:surround_112 = "\1surround: \1\r\1\1"
+
+        " javascript tags
+        let g:tagbar_type_javascript = { 'ctagsbin': '/usr/local/bin/jsctags' }
+        " let g:tagbar_type_javascript = { 'ctagsbin': '/home/tommy/config/bin/ejstags' }
+
+        " syntastic settings
+        let g:syntastic_check_on_wq = 0
+        let g:syntastic_mode_map = {
+            \ "mode": "passive",
+            \ "active_filetypes": [],
+            \ "passive_filetypes": [] }
+        let g:syntastic_python_python_exec = 'python3'
+        let g:syntastic_python_checkers = ['python', 'flake8']
+
+        let g:ycm_goto_buffer_command = 'split-or-existing-window'
+        let g:ycm_confirm_extra_conf = 0
+        let g:ycm_python_interpreter_path = ''
+        let g:ycm_python_sys_path = []
+        let g:ycm_disable_for_files_larger_than_kb = 1000
+        let g:ycm_extra_conf_vim_data = [
+            \   'g:ycm_python_interpreter_path',
+            \   'g:ycm_python_sys_path'
+            \ ]
+        " let g:ycm_filetype_blacklist = {
+        "     \   'sql': 1,
+        "     \   'log': 1,
+        "     \   'json': 1
+        "     \ }
+            " \     'cmdline': ['bundle', 'exec', 'solargraph', 'stdio'],
+        let g:ycm_language_server =
+            \ [
+            \   {
+            \     'name': 'ruby',
+            \     'filetypes': ['ruby'],
+            \     'cmdline': ['env', 'RBENV_VERSION=3.1.2', 'solargraph', 'stdio'],
+            \     'project_root_files': ['Rakefile', 'Gemfile', '.solargraph.yml']
+            \   }
+            \ ]
+        let g:ycm_keep_logfiles = 1
+
+
+        " mappings for plugins that don't have these nice settings
+        noremap <silent> <leader>u :MundoToggle<cr>
+        noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
+        noremap <silent> <leader>tt :TagbarToggle<cr>
+        noremap <silent> <leader>to :TagbarOpen<cr>
+        noremap <silent> <leader>tc :TagbarClose<cr>
+
+        noremap <silent> <leader>a :AnsiEsc<cr>
+        noremap <silent> <leader>A :AnsiEsc!<cr>
+
+        noremap <silent> <leader>se :Errors<cr>
+        noremap <silent> <leader>sc :SyntasticCheck<cr>
+        noremap <silent> <leader>st :SyntasticToggleMode<cr>
+        noremap <silent> <leader>si :SyntasticInfo<cr>
+        noremap <silent> <leader>sr :SyntasticReset<cr>
+
+        noremap <leader>D :YcmCompleter GetDoc<cr>
+        noremap <leader>GR :YcmCompleter GoToReferences<cr>
+        noremap <leader>GG :YcmCompleter GoTo<cr>
+        noremap <leader>GS :vsplit<cr>:YcmCompleter GoTo<cr>
+        noremap <leader>GT :tab YcmCompleter GoTo<cr>
+        " need to type a new name, so trailing space instead of <cr>,
+        exec "noremap <leader>RR :YcmCompleter RefactorRename\x20"
+
+        noremap <leader>gd :Gvdiffsplit<cr>
+        noremap <leader>gb :Git blame<cr>
+
+        " align vim-commentary w/ other comment bindings
+        vnoremap <C-_> :'<,'>Commentary<cr>
+
+        " colorscheme babymate256
+        " colorscheme Chasing_Logic
+        " colorscheme Tomorrow-Night
+        " colorscheme Tomorrow-Night-Eighties
+        colorscheme apprentice
+        " colorscheme atom-dark-256
+        " colorscheme badwolf
+        " colorscheme bubblegum-256-dark
+        " colorscheme darkula
+        " colorscheme desert
+        " colorscheme iceberg
+        " colorscheme kolor
+        " colorscheme lilypink
+        " colorscheme molokai
+        " colorscheme muon
+        " colorscheme neverland
+        " colorscheme neverland2
+        " colorscheme slate
+        " colorscheme wombat256mod
+
+        filetype indent on
+
+    endif
+
+    " }}}
+
+    " tabs {{{
+    " set shiftwidth=4
+    " set softtabstop=4
+    " set expandtab
+    " set smarttab
+    " end tabs }}}
+
+    " powerline {{{
+    if $HAS_POWERLINE
+        python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
+        python3 << trim endpython
+            try:
+                from powerline.vim import setup as powerline_setup
+                powerline_setup()
+                del powerline_setup
+            except ImportError:
+                pass
+        endpython
+    endif
+    " }}}
+
+" endif
+" vim: sw=4 sts=4 et fdm=marker
+
+
+" let b:cucumber_steps_glob = '%:p:h:s?.*[\/].*step.*\zs[\/].*??'

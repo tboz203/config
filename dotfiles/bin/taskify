@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# i want to take all the little snippets i've been throwing into cron jobs and
+# collect and modularize them. i'm imagining a script that wraps around another
+# command and does things like squelching all output on success, wait some
+# random amount of time before starting, include a timestamp, etc.
+
+# i think i'm going to do my best to write the script in such a way that it can
+# be either used as a wrapper, or copied & pasted into other projects
+
+# - random wait
+# - output only on error
+# - logrotate?
+
+die() {
+	echo "taskify: $@"
+	[[ $LOG ]] && echo "taskify: $@" >>$LOG
+	exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+	arg="$1"
+	shift
+	case $arg in
+	--) break ;;
+	-h | --help)
+		HELP=1
+		;;
+	-s | --random-sleep)
+		TIMEOUT="$1"
+		shift
+		;;
+	-q | --quiet)
+		QUIET=$((${QUIET:-0} + 1))
+		;;
+	-l | --log)
+		LOG="$1"
+		shift
+		;;
+	-d | --directory)
+		DIRECTORY="$1"
+		shift
+		;;
+	-*)
+		echo "[X] I don't understand this argument: ($arg)"
+		HELP=1
+		;;
+	*)
+		# put this arg back on the stack
+		set -- "$arg" "$@"
+		break
+		;;
+	esac
+done
+
+COMMAND=("$@")
+
+if [[ ! $HELP && ! "${COMMAND[*]}" ]]; then
+	echo "[X] No command supplied"
+	HELP=1
+fi
+
+if [[ $HELP ]]; then
+	cat <<EOF
+Usage: $(basename $0) [OPTIONS] [--] COMMAND ...
+
+Sanitize commands for cron.
+
+Arguments:
+COMMAND                 The command to run, with arguments
+
+Options:
+-h|--help       Print out this message.
+-q|--quiet      Silence the command, unless it exits with an error (to prevent
+                useless cron emails from chatty programs). Can be given more 
+                than once to also silence errors
+-l|--log LOG    Append any output to LOG as well (includes timestamp & exit
+                code; path LOG is *not* relative to --directory argument)
+-s|--random-sleep TIMEOUT
+                Sleep for a random duration up to TIMEOUT seconds before
+                executing the command (to prevent load spikes at midnight,
+                etc).
+-d|--directory DIRECTORY
+                change to DIRECTORY before executing command
+EOF
+
+	exit 1
+fi
+
+if [[ $TIMEOUT ]]; then
+	sleep $((RANDOM % TIMEOUT))
+fi
+
+if [[ $DIRECTORY ]]; then
+	pushd $DIRECTORY &>/dev/null || die "could not change directory to ($DIRECTORY)"
+fi
+
+output="$(eval "${COMMAND[@]}" 2>&1)"
+status=$?
+
+if [[ $DIRECTORY ]]; then
+	popd &>/dev/null
+fi
+
+if [[ ! $QUIET || ($QUIET -lt 2 && $status -ne 0) ]]; then
+	[[ $output ]] && echo "$output"
+fi
+
+if [[ $LOG ]]; then
+	[[ $output ]] || output='(no output)'
+	{
+		date
+		echo "$output"
+		echo "exit code $status"
+	} >>$LOG
+fi
+
+exit $status

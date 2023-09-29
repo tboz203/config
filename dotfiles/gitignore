@@ -1,0 +1,7 @@
+# global gitignore file
+
+/untracked
+/gems
+
+!lib/
+!venv/
