@@ -9,11 +9,11 @@ import subprocess
 import time
 import traceback
 from pathlib import Path
-from typing import Iterable, TYPE_CHECKING, Union, Optional
+from typing import TYPE_CHECKING, Iterable, Optional, Union
 
 from stransi import Ansi
-from stransi.attribute import SetAttribute, Attribute
-from stransi.color import SetColor, ColorRole
+from stransi.attribute import Attribute, SetAttribute
+from stransi.color import ColorRole, SetColor
 from stransi.instruction import Instruction
 
 if TYPE_CHECKING:
@@ -27,10 +27,11 @@ if TYPE_CHECKING:
 
 root = Path(__file__).parent
 logfile = f"{root}/viewpane.log"
+logging.root.addHandler(logging.NullHandler())
 logging.basicConfig(
     filename=logfile,
     format="[%(asctime)s %(levelname)-8s %(name)s] %(message)s",
-    level=logging.DEBUG
+    level=logging.DEBUG,
 )
 # logging.basicConfig(handlers=[logging.NullHandler()])
 logger = logging.getLogger("viewpane")
@@ -49,7 +50,12 @@ class StransiInstructionStreamTranslator:
     stream, and what color pairs known to curses.
     """
 
-    def __init__(self, init_attr: int = 0, init_color_num: Optional[int] = None, color_map: Optional[ColorMap] = None):
+    def __init__(
+        self,
+        init_attr: int = 0,
+        init_color_num: Optional[int] = None,
+        color_map: Optional[ColorMap] = None,
+    ):
         """
         initialize a new StransiInstructionStreamTranslator. you can specify a
         starting attr state and/or initial color map here.
@@ -68,7 +74,9 @@ class StransiInstructionStreamTranslator:
 
         self._color_map = color_map or {}
 
-    def translate_ansi_instruction_stream(self, stream: InstructionStream) -> OutputStream:
+    def translate_ansi_instruction_stream(
+        self, stream: InstructionStream
+    ) -> OutputStream:
         """
         Translate a stransi instruction stream into a sequence of attr/text pairs
         (with the intention of being fed to `stdscr.addstr(y, x, text, attr)`).
@@ -100,7 +108,9 @@ class StransiInstructionStreamTranslator:
                     color_num = self._color_map[(fg, bg)]
                 else:
                     # get the next available color number
-                    color_num = (max(self._color_map.values()) + 1) if self._color_map else 1
+                    color_num = (
+                        (max(self._color_map.values()) + 1) if self._color_map else 1
+                    )
                     # tell curses about it
                     curses.init_pair(color_num, fg, bg)
                     # store the mapping
@@ -148,14 +158,14 @@ class StransiInstructionStreamTranslator:
 
 
 class PadManager:
-    """Write Ansi lines into a curses pad, and keep track of its location """
+    """Write Ansi lines into a curses pad, and keep track of its location"""
 
     def __init__(
         self,
         stdscr: CursesWindow,
         pad: CursesWindow,
         coords: tuple[int, int] = (0, 0),
-        color_map: Optional[ColorMap] = None
+        color_map: Optional[ColorMap] = None,
     ):
         """
         Initialize a new PadWriter.
@@ -186,7 +196,9 @@ class PadManager:
             # ansi translation magic
             instructions = line.instructions()
             # turn our instructions into text/attr pairs
-            stream = iter(self._translator.translate_ansi_instruction_stream(instructions))
+            stream = iter(
+                self._translator.translate_ansi_instruction_stream(instructions)
+            )
             # get the first pair and put it explicitly at (y, 0)
             text, attr = next(stream)
             self._pad.addstr(y, 0, text, attr)
@@ -224,13 +236,12 @@ class PadManager:
         self._stdscr.erase()
         self._stdscr.noutrefresh()
         self._pad.noutrefresh(y, x, 0, 0, curses.LINES - 1, curses.COLS - 1)
-        self._stdscr.move(curses.LINES-1, 0)
+        self._stdscr.move(curses.LINES - 1, 0)
         self._stdscr.noutrefresh()
         curses.doupdate()
 
 
 def win_main(stdscr: CursesWindow, command: list[str], draw_rate=None):
-
     draw_rate = draw_rate or DEFAULT_DRAW_RATE
 
     curses.use_default_colors()
@@ -266,28 +277,28 @@ def win_main(stdscr: CursesWindow, command: list[str], draw_rate=None):
         try:
             c = pad.getkey()
         except curses.error as exc:
-            if exc.args == ('no input',):
+            if exc.args == ("no input",):
                 # logger.debug("no input")
                 continue
             else:
                 raise
 
-        if c == 'q':
+        if c == "q":
             # time to goodbye
             break
-        elif c == 'KEY_UP':
+        elif c == "KEY_UP":
             manager.move_by(-v_shift, 0)
             manager.refresh()
-        elif c == 'KEY_DOWN':
+        elif c == "KEY_DOWN":
             manager.move_by(v_shift, 0)
             manager.refresh()
-        elif c == 'KEY_LEFT':
+        elif c == "KEY_LEFT":
             manager.move_by(0, -h_shift)
             manager.refresh()
-        elif c == 'KEY_RIGHT':
+        elif c == "KEY_RIGHT":
             manager.move_by(0, h_shift)
             manager.refresh()
-        elif c == 'KEY_RESIZE':
+        elif c == "KEY_RESIZE":
             logger.info("refreshing for resize")
             curses.update_lines_cols()
             manager.refresh()
@@ -301,8 +312,12 @@ def ansi_length(ansi: Ansi):
 def main():
     logger.info("starting")
 
-    parser = argparse.ArgumentParser(description="A quick little program somewhere between `watch` and `less`")
-    parser.add_argument("-d", "--delay", type=float, help="How frequently to run the watched command")
+    parser = argparse.ArgumentParser(
+        description="A quick little program somewhere between `watch` and `less`"
+    )
+    parser.add_argument(
+        "-d", "--delay", type=float, help="How frequently to run the watched command"
+    )
     parser.add_argument("command", nargs="+", help="the command to watch")
 
     args = parser.parse_args()

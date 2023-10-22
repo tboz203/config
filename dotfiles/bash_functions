@@ -2,23 +2,23 @@
 # vim: ft=sh
 
 realwhich() {
-	realpath $(command which "$@")
+    realpath "$(command which "$@")"
 }
 
 doihave() {
-	command which "$@" &>/dev/null
+    command which "$@" &>/dev/null
 }
 # so i can type `if ihave program; ...`
 alias ihave=doihave
 
 heregit() {
-	# execute a git command in every child directory
-	local item
-	for item in *; do
-		echo -e "\e[30;43m> $item\e[0m"
-		git -C $item "$@"
-		echo
-	done
+    # execute a git command in every child directory
+    local item
+    for item in *; do
+        echo -e "\e[30;43m> $item\e[0m"
+        git -C "$item" "$@"
+        echo
+    done
 }
 
 # files() {
@@ -27,181 +27,220 @@ heregit() {
 # }
 
 files() {
-	# list regular files, here or at given paths
-	fd . -t f "$@"
+    # list regular files, here or at given paths
+    fd . -t f "$@"
 }
 
 vimfiles() {
-	vim -p $(files "$@")
+    vim -p $(files "$@")
 }
 # if we have `_filedir` from bash completion, use it
 declare -F _filedir &>/dev/null && complete -F _filedir -d vimfiles
 
 vimwhich() {
-	vim $(\which "$@")
+    vim $(realwhich "$@")
 }
 complete -c vimwhich
 
 nvfiles() {
-	nv -p $(files "$@")
+    nv $(files "$@")
 }
 # if we have `_filedir` from bash completion, use it
 declare -F _filedir &>/dev/null && complete -F _filedir -d nvfiles
 
 nvwhich() {
-	nv $(\which $@)
+    nv $(realwhich "$@")
 }
 complete -c nvwhich
 
 # mnemonic "move with"
 # move a file & cd to that directory
 mw() {
-	if [[ $# -lt 2 || " $@ " =~ " -h " || " $@ " =~ " --help " ]]; then
-		echo "mw: FILE... DIR -> mv FILE... DIR && cd DIR"
-		exit 1
-	fi
-	# the last parameter
-	local dest="${@: -1}"
-	# everything but the last parameter, as an array
-	local files=("${@:1:$#-1}")
-	[[ -d $dest ]] || {
-		echo "last parameter should be a directory"
-		return 1
-	}
-	mv -t "$dest" "${files[@]}" && cd "$dest"
+    if [[ $# -lt 2 || " $@ " =~ " -h " || " $@ " =~ " --help " ]]; then
+        echo "mw: FILE... DIR -> mv FILE... DIR && cd DIR"
+        exit 1
+    fi
+    # the last parameter
+    local dest="${@: -1}"
+    # everything but the last parameter, as an array
+    local files=("${@:1:$#-1}")
+    [[ -d $dest ]] || {
+        echo "last parameter should be a directory"
+        return 1
+    }
+    mv -t "$dest" "${files[@]}" && cd "$dest"
 }
 # if we have `_filedir` from bash completion, use it
 declare -F _filedir &>/dev/null && complete -F _filedir mw
 
 repeat() {
-	# usage: repeat TEXT COUNT
-	# does something a bit like `TEXT * COUNT`
-	local text="$1"
-	local count="$2"
-	printf "${text}%.0s" $(seq 1 $count)
+    # usage: repeat TEXT COUNT
+    # does something a bit like `TEXT * COUNT`
+    local text="$1"
+    local count="$2"
+    printf "${text}%.0s" $(seq 1 $count)
 }
 
 pathmunge() {
-	# add a directory to the PATH if not already present
-	case ":${PATH}:" in
-	*:"$1":*) ;;
-	*)
-		if [ -d "$1" ]; then
-			if [ "$2" = "after" ]; then
-				PATH=$PATH:$1
-			else
-				PATH=$1:$PATH
-			fi
-		fi
-		;;
-	esac
+    # add a directory to the PATH if not already present
+    case ":${PATH}:" in
+    *:"$1":*) ;;
+    *)
+        if [ -d "$1" ]; then
+            if [ "$2" = "after" ]; then
+                PATH=$PATH:$1
+            else
+                PATH=$1:$PATH
+            fi
+        fi
+        ;;
+    esac
 }
 
 pathmungex() {
-	# like pathmunge, but better
-	local params arg PATHVAR DIR EXPORT AFTER HELP
-	params=(PATHVAR DIR)
-	while [[ $# -gt 0 ]]; do
-		arg="$1"
-		shift
-		case $arg in
-		-e | --export) EXPORT=1 ;;
-		-a | --after) AFTER=1 ;;
-		-h | --help) HELP=1 ;;
-		-*)
-			echo >&2 "[X] I don't understand \"$arg\""
-			HELP=1
-			;;
-		*)
-			: "setting a positional parameter: ${params[0]} -> $arg"
-			if [[ ${#params[@]} -gt 0 ]]; then
-				param="${params[0]}"
-				declare "$param=$arg"
-				params=("${params[@]:1}")
-			else
-				echo >&2 "[X] Too many parameters: \"$arg\""
-				HELP=1
-			fi
-			;;
-		esac
-	done
+    # like pathmunge, but better
+    local params arg PATHVAR DIR EXPORT AFTER HELP
+    params=(PATHVAR DIR)
+    while [[ $# -gt 0 ]]; do
+        arg="$1"
+        shift
+        case $arg in
+        -e | --export) EXPORT=1 ;;
+        -a | --after) AFTER=1 ;;
+        -h | --help) HELP=1 ;;
+        -*)
+            echo >&2 "[X] I don't understand \"$arg\""
+            HELP=1
+            ;;
+        *)
+            : "setting a positional parameter: ${params[0]} -> $arg"
+            if [[ ${#params[@]} -gt 0 ]]; then
+                param="${params[0]}"
+                declare "$param=$arg"
+                params=("${params[@]:1}")
+            else
+                echo >&2 "[X] Too many parameters: \"$arg\""
+                HELP=1
+            fi
+            ;;
+        esac
+    done
 
-	if [[ ${#params[@]} -gt 0 ]]; then
-		echo >&2 "[X] Not enough parameters"
-		HELP=1
-	fi
+    if [[ ${#params[@]} -gt 0 ]]; then
+        echo >&2 "[X] Not enough parameters"
+        HELP=1
+    fi
 
-	: "PATHVAR is ${PATHVAR:-<unset>}"
-	: "DIR is ${DIR:-<unset>}"
-	: "AFTER is ${AFTER:-<unset>}"
-	: "EXPORT is ${EXPORT:-<unset>}"
+    : "PATHVAR is ${PATHVAR:-<unset>}"
+    : "DIR is ${DIR:-<unset>}"
+    : "AFTER is ${AFTER:-<unset>}"
+    : "EXPORT is ${EXPORT:-<unset>}"
 
-	if [[ -v HELP ]]; then
-		echo "usage: pathmungex [-e|--export] [-a|--after] PATHVAR DIR"
-		echo
-		echo "Add a directory to a path variable if that directory exists, and is not already in that path"
-		echo "example: pathmungex -a PATH $HOME/.bin -e"
-		return 1
-	fi
+    if [[ -v HELP ]]; then
+        echo "usage: pathmungex [-e|--export] [-a|--after] PATHVAR DIR"
+        echo
+        echo "Add a directory to a path variable if that directory exists, and is not already in that path"
+        echo "example: pathmungex -a PATH $HOME/.bin -e"
+        return 1
+    fi
 
-	# DIR=$( realpath -msq "$DIR")
+    # DIR=$( realpath -msq "$DIR")
 
-	if [[ ! (:${!PATHVAR}: =~ :$DIR:) && -d $DIR ]]; then
-		if [[ ! -v $PATHVAR ]]; then
-			declare -g "$PATHVAR=$DIR"
-		elif [[ -v AFTER ]]; then
-			declare -g "$PATHVAR=${!PATHVAR}:$DIR"
-		else
-			declare -g "$PATHVAR=$DIR:${!PATHVAR}"
-		fi
-		if [[ -v EXPORT ]]; then
-			export $PATHVAR
-		fi
-	fi
+    if [[ ! (:${!PATHVAR}: =~ :$DIR:) && -d $DIR ]]; then
+        if [[ ! -v $PATHVAR ]]; then
+            declare -g "$PATHVAR=$DIR"
+        elif [[ -v AFTER ]]; then
+            declare -g "$PATHVAR=${!PATHVAR}:$DIR"
+        else
+            declare -g "$PATHVAR=$DIR:${!PATHVAR}"
+        fi
+        if [[ -v EXPORT ]]; then
+            export $PATHVAR
+        fi
+    fi
 }
 
 showmounts() {
-	# list mounts in a table, and cut off the options
-	mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
+    # list mounts in a table, and cut off the options
+    mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
 }
 
 flash_message() {
-	local arg message HELP
-	local sleep=1
-	while [[ $# -gt 0 ]]; do
-		arg="$1" ; shift
-		case $arg in
-			-s|--sleep)
-				sleep="$1" ; shift ;;
-			-h|--help)
-				HELP=1 ;;
-			-*)
-				echo >&2 "Unrecognized option: $arg" ;;
-			*)
-				message+="$arg " ;;
-		esac
-	done
+    local arg message HELP
+    local sleep=1
+    while [[ $# -gt 0 ]]; do
+        arg="$1"
+        shift
+        case $arg in
+        -s | --sleep)
+            sleep="$1"
+            shift
+            ;;
+        -h | --help)
+            HELP=1
+            ;;
+        -*)
+            echo >&2 "Unrecognized option: $arg"
+            ;;
+        *)
+            message+="$arg "
+            ;;
+        esac
+    done
 
-	if [[ -v HELP ]]; then
-		command cat <<EOF
+    if [[ -v HELP ]]; then
+        command cat <<EOF
 flash_message: briefly print a message to the screen.
 
 Usage: flash_message [-s|--sleep SLEEP] MESSAGE...
 
 	-s|--sleep: how long to sleep (currently $sleep)
 EOF
-		return 1
-	fi
+        return 1
+    fi
 
-	tput sc
-	figlet "$message"
-	sleep $sleep
-	tput rc
-	tput ed
+    tput sc
+    figlet "$message"
+    sleep "$sleep"
+    tput rc
+    tput ed
 }
 
 function vim() {
-	flash_message -s 2 '!!! use nv !!!'
-	nvim "$@"
-	return $?
+    flash_message -s 2 '!!! use nv !!!'
+    nvim "$@"
+    return $?
 }
+
+# don't wanna set pager globally, but do wanna pick one for these
+doihave bat && _pager=bat || _pager=less
+
+# mnemonic: `jq | less`
+function jql() {
+    jq -C "${@:-.}" | $_pager
+}
+
+# mnemonic: `jq | less`
+function yql() {
+    yq -C "${@:-.}" | $_pager
+}
+
+pkg-config-vars() {
+    for name in "$@"; do
+        pkg-config "$name" --print-variables | while read -r var; do
+            value=$(pkg-config "$name" --variable "$var")
+            echo "$name: $var = $value"
+        done
+    done
+}
+
+pkg-config-names() {
+    pkg-config --list-all | cut -f1 -d" "
+}
+
+_complete-pkg-config-names() {
+    COMPREPLY=($(compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}"))
+    return 0
+}
+
+complete -F _complete-pkg-config-names pkg-config-vars

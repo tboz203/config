@@ -7,5 +7,6 @@ __pycache__
 /dotfiles/vim/undodir
 /dotfiles/vim/bundle
 /dotfiles/vim/plugged
+!/dotfiles/vim/plugged/CACHEDIR.TAG
 
 !.gitignore

@@ -26,9 +26,11 @@ alias ll.='ll -d .*'
 # alias .....='../../../..'
 _dots=..
 _dirs=..
-for x in $(seq 1 20); do
+for _ in $(seq 1 20); do
     _dots+=.
     _dirs+=/..
+    # sh*llcheck complains about dynamically defining aliases (and when you talk about it)
+    # shellcheck disable=SC2139
     alias $_dots=$_dirs
 done
 unset _dots _dirs
@@ -39,6 +41,8 @@ unset _dots _dirs
 # alias vim='vim -p'
 # alias view='view -p'
 alias nv=nvim
+alias nvimdiff='nvim -d'
+alias nvdiff=nvimdiff
 
 alias cat=bat
 
@@ -83,6 +87,7 @@ alias vimrc='vim ~/.vimrc'
 alias aliases='nv ~/.bash_aliases'
 alias bashrc='nv ~/.bashrc'
 alias nvconfig='nv ~/.config/nvim/lua/config/lazy.lua'
+alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show"'
 alias rmf='rm -rf'
 alias ps='ps -H'
 # alias listening='lsof -i -s TCP:Listen'
@@ -114,10 +119,15 @@ alias cd='cd -P'
 
 # this is a script now
 # alias mxcurl='curl -s -H "Authorization: $(token)" -H "Accept: application/json, */*"'
-# bootstrap depends on an old version of yq, so i've installed yq 4 as "yq-4"
-alias yq='yq-4'
+# # bootstrap depends on an old version of yq, so i've installed yq 4 as "yq-4"
+# alias yq='yq-4'
 
 alias eureka='eureka -s'
 
 # print out all variables, even if not exported
-alias xenv='compgen -v | grep -v "^_" | sort | while read item; do declare -p $item ; done'
+# sh*llcheck sees `$item` being used, but not defined 🙄
+# shellcheck disable=SC2154
+alias xenv='compgen -v | grep -v "^_" | sort | while read -r item; do declare -p $item ; done'
+
+# become root, but with all my bells and whistles (not well tested)
+alias super='sudo env HOME=$HOME /usr/local/bin/bash --login -i'

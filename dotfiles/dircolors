@@ -29,9 +29,11 @@ TERM screen-256color
 TERM xterm-256color
 TERM gnome-256color
 TERM st-256color
+TERM alacritty
+TERM tmux-256color
 
 # EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
-EIGHTBIT 1
+# EIGHTBIT 1
 
 # Below are the color init strings for the basic file types. A color init
 # string consists of one or more of the following numeric codes:

@@ -94,6 +94,9 @@
 	tag = auto column dense
 [tag]
 	sort = version:refname
+[color "diff"]
+	meta = "bold #000000 brightblue"
+	frag = "bold #000000 yellow"
 [interactive]
 	diffFilter = delta --color-only --features=interactive
 [delta]

@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+"""Translate glob patterns to regular expressions."""
+
+# fnmatch.translate emits regular expressions that rely on some features pretty
+# specific to python's own regular expression engine, so this script is not
+# worth a whole lot...
+
+import argparse
+import fnmatch
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("pattern", help="a `fnmatch`-compatible glob pattern")
+glob_pattern = parser.parse_args().pattern
+print(fnmatch.translate(glob_pattern))

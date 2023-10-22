@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+[[ -v against ]] || against=HEAD
+[[ -v refs ]] || refs=("refs/heads" "refs/remotes")
+
+git for-each-ref "${refs[@]}" --format="%(refname:short)" | while read -r ref; do
+    # TODO: make this better
+    [[ "$ref" == "$against" ]] && continue
+    read -r -a leftright < <(git rev-list --left-right --count "${ref}"..."${against}")
+    # echo "ref ${ref} is ${leftright[0]} commit(s) ahead and ${leftright[1]} commit(s) behind ${against}"
+    # echo "ref ${against} is ${leftright[1]} commit(s) ahead and ${leftright[0]} commit(s) behind ${ref}"
+    printf "ref %s is %3g commit(s) ahead and %3g commit(s) behind %s\n" \
+        "$against" "${leftright[1]}" "${leftright[0]}" "$ref"
+done

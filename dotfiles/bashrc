@@ -5,18 +5,22 @@
 
 : top of bashrc
 
-.() { source "$@"; }
-source() {
-	shopt -oq verbose && echo "# sourcing $@" || true
-	builtin source "$@"
-	shopt -oq verbose && echo "# leaving $@" || true
+.()
+{
+    source "$@"
+}
+source()
+{
+    (shopt -oq verbose && echo "# sourcing $*") || true
+    builtin source "$@"
+    (shopt -oq verbose && echo "# leaving $*") || true
 }
 
 # functionless pathmunge ~/.local/bin to get powerline into PATH before attempting turbo mode
-[[ :$PATH: == *:$HOME/.local/bin:* ]] || PATH=$HOME/.local/bin:$PATH
+[[ :$PATH: == *:$HOME/.local/bin:* ]] || PATH="$HOME/.local/bin:$PATH"
 
 # ensure ssh, tmux, and powerline
-[[ $- == *i* && -f ~/.turbo-mode.sh ]] && . ~/.turbo-mode.sh
+[[ $- == *i* && -f $HOME/.turbo-mode.sh ]] && . "$HOME/.turbo-mode.sh"
 
 export ANSIBLE_NOCOWS=1
 export MAILTO=thomas.bozeman@cgifederal.com
@@ -40,33 +44,33 @@ LOCAL_BASH_COMPLETION=/usr/local/share/bash-completion/bash_completion
 [[ -r $LOCAL_BASH_COMPLETION ]] && shopt -u progcomp
 
 [[ -f /etc/bashrc ]] && . /etc/bashrc
-[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases
-[[ -f ~/.bash_functions ]] && . ~/.bash_functions
+[[ -f $HOME/.bash_aliases ]] && . "$HOME/.bash_aliases"
+[[ -f $HOME/.bash_functions ]] && . "$HOME/.bash_functions"
 
 # counter-intuitively, later lines will be higher in the path
-pathmungex PATH $HOME/workspace/maxar/dodev
+pathmungex PATH "$HOME/workspace/maxar/dodev"
 
-pathmungex PATH $HOME/.local/share/plantuml
-pathmungex PATH $HOME/.local/share/jdt-language-server/bin
-pathmungex PATH $HOME/.local/share/node/bin
-pathmungex PATH $HOME/.local/share/flyway
-pathmungex PATH $HOME/.local/share/pycharm/bin
-pathmungex PATH $HOME/.local/share/Postman
-pathmungex PATH $HOME/.local/share/idea/bin
-pathmungex PATH $HOME/.local/share/groovy/bin
-pathmungex PATH $HOME/.local/share/go/bin
-pathmungex PATH $HOME/.local/bin
+pathmungex PATH "$HOME/.local/share/plantuml"
+pathmungex PATH "$HOME/.local/share/jdt-language-server/bin"
+pathmungex PATH "$HOME/.local/share/node/bin"
+pathmungex PATH "$HOME/.local/share/flyway"
+pathmungex PATH "$HOME/.local/share/pycharm/bin"
+pathmungex PATH "$HOME/.local/share/Postman"
+pathmungex PATH "$HOME/.local/share/idea/bin"
+pathmungex PATH "$HOME/.local/share/groovy/bin"
+pathmungex PATH "$HOME/.local/share/go/bin"
+pathmungex PATH "$HOME/.local/bin"
 
-pathmungex PATH $HOME/go/bin
-pathmungex PATH $HOME/.cargo/bin
-pathmungex PATH $HOME/.poetry/bin
-pathmungex PATH $HOME/.rbenv/bin
-pathmungex PATH $HOME/.nodenv/bin
-pathmungex PATH $HOME/.pyenv/bin
-pathmungex PATH $HOME/.tfenv/bin
-pathmungex PATH $HOME/.tgenv/bin
-pathmungex PATH $HOME/.bin
-pathmungex PATH $HOME/.maxar-bin
+pathmungex PATH "$HOME/go/bin"
+pathmungex PATH "$HOME/.cargo/bin"
+pathmungex PATH "$HOME/.poetry/bin"
+pathmungex PATH "$HOME/.rbenv/bin"
+pathmungex PATH "$HOME/.nodenv/bin"
+pathmungex PATH "$HOME/.pyenv/bin"
+pathmungex PATH "$HOME/.tfenv/bin"
+pathmungex PATH "$HOME/.tgenv/bin"
+pathmungex PATH "$HOME/.bin"
+pathmungex PATH "$HOME/.maxar-bin"
 
 # pathmungex --after PATH $HOME/.bootstrap/bin
 # pathmungex --after PATH $HOME/.bootstrap/java/default/bin
@@ -79,26 +83,26 @@ pathmungex --after PATH /usr/pgsql-12/bin
 export PERL_MB_OPT="--install_base /home/tbozeman/perl5"
 export PERL_MM_OPT="INSTALL_BASE=/home/tbozeman/perl5"
 pathmungex PATH /home/tbozeman/perl5/bin
-pathmungex -e -a PERL_LOCAL_LIB_ROOT $HOME/perl5
-pathmungex -e PERL5LIB $HOME/perl5/lib/perl5
+pathmungex -e -a PERL_LOCAL_LIB_ROOT "$HOME/perl5"
+pathmungex -e PERL5LIB "$HOME/perl5/lib/perl5"
 
-pathmungex -e PYTHONPATH $HOME/.pymodules
+pathmungex -e PYTHONPATH "$HOME/.pymodules"
 
 # If not running interactively, don't do anything else
 [[ $- == *i* ]] || return
 
 # number one: complain
 if [[ ${BASH_VERSINFO[0]} -lt 5 ]]; then
-	echo >&2 "Hi! go update your bash please..."
+    echo >&2 "Hi! go update your bash please..."
 fi
 
 # if programmable completion wasn't activated by /etc/bashrc
 # (or if we disabled it in ~/.config/bash_completion),
 # re-enable it here
 if ! shopt -q progcomp && [[ -r $LOCAL_BASH_COMPLETION ]]; then
-	shopt -s progcomp
-	[[ ${BASH_VERSINFO[0]} -ge 5 ]] && shopt -s progcomp_alias
-	. $LOCAL_BASH_COMPLETION
+    shopt -s progcomp
+    [[ ${BASH_VERSINFO[0]} -ge 5 ]] && shopt -s progcomp_alias
+    . "$LOCAL_BASH_COMPLETION"
 fi
 
 # don't save duplicate commands or commands starting with spaces in bash history
@@ -175,12 +179,25 @@ export GIT_PS1_DESCRIBE_STYLE=branch
 export GIT_PS1_SHOWCOLORHINTS=1
 export GIT_PS1_HIDE_IF_PWD_IGNORED=1
 
-pathmungex -e PKG_CONFIG_PATH $HOME/local/lib/pkgconfig
-pathmungex -e PKG_CONFIG_PATH $HOME/local/share/pkgconfig
+# turn on every option listed in
+# /usr/local/share/bash-completion/completions/docker
+export DOCKER_COMPLETION_SHOW_CONFIG_IDS=yes
+export DOCKER_COMPLETION_SHOW_CONTAINER_IDS=yes
+export DOCKER_COMPLETION_SHOW_NETWORK_IDS=yes
+export DOCKER_COMPLETION_SHOW_NODE_IDS=yes
+export DOCKER_COMPLETION_SHOW_PLUGIN_IDS=yes
+export DOCKER_COMPLETION_SHOW_SECRET_IDS=yes
+export DOCKER_COMPLETION_SHOW_SERVICE_IDS=yes
+
+pathmungex -e PKG_CONFIG_PATH "$HOME/local/lib/pkgconfig"
+pathmungex -e PKG_CONFIG_PATH "$HOME/local/lib64/pkgconfig"
+pathmungex -e PKG_CONFIG_PATH "$HOME/local/share/pkgconfig"
 pathmungex -e PKG_CONFIG_PATH /usr/local/lib/pkgconfig
+pathmungex -e PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
+pathmungex -e PKG_CONFIG_PATH /usr/local/share/pkgconfig
 
 for item in ~/.profile.d/*.{sh,bash}; do
-	[[ -f $item && -r $item ]] && . $item
+    [[ -f $item && -r $item ]] && . $item
 done
 unset item
 
