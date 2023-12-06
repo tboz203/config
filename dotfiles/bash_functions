@@ -1,13 +1,29 @@
 # .bash_functions
 # vim: ft=sh
+# shellcheck disable=SC2016
 
 realwhich()
 {
-    realpath $(command which "$@")
+    : '`which` without aliases or functions, dereferencing symlinks'
+    # {
+    #     command which "$@" || return
+    # } | xargs -r realpath
+    declare -a items
+    local item failures
+    for item in "$@"; do
+        # i just don't like the error output of `which`...
+        items+=("$(command which "$item" 2> /dev/null)") || {
+            echo >&2 "[X] realwhich: did not find $item"
+            failures=1
+        }
+    done
+    [[ -v failures ]] && return 1
+    realpath "${items[@]}"
 }
 
 doihave()
 {
+    : 'silently test whether a command is in the path'
     command which "$@" &> /dev/null
 }
 # so i can type `if ihave program; ...`
@@ -25,40 +41,104 @@ alias ihave=doihave
 #     done
 # }
 
+# this is an alias now (using `fd`)
 # files() {
-#   : like `find -type f`, but exclude hidden files
+#   : 'like "find -type f", but exclude hidden files'
 #   find "$@" -iregex ".*/\.[^/].*" -prune -o -type f -print
 # }
 
-files()
+get_array()
 {
-    : 'list regular files, here or at given paths'
-    fd . -t f "$@"
+    : '`readarray` with error handling'
+    : 'usage: get_array [READARRAY_ARGS...] ARRAY -- COMMAND...'
+    declare -a mapargs
+    while [[ $# -gt 0 ]]; do
+        local arg=$1
+        shift
+        case $arg in
+            --) break ;;
+            *) mapargs+=("$arg") ;;
+        esac
+    done
+    if [[ $# -eq 0 ]]; then
+        echo >&2 "[X] get_array: no command given"
+        return 1
+    elif [[ ${#mapargs[*]} -eq 0 ]]; then
+        # technically you could call like `get_array -d : -- echo $PATH` and
+        # pass this check, but if you've gotten that far, i'll assume you know
+        # what you're doing
+        echo >&2 "[X] get_array: no array given"
+        return 1
+    fi
+
+    # execute the command
+    local fulltext
+    fulltext=$("$@") || {
+        local err=$?
+        echo >&2 -n "$fulltext"
+        return $err
+    }
+
+    # map the array
+    readarray -t "${mapargs[@]}" <<< "$fulltext"
+}
+
+with_files()
+{
+    : 'run a command & pass `files` as parameters'
+    : 'usage: with_files COMMAND [COMMAND_ARGS...] [-- FILES_ARGS...]'
+    # split our params into command and files_args
+    declare -a command files
+    while [[ $# -gt 0 ]]; do
+        local arg="$1"
+        shift
+        case $arg in
+            --) break ;;
+            *) command+=("$arg") ;;
+        esac
+    done
+    #
+    # remaining args, if any, go to `files`
+    get_lines files files "$@" || return
+    # check for empty set
+    [[ ${#files[*]} -eq 0 ]] && {
+        echo >&2 "[X] no files"
+        return 1
+    }
+    # handoff
+    "${command[@]}" "${files[@]}"
 }
 
 vimfiles()
 {
-    vim -p $(files "$@")
+    : 'edit all regular files (in $@ or .) with vim'
+    with_files vim -- "$@"
 }
 # if we have `_filedir` from bash completion, use it
 declare -F _filedir &> /dev/null && complete -F _filedir -d vimfiles
 
 vimwhich()
 {
-    vim $(realwhich "$@")
+    declare -a targets
+    get_array targets -- realwhich "$@" || return
+    vim "${targets[@]}"
 }
 complete -c vimwhich
 
 nvfiles()
 {
-    nv $(files "$@")
+    with_files nv -- "$@"
 }
 # if we have `_filedir` from bash completion, use it
 declare -F _filedir &> /dev/null && complete -F _filedir -d nvfiles
 
 nvwhich()
 {
-    nv $(realwhich "$@")
+    declare -a targets
+    # mapfile -t targets < <(realwhich "$@") || return
+    # targets=($(realwhich "$@"))
+    get_array targets -- realwhich "$@" || return
+    nv "${targets[@]}"
 }
 complete -c nvwhich
 
@@ -71,7 +151,7 @@ mw()
         exit 1
     fi
     # the last parameter
-    local dest="${@: -1}"
+    local dest="${*: -1}"
     # everything but the last parameter, as an array
     local files=("${@:1:$#-1}")
     [[ -d $dest ]] || {
@@ -122,7 +202,7 @@ pathmungex()
             -a | --after) AFTER=1 ;;
             -h | --help) HELP=1 ;;
             -*)
-                echo >&2 "[X] I don't understand \"$arg\""
+                echo >&2 "[X] pathmungex: I don't understand \"$arg\""
                 HELP=1
                 ;;
             *)
@@ -132,7 +212,7 @@ pathmungex()
                     declare "$param=$arg"
                     params=("${params[@]:1}")
                 else
-                    echo >&2 "[X] Too many parameters: \"$arg\""
+                    echo >&2 "[X] pathumngex: Too many parameters: \"$arg\""
                     HELP=1
                 fi
                 ;;
@@ -140,7 +220,7 @@ pathmungex()
     done
 
     if [[ ${#params[@]} -gt 0 ]]; then
-        echo >&2 "[X] Not enough parameters"
+        echo >&2 "[X] pathumngex: Not enough parameters"
         HELP=1
     fi
 
@@ -168,7 +248,7 @@ pathmungex()
             declare -g "$PATHVAR=$DIR:${!PATHVAR}"
         fi
         if [[ -v EXPORT ]]; then
-            export $PATHVAR
+            export "${PATHVAR?}"
         fi
     fi
 }
@@ -262,15 +342,15 @@ pkg-config-names()
 
 _complete-pkg-config-names()
 {
-    # COMPREPLY=($(compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}"))
-    read -ra COMPREPLY <<< "$(compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}")"
-    return 0
+    # mapfile -t COMPREPLY < <(compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}")
+    get_array COMPREPLY -- compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}"
 }
 
 complete -F _complete-pkg-config-names pkg-config-vars
 
 dush()
 {
+    : 'like alias dush=`du -shc`'
     command du -shc "$@" | sort -h
 }
 
@@ -293,7 +373,7 @@ showpaths()
     for item in "${paths[@]}"; do
         if [[ ! -v $item ]]; then
             # if there's no variable with that name, warn & continue
-            echo >&2 "[X] $item unset"
+            echo >&2 "[X] showpaths: $item unset"
             status=1
             continue
         fi
@@ -320,7 +400,7 @@ searchpath()
 
     if [[ ! -v $pathvar ]]; then
         # if there's no variable with that name, explode
-        echo >&2 "[X] $pathvar unset"
+        echo >&2 "[X] searchpath: $pathvar unset"
         return 1
     fi
 
@@ -370,15 +450,15 @@ stacktrace()
                 bottom=$OPTARG
                 ;;
             :)
-                echo >&2 "[X] required argument not found: $OPTARG"
+                echo >&2 "[X] stacktrace: required argument not found: $OPTARG"
                 help=1
                 ;;
             ?)
-                echo >&2 "[X] invalid option: $OPTARG"
+                echo >&2 "[X] stacktrace: invalid option: $OPTARG"
                 help=1
                 ;;
             *)
-                echo >&2 "[X] unexpected input"
+                echo >&2 "[X] stacktrace: unexpected input"
                 declare -p opt OPTARG
                 help=1
                 ;;
@@ -388,8 +468,8 @@ stacktrace()
 
     if [[ -v help ]]; then
         cat >&2 << EOF
-$FUNCNAME: print a bash function stacktrace
-Usage: $FUNCNAME [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]
+${FUNCNAME[0]}: print a bash function stacktrace
+Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]
 
 Options:
 -c CONTEXT      print CONTEXT number of lines of context (currently $context)
@@ -422,5 +502,7 @@ EOF
 
 faketty()
 {
+    : 'convince a command that it is attached to a tty'
     script -qefc "$(printf "%q " "$@")" /dev/null
 }
+complete -c faketty

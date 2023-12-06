@@ -1,14 +1,12 @@
+# config/.gitignore
 .*
-# lets just exclude the swap directory specifically
-# *.swp
-# *.swo
-/dotfiles/vim/swap
 
 __pycache__
 
 /dotfiles/vim/undodir
 /dotfiles/vim/bundle
 /dotfiles/vim/plugged
-!/dotfiles/vim/plugged/CACHEDIR.TAG
+/dotfiles/vim/swap
 
 !.gitignore
+!CACHEDIR.TAG
