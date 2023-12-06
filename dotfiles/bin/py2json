@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python3
+"""
+Attempt to extract python literals from stdin & re-print them as json.
+"""
 
 import ast
 import fileinput
@@ -14,8 +17,7 @@ try:
         except (ValueError, TypeError, KeyboardInterrupt):
             break
 except OSError as exc:
-    print(f"Stopping: {exc}")
-    exit(1)
-except Exception as exc:
+    exit(exc)
+except Exception:
     traceback.print_exc()
     exit(1)

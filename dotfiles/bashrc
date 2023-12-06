@@ -48,6 +48,8 @@ LOCAL_BASH_COMPLETION=/usr/local/share/bash-completion/bash_completion
 [[ -f $HOME/.bash_functions ]] && . "$HOME/.bash_functions"
 
 # counter-intuitively, later lines will be higher in the path
+pathmungex PATH "/usr/local/go/bin"
+
 pathmungex PATH "$HOME/workspace/maxar/dodev"
 
 pathmungex PATH "$HOME/.local/share/plantuml"
@@ -80,9 +82,9 @@ pathmungex PATH "$HOME/.maxar-bin"
 
 pathmungex --after PATH /usr/pgsql-12/bin
 
-export PERL_MB_OPT="--install_base /home/tbozeman/perl5"
-export PERL_MM_OPT="INSTALL_BASE=/home/tbozeman/perl5"
-pathmungex PATH /home/tbozeman/perl5/bin
+export PERL_MB_OPT="--install_base $HOME/perl5"
+export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
+pathmungex PATH "$HOME/perl5/bin"
 pathmungex -e -a PERL_LOCAL_LIB_ROOT "$HOME/perl5"
 pathmungex -e PERL5LIB "$HOME/perl5/lib/perl5"
 
@@ -111,10 +113,14 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=
-HISTFILESIZE=
-HISTTIMEFORMAT="%h %d %H:%M:%S> "
+# bash 4.2 doesn't seem to like negative values here...
+# HISTSIZE="-1"
+# HISTFILESIZE="-1"
+HISTSIZE=$((2 ** 20))
+HISTFILESIZE=$HISTSIZE
 HISTIGNORE="ls:la:lf:ll:l"
+# HISTTIMEFORMAT="%h %d %H:%M:%S> "
+HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S> "
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -127,6 +133,10 @@ export RSYNC_RSH="ssh -i $HOME/.ssh/rsync_key"
 shopt -s autocd
 # set recursive globbing w/ "**"
 shopt -s globstar
+# I wanna set this, but it seems like it would probably break things...
+# shopt -s nocaseglob
+# if any command in a pipeline fails, the pipeline should be considered to have failed
+shopt -so pipefail
 
 # attempt to set some options for LESS LESS="-SRFXJ"
 export LESS="-SRFi"
@@ -154,10 +164,8 @@ export NVM_DIR="$HOME/.nvm"
 
 # [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
 
-export PYENV_ROOT=$HOME/.pyenv
-
-# export M2_HOME=/home/tbozeman/.bootstrap/maven/default
-# export JAVA_HOME=$HOME/.bootstrap/java/default
+# export M2_HOME="$HOME/.bootstrap/maven/default"
+# export JAVA_HOME="$HOME/.bootstrap/java/default"
 
 export SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 
@@ -189,33 +197,20 @@ export DOCKER_COMPLETION_SHOW_PLUGIN_IDS=yes
 export DOCKER_COMPLETION_SHOW_SECRET_IDS=yes
 export DOCKER_COMPLETION_SHOW_SERVICE_IDS=yes
 
-pathmungex -e PKG_CONFIG_PATH "$HOME/local/lib/pkgconfig"
-pathmungex -e PKG_CONFIG_PATH "$HOME/local/lib64/pkgconfig"
-pathmungex -e PKG_CONFIG_PATH "$HOME/local/share/pkgconfig"
-pathmungex -e PKG_CONFIG_PATH /usr/local/lib/pkgconfig
-pathmungex -e PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
-pathmungex -e PKG_CONFIG_PATH /usr/local/share/pkgconfig
+export PKG_CONFIG_PATH
+pathmungex PKG_CONFIG_PATH /usr/share/pkgconfig
+pathmungex PKG_CONFIG_PATH /usr/lib64/pkgconfig
+pathmungex PKG_CONFIG_PATH /usr/lib/pkgconfig
+pathmungex PKG_CONFIG_PATH /usr/local/share/pkgconfig
+pathmungex PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
+pathmungex PKG_CONFIG_PATH /usr/local/lib/pkgconfig
+pathmungex PKG_CONFIG_PATH "$HOME/local/share/pkgconfig"
+pathmungex PKG_CONFIG_PATH "$HOME/local/lib64/pkgconfig"
+pathmungex PKG_CONFIG_PATH "$HOME/local/lib/pkgconfig"
 
 for item in ~/.profile.d/*.{sh,bash}; do
-    [[ -f $item && -r $item ]] && . $item
+    [[ -f $item && -r $item ]] && . "$item"
 done
 unset item
-
-# -------- SNIP --------
-
-# # >>> conda initialize >>>
-# # !! Contents within this block are managed by 'conda init' !!
-# __conda_setup=$($HOME/.bootstrap/miniconda/bin/conda shell.bash hook 2> /dev/null)
-# if [ $? -eq 0 ]; then
-#     eval "$__conda_setup"
-# else
-#     if [ -f "$HOME/.bootstrap/miniconda/etc/profile.d/conda.sh" ]; then
-#         . "$HOME/.bootstrap/miniconda/etc/profile.d/conda.sh"
-#     else
-#         export PATH="$HOME/.bootstrap/miniconda/bin:$PATH"
-#     fi
-# fi
-# unset __conda_setup
-# # <<< conda initialize <<<
 
 : end of bashrc

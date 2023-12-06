@@ -1,6 +1,8 @@
 .*
-*.swp
-*.swo
+# lets just exclude the swap directory specifically
+# *.swp
+# *.swo
+/dotfiles/vim/swap
 
 __pycache__
 

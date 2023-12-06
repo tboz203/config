@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# I've seen people recommend `rev-parse --is-in-work-tree`, but this serves
+# largely the same purpose
+exec git rev-parse &> /dev/null

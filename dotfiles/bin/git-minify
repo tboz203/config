@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -eEuo pipefail
+trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
+
+# shellcheck disable=SC2034
+USAGE="--force"
+LONG_USAGE="Minimize the amount of space a git repository uses on disk
+
+!!!WARNING: DESTRUCTIVE!!!
+
+This script will obliterate the commit history of any repository you run it in.
+Don't use it unless you understand the consequences!"
+
+# shellcheck disable=SC2034
+SUBDIRECTORY_OK=1
+set +u # allow unset variables in git-sh-setup
+# shellcheck disable=SC1091
+. "$(git --exec-path)/git-sh-setup"
+set -u # but then turn it back on
+
+if [[ "$*" != "--force" ]]; then
+    echo "$LONG_USAGE"
+    exit
+fi
+
+DEREF_OBJ="%(if)%(*objectname)%(then)%(*objectname)%(else)%(objectname)%(end)"
+CURRENT_COMMIT=$(git rev-parse HEAD)
+
+# first remove any extraneous symrefs:
+# list all refs with any referenced ref (empty if not symbolic ref)
+git for-each-ref --format="%(refname):%(symref)" |
+    # find ref/referenced pairs with any referenced ref
+    (grep ':.\+$' || true) |
+    # strip referenced refs, keep symrefs
+    cut -d: -f1 |
+    while read -r symref; do
+        # remove symref
+        git symbolic-ref --delete -q "$symref"
+    done
+
+# next, remove refs not pointing at current commit:
+# list all remaining refs as "<hash> delete <name>"
+git for-each-ref --format="$DEREF_OBJ:delete %(refname)" |
+    # exclude refs pointed at our current commit
+    # (grep "$CURRENT_COMMIT" || true) |
+    (grep -v "$CURRENT_COMMIT" || true) |
+    # discard hash, keep the rest
+    cut -d: -f2- |
+    # send each remaining ref to hell
+    git update-ref --stdin
+
+# mark commits under each remaining ref as grafts
+{
+    git for-each-ref --format="$DEREF_OBJ"
+    echo "$CURRENT_COMMIT"
+} | sort -u > "$GIT_DIR/shallow"
+
+# obliterate reflogs
+git reflog expire --expire=now --all
+
+# and collect garbage
+git gc --prune=now

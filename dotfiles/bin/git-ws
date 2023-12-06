@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# more useful `git worktree` information
+
+set -eEuo pipefail
+trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
+
+# shellcheck disable=SC2034
+LONG_USAGE="output status info for all worktrees"
+
+# shellcheck disable=SC2034
+SUBDIRECTORY_OK=1
+
+set +u # allow unset variables in git-sh-setup
+# shellcheck disable=SC1091
+. git-sh-setup
+set -u # but then turn it back on
+
+git worktree list --porcelain |
+    while read -r key value; do
+        [[ $key == worktree ]] || continue
+        [[ $value == "$PWD" ]] && is_current="\e[1;33m **" || is_current=""
+        echo -e ">> \e[1;34m${value}${is_current}\e[0m"
+        git -C "$value" status --short --branch --untracked-files=no "$@"
+    done

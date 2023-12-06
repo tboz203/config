@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# based on https://stackoverflow.com/a/44973360
+# git config --global alias.sdiff '!'"bash -c 'O=(); A=(); while x=\"\$1\"; shift; do case \$x in -*) O+=(\"\$x\");; *) A+=(\"\$x^{}\");; esac; done; g(){ git show \"\${A[\$1]}\" && return; echo FAIL \${A[\$1]}; git show \"\${A[\$2]}\"; }; diff \"\${O[@]}\" <(g 0 1) <(g 1 0)' --"
+
+# I'd like to modify this to calculate diffs per-file; i.e. iterating through
+# files modified in either commit, and comparing those diffs individually
+
+set -eEuo pipefail
+trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
+
+# put the git-core directory in the path
+git_core_path=$(git --exec-path)
+[[ :$PATH: == *:$git_core_path:* ]] || PATH="$git_core_path:$PATH"
+
+# shellcheck disable=SC2034
+USAGE="[DIFF_OPTS] LEFT_REVISION RIGHT_REVISION [-- DIFF_TREE_OPTS]"
+LONG_USAGE="Compare two commits directly, without considering history."
+
+# shellcheck disable=SC2034
+SUBDIRECTORY_OK=1
+set +u # allow unset variables in git-sh-setup
+# shellcheck disable=SC1091
+. git-sh-setup
+set -u # but then turn it back on
+
+diff_opts=()
+diff_tree_opts=()
+revisions=()
+
+# set to `diffstat` if `--stat` requested
+stat_command="cat"
+if [[ -t 1 ]]; then
+    use_color_auto=always
+else
+    use_color_auto=never
+fi
+use_color=$use_color_auto
+
+while (($# > 0)); do
+    arg="$1"
+    shift
+    case $arg in
+        --) break ;;
+        # -*=*) set -- "${arg%%=*}" "${arg#*=}" "$@" ;;
+        --stat) stat_command="diffstat" ;;
+        --color | --color=*)
+            if [[ $arg =~ "=" ]]; then
+                colorarg=${arg#*=}
+                explicit=1
+            else
+                colorarg=$1
+                explicit=0
+            fi
+
+            case "$colorarg" in
+                always | never) use_color=$colorarg ;;
+                auto) use_color=$use_color_auto ;;
+                *)
+                    if [[ $explicit ]]; then
+                        echo >&2 "[X] invalid argument to --color"
+                        exit 1
+                    else
+                        use_color=$use_color_auto
+                    fi
+                    ;;
+            esac
+            ;;
+        -*) diff_opts+=("$arg") ;;
+        *) revisions+=("$arg") ;;
+    esac
+done
+
+if ((${#revisions[@]} != 2)); then
+    echo >&2 "[X] exactly two revisions required"
+    echo >&2 "$LONG_USAGE"
+    exit 1
+fi
+
+diff_tree_opts=("$@")
+
+if ! (diff --help | grep -q -- --color); then
+    coloropt=""
+else
+    coloropt="--color=$use_color"
+fi
+
+show_revision_patch()
+{
+    git diff-tree -m --patch --no-commit-id --ignore-blank-lines "${diff_tree_opts[@]}" "$1" |
+        # replace file header & hunk header with `diff --git` line
+        awk '/^diff/ { header=$0 ; skip=1 }; /^@@/ { skip=0; $0 = header}; { if (skip) next; print }'
+}
+
+diff "$coloropt" "${diff_opts[@]}" \
+    --label "${revisions[0]}" \
+    <(show_revision_patch "${revisions[0]}") \
+    --label "${revisions[1]}" \
+    <(show_revision_patch "${revisions[1]}") |
+    $stat_command |
+    git_pager || true

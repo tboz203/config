@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 [[ -v against ]] || against=HEAD
 [[ -v refs ]] || refs=("refs/heads" "refs/remotes")
 

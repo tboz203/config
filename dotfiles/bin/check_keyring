@@ -1,15 +1,15 @@
-#!/usr/bin/python3
-'''
+#!/usr/local/bin/python3
+"""
 teeny tiny script to check and see whether keyrings are available
-'''
+"""
 
 import keyring
 
 kr = keyring.get_keyring()
 
 if isinstance(kr, keyring.backends.fail.Keyring):
-    print('Keyring looks broken')
+    print("Keyring looks broken")
     exit(1)
 else:
-    print('Keyring looks okay')
+    print("Keyring looks okay")
     exit(0)

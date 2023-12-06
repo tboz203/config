@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if git diff --staged --quiet; then
+    echo "[X] refusing to fix last with an empty index"
+    exit 1
+fi
+
+git commit --amend --no-edit

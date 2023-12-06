@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 """
 Find git repositories and guess tracking branches.
 """
@@ -11,9 +11,9 @@ Find git repositories and guess tracking branches.
 
 import argparse
 import logging
-from typing import Any, Callable, List, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence
 
-import git  # type: ignore
+import git
 from update_repos import find_git_repos
 
 logger = logging.getLogger("set-tracking-branches")
@@ -38,7 +38,7 @@ def set_unset_tracking_branches(repo: git.Repo) -> None:
                 logger.info("setting tracking branch: %s %s", repo.working_dir, branch)
                 branch.set_tracking_branch(origin.refs[branch.name])
             else:
-                logger.info('matching upstream branch does not exist: %s %s', repo.working_dir, branch)
+                logger.info("matching upstream branch does not exist: %s %s", repo.working_dir, branch)
         else:
             logger.debug("already tracking: %s %s", repo.working_dir, branch)
 
@@ -95,7 +95,7 @@ def validate_tracking_branches(repo: git.Repo) -> bool:
 
 
 def parse_arguments(argv: Optional[Sequence[str]]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Update tracking branches in git repos.")
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "directories",
         nargs="*",

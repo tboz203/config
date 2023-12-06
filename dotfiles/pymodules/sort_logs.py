@@ -1,10 +1,9 @@
-#!/usr/bin/env python
-'''sort logs by timestamp (as long as its the first field)'''
+#!/usr/local/bin/python3
+"""sort logs by timestamp (as long as its the first field)"""
 
 import argparse
 import fileinput
 import re
-
 from textwrap import dedent, fill
 from typing import Iterator
 
@@ -33,11 +32,12 @@ def main() -> None:
 
 
 def sort_logs(lines: Iterator[str]) -> list[str]:
-    pattern = re.compile(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{1,9})?')
+    # pattern matching ISO-8601 timestamp at start of line
+    pattern = re.compile(r"^\d{4}-\d\d-\d\d[T ]\d\d:\d\d:\d\d(\.\d{1,9})?")
 
     # collect any multiline blobs
 
-    current_blob = None
+    current_blob = ""
     blobs = []
 
     for line in lines:
@@ -52,11 +52,13 @@ def sort_logs(lines: Iterator[str]) -> list[str]:
     if current_blob:
         blobs.append(current_blob)
 
-    # then sort our blobs
-    blobs = sorted(blobs, key=(lambda b: match.group(0) if (match := pattern.search(b)) else None))
+    def keyfunc(blob) -> str:
+        if match := pattern.search(blob):
+            return match.group(0)
+        return ""
 
-    return blobs
+    return sorted(blobs, key=keyfunc)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
