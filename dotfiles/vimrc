@@ -23,6 +23,7 @@ set ignorecase
 set smartcase
 set shiftround
 set cursorline
+set colorcolumn=
 
 set sidescroll=20
 set sidescrolloff=20

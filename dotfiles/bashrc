@@ -5,16 +5,16 @@
 
 : top of bashrc
 
-.()
-{
-    source "$@"
-}
-source()
-{
-    (shopt -oq verbose && echo "# sourcing $*") || true
-    builtin source "$@"
-    (shopt -oq verbose && echo "# leaving $*") || true
-}
+# .()
+# {
+#     source "$@"
+# }
+# source()
+# {
+#     (shopt -oq verbose && echo "# sourcing $*") || true
+#     builtin source "$@"
+#     (shopt -oq verbose && echo "# leaving $*") || true
+# }
 
 # functionless pathmunge ~/.local/bin to get powerline into PATH before attempting turbo mode
 [[ :$PATH: == *:$HOME/.local/bin:* ]] || PATH="$HOME/.local/bin:$PATH"
@@ -31,11 +31,32 @@ export PIPENV_VENV_IN_PROJECT=1
 export DOCKER_HIDE_LEGACY_COMMANDS=1
 export DOCKER_BUILDKIT=1
 export EDITOR=nvim
+export PAGER=less
+
+# attempt to set some options for LESS LESS="-SRFXJ"
+export LESS="-SRFi"
+# (less --mouse |& grep -q "no mouse option") || LESS+=" --mouse --wheel-lines=3"
+(less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
+export LESSCHARSET=utf-8
 
 # [[ -x $HOME/.local/bin/vim ]] && export EDITOR=$HOME/.local/bin/vim
 # [[ -x $HOME/.local/bin/less ]] && export PAGER=$HOME/.local/bin/less
 [[ -e $HOME/.pythonrc.py ]] && export PYTHONSTARTUP=$HOME/.pythonrc.py
 [[ -d $HOME/.local/boost_1_82_0 ]] && export BOOST_ROOT=$HOME/.local/boost_1_82_0
+
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+# [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
+
+# export M2_HOME="$HOME/.bootstrap/maven/default"
+# export JAVA_HOME="$HOME/.bootstrap/java/default"
+
+export SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 
 # if we have our own installation of bash_completion, don't let
 # /etc/profile.d/bash_completion.sh source the system installation
@@ -138,11 +159,6 @@ shopt -s globstar
 # if any command in a pipeline fails, the pipeline should be considered to have failed
 shopt -so pipefail
 
-# attempt to set some options for LESS LESS="-SRFXJ"
-export LESS="-SRFi"
-# (less --mouse |& grep -q "no mouse option") || LESS+=" --mouse --wheel-lines=3"
-(less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
-
 # these have been written to disk in order to reduce bash startup time. the
 # bash completion ones are in ~/.local/share/bash-completion/completions and
 # are lazily loaded at first use
@@ -154,20 +170,6 @@ doihave kind && eval "$(kind completion bash)"
 # doihave pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
 # doihave oc && eval "$(oc completion bash)"
 # doihave yq && eval "$(yq shell-completion bash)"
-
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-
-# [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
-
-# export M2_HOME="$HOME/.bootstrap/maven/default"
-# export JAVA_HOME="$HOME/.bootstrap/java/default"
-
-export SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 
 # When set to "1" suggest all commands, including plumbing commands
 # which are hidden by default (e.g. "cat-file" on "git ca<TAB>").

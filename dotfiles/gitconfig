@@ -1,9 +1,9 @@
 ; vim: ft=gitconfig sw=8 ts=8 noet
-[color]
-	ui = true
 [user]
 	name = Thomas Bozeman th026106
 	email = thomas.bozeman@digitalglobe.com
+[color]
+	ui = true
 [core]
 	editor = nvim
 	autocrlf = false
@@ -26,13 +26,42 @@
 	; tool itself goes in `diff`
 	prompt = false
 	trustExitCode = true
-[push]
-	default = current
+[advice]
+	detachedHead = false
+[checkout]
+	defaultRemote = origin
+[column]
+; 	ui = auto column dense
+	tag = auto column dense
 [credential]
 	helper = cache
 [fetch]
 	recursesubmodules = on-demand
 	prune = true
+[init]
+; 	templatedir = ~/.git_template
+	defaultBranch = main
+[log]
+	date = relative
+	initialDecorationSet = all
+[mailmap]
+	file = ~/.git-mailmap
+[pull]
+	ff = only
+[push]
+	default = current
+[rebase]
+	autoStash = true
+	autoSquash = true
+	rebaseMerges = true
+	updateRefs = false
+	missingCommitsCheck = error
+[rerere]
+	enabled = true
+[revert]
+	reference = true
+[tag]
+	sort = version:refname
 [pretty]
 	myline = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %s
 	long = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%B
@@ -40,7 +69,7 @@
 	loud = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %C(black brightyellow)%s%C(reset)
 	myshort = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s
 	committer = %C(auto)%h %C(cyan)%aN %C(green)%ad %C(reset)(%C(blue)%cN %C(red)%cd%C(reset))%C(auto)%d %s
-	contrast = %C(black blue)%h %aN %ad%d %s%n%B
+	contrast = %C(black blue)COMMIT %h %aN %ad%d %s%n%B
 	; no colors here b/c `column` can't count characters correctly
 	tableable = & %h & %aN & %ad & %<(80,trunc)%s & %d
 	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %gs - %C(dim blue)%s
@@ -77,32 +106,6 @@
 	logtab = !git l --pretty=tableable | column -t -s '&'
 	; this is a script now
 	; fixlast = git commit --amend --no-edit
-[pull]
-	ff = only
-[rerere]
-	enabled = true
-; [init]
-; 	templatedir = ~/.git_template
-[rebase]
-	autoStash = true
-	autoSquash = true
-	rebaseMerges = true
-[init]
-	defaultBranch = main
-[mailmap]
-	file = ~/.git-mailmap
-[log]
-	date = relative
-	initialDecorationSet = all
-[advice]
-	detachedHead = false
-[checkout]
-	defaultRemote = origin
-[column]
-; 	ui = auto column dense
-	tag = auto column dense
-[tag]
-	sort = version:refname
 [color "diff"]
 	meta = "bold #000000 brightblue"
 	frag = "bold #000000 yellow"

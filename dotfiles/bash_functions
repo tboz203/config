@@ -98,8 +98,8 @@ with_files()
         esac
     done
     #
-    # remaining args, if any, go to `files`
-    get_lines files files "$@" || return
+    # remaining args, if any, go to `fd`
+    get_array files -- fd -t f . "$@" || return
     # check for empty set
     [[ ${#files[*]} -eq 0 ]] && {
         echo >&2 "[X] no files"
@@ -127,7 +127,7 @@ complete -c vimwhich
 
 nvfiles()
 {
-    with_files nv -- "$@"
+    with_files nvim -- "$@"
 }
 # if we have `_filedir` from bash completion, use it
 declare -F _filedir &> /dev/null && complete -F _filedir -d nvfiles
@@ -138,7 +138,7 @@ nvwhich()
     # mapfile -t targets < <(realwhich "$@") || return
     # targets=($(realwhich "$@"))
     get_array targets -- realwhich "$@" || return
-    nv "${targets[@]}"
+    nvim "${targets[@]}"
 }
 complete -c nvwhich
 
@@ -350,8 +350,14 @@ complete -F _complete-pkg-config-names pkg-config-vars
 
 dush()
 {
-    : 'like alias dush=`du -shc`'
-    command du -shc "$@" | sort -h
+    : 'like alias dush=`du -shxc`'
+    command du -shxc "$@" | sort -h
+}
+
+dfh()
+{
+    : 'like alias dfh=`df -hT -t xfs -t ext4`'
+    df -hT -t xfs -t ext4 "$@" | sort -h -k 4
 }
 
 each()
