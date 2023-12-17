@@ -206,11 +206,11 @@ EOF
     tput ed
 }
 
-function vim() {
-    flash_message -s 2 '!!! use nv !!!'
-    nvim "$@"
-    return $?
-}
+# function vim() {
+#     flash_message -s 2 '!!! use nv !!!'
+#     nvim "$@"
+#     return $?
+# }
 
 # don't wanna set pager globally, but do wanna pick one for these
 doihave bat && _pager=bat || _pager=less

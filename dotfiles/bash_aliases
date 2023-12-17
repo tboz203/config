@@ -44,8 +44,6 @@ alias nv=nvim
 alias nvimdiff='nvim -d'
 alias nvdiff=nvimdiff
 
-alias cat=bat
-
 # common misspellings
 alias sl=ls
 alias s=ls
@@ -82,12 +80,12 @@ alias nl='nl -ba'
 alias make='make -j $(nproc)'
 alias figlet='figlet -t'
 # alias rgrep='grep -r'
-alias vimrc='vim ~/.vimrc'
-# alias gvimrc='gvim ~/.gvimrc'
-alias aliases='nv ~/.bash_aliases'
-alias bashrc='nv ~/.bashrc'
-alias nvconfig='nv ~/.config/nvim/lua/config/lazy.lua'
-alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show"'
+alias vimrc='$EDITOR ~/.vimrc'
+# alias gvimrc='$EDITOR ~/.gvimrc'
+alias aliases='$EDITOR ~/.bash_aliases'
+alias bashrc='$EDITOR ~/.bashrc'
+alias nvconfig='$EDITOR ~/.config/nvim/lua/config/lazy.lua'
+alias nvrc='$EDITOR ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show"'
 alias rmf='rm -rf'
 alias ps='ps -H'
 # alias listening='lsof -i -s TCP:Listen'

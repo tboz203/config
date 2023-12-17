@@ -350,7 +350,7 @@ if version > "500"
         " colorscheme Chasing_Logic
         " colorscheme Tomorrow-Night
         " colorscheme Tomorrow-Night-Eighties
-        colorscheme apprentice
+        " colorscheme apprentice
         " colorscheme atom-dark-256
         " colorscheme badwolf
         " colorscheme bubblegum-256-dark
@@ -380,17 +380,17 @@ if version > "500"
     " end tabs }}}
 
     " powerline {{{
-    if $HAS_POWERLINE
-        python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
-        python3 << trim endpython
-            try:
-                from powerline.vim import setup as powerline_setup
-                powerline_setup()
-                del powerline_setup
-            except ImportError:
-                pass
-        endpython
-    endif
+"     if $HAS_POWERLINE
+"         python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
+"         python3 << trim endpython
+"             try:
+"                 from powerline.vim import setup as powerline_setup
+"                 powerline_setup()
+"                 del powerline_setup
+"             except ImportError:
+"                 pass
+"         endpython
+"     endif
     " }}}
 
 " endif

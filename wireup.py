@@ -58,6 +58,7 @@ def link_files(source_dir, target_dir, relative, preserve, dryrun, transformer=N
             path = relative_to(target_dir, path)
         logger.info('%s -> %s', link, path)
         if not dryrun:
+            link.parent.mkdir(parents=True, exist_ok=True)
             link.symlink_to(path)
 
 

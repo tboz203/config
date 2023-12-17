@@ -5,16 +5,16 @@
 
 : top of bashrc
 
-.()
-{
-    source "$@"
-}
-source()
-{
-    (shopt -oq verbose && echo "# sourcing $*") || true
-    builtin source "$@"
-    (shopt -oq verbose && echo "# leaving $*") || true
-}
+# .()
+# {
+#     source "$@"
+# }
+# source()
+# {
+#     (shopt -oq verbose && echo "# sourcing $*") || true
+#     builtin source "$@"
+#     (shopt -oq verbose && echo "# leaving $*") || true
+# }
 
 # functionless pathmunge ~/.local/bin to get powerline into PATH before attempting turbo mode
 [[ :$PATH: == *:$HOME/.local/bin:* ]] || PATH="$HOME/.local/bin:$PATH"
@@ -23,19 +23,18 @@ source()
 [[ $- == *i* && -f $HOME/.turbo-mode.sh ]] && . "$HOME/.turbo-mode.sh"
 
 export ANSIBLE_NOCOWS=1
-export MAILTO=thomas.bozeman@cgifederal.com
-export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
+# export SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+# export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export PIPENV_VENV_IN_PROJECT=1
 export DOCKER_HIDE_LEGACY_COMMANDS=1
 export DOCKER_BUILDKIT=1
-export EDITOR=nvim
+export EDITOR=vim
 
 # [[ -x $HOME/.local/bin/vim ]] && export EDITOR=$HOME/.local/bin/vim
 # [[ -x $HOME/.local/bin/less ]] && export PAGER=$HOME/.local/bin/less
 [[ -e $HOME/.pythonrc.py ]] && export PYTHONSTARTUP=$HOME/.pythonrc.py
-[[ -d $HOME/.local/boost_1_82_0 ]] && export BOOST_ROOT=$HOME/.local/boost_1_82_0
 
 # if we have our own installation of bash_completion, don't let
 # /etc/profile.d/bash_completion.sh source the system installation
@@ -48,15 +47,8 @@ LOCAL_BASH_COMPLETION=/usr/local/share/bash-completion/bash_completion
 [[ -f $HOME/.bash_functions ]] && . "$HOME/.bash_functions"
 
 # counter-intuitively, later lines will be higher in the path
-pathmungex PATH "$HOME/workspace/maxar/dodev"
-
-pathmungex PATH "$HOME/.local/share/plantuml"
-pathmungex PATH "$HOME/.local/share/jdt-language-server/bin"
 pathmungex PATH "$HOME/.local/share/node/bin"
 pathmungex PATH "$HOME/.local/share/flyway"
-pathmungex PATH "$HOME/.local/share/pycharm/bin"
-pathmungex PATH "$HOME/.local/share/Postman"
-pathmungex PATH "$HOME/.local/share/idea/bin"
 pathmungex PATH "$HOME/.local/share/groovy/bin"
 pathmungex PATH "$HOME/.local/share/go/bin"
 pathmungex PATH "$HOME/.local/bin"
@@ -66,7 +58,6 @@ pathmungex PATH "$HOME/.cargo/bin"
 pathmungex PATH "$HOME/.poetry/bin"
 pathmungex PATH "$HOME/.rbenv/bin"
 pathmungex PATH "$HOME/.nodenv/bin"
-pathmungex PATH "$HOME/.pyenv/bin"
 pathmungex PATH "$HOME/.tfenv/bin"
 pathmungex PATH "$HOME/.tgenv/bin"
 pathmungex PATH "$HOME/.bin"
@@ -154,12 +145,8 @@ export NVM_DIR="$HOME/.nvm"
 
 # [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
 
-export PYENV_ROOT=$HOME/.pyenv
-
 # export M2_HOME=/home/tbozeman/.bootstrap/maven/default
 # export JAVA_HOME=$HOME/.bootstrap/java/default
-
-export SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 
 # When set to "1" suggest all commands, including plumbing commands
 # which are hidden by default (e.g. "cat-file" on "git ca<TAB>").
@@ -200,22 +187,5 @@ for item in ~/.profile.d/*.{sh,bash}; do
     [[ -f $item && -r $item ]] && . $item
 done
 unset item
-
-# -------- SNIP --------
-
-# # >>> conda initialize >>>
-# # !! Contents within this block are managed by 'conda init' !!
-# __conda_setup=$($HOME/.bootstrap/miniconda/bin/conda shell.bash hook 2> /dev/null)
-# if [ $? -eq 0 ]; then
-#     eval "$__conda_setup"
-# else
-#     if [ -f "$HOME/.bootstrap/miniconda/etc/profile.d/conda.sh" ]; then
-#         . "$HOME/.bootstrap/miniconda/etc/profile.d/conda.sh"
-#     else
-#         export PATH="$HOME/.bootstrap/miniconda/bin:$PATH"
-#     fi
-# fi
-# unset __conda_setup
-# # <<< conda initialize <<<
 
 : end of bashrc

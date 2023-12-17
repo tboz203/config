@@ -11,7 +11,8 @@
 # 	export TERM=rxvt-256color
 # fi
 #
-if [[ ! -v SSH_CONNECTION && ! -v HAS_POWERLINE_FONTS ]] && (fc-list | grep -iqE "powerline|nerd"); then
+if [[ ! -v SSH_CONNECTION && ! -v HAS_POWERLINE_FONTS ]] && 
+    (which fc-list &>/dev/null && fc-list | grep -iqE "powerline|nerd"); then
     export HAS_POWERLINE_FONTS=1
 fi
 
