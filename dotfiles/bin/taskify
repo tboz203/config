@@ -12,57 +12,58 @@
 # - output only on error
 # - logrotate?
 
-die() {
-	echo "taskify: $@"
-	[[ $LOG ]] && echo "taskify: $@" >>$LOG
-	exit 1
+die()
+{
+    echo "taskify: $*"
+    [[ $LOG ]] && echo "taskify: $*" >> "$LOG"
+    exit 1
 }
 
 while [[ $# -gt 0 ]]; do
-	arg="$1"
-	shift
-	case $arg in
-	--) break ;;
-	-h | --help)
-		HELP=1
-		;;
-	-s | --random-sleep)
-		TIMEOUT="$1"
-		shift
-		;;
-	-q | --quiet)
-		QUIET=$((${QUIET:-0} + 1))
-		;;
-	-l | --log)
-		LOG="$1"
-		shift
-		;;
-	-d | --directory)
-		DIRECTORY="$1"
-		shift
-		;;
-	-*)
-		echo "[X] I don't understand this argument: ($arg)"
-		HELP=1
-		;;
-	*)
-		# put this arg back on the stack
-		set -- "$arg" "$@"
-		break
-		;;
-	esac
+    arg="$1"
+    shift
+    case $arg in
+        --) break ;;
+        -h | --help)
+            HELP=1
+            ;;
+        -s | --random-sleep)
+            TIMEOUT="$1"
+            shift
+            ;;
+        -q | --quiet)
+            QUIET=$((${QUIET:-0} + 1))
+            ;;
+        -l | --log)
+            LOG="$1"
+            shift
+            ;;
+        -d | --directory)
+            DIRECTORY="$1"
+            shift
+            ;;
+        -*)
+            echo "[X] I don't understand this argument: ($arg)"
+            HELP=1
+            ;;
+        *)
+            # put this arg back on the stack
+            set -- "$arg" "$@"
+            break
+            ;;
+    esac
 done
 
 COMMAND=("$@")
 
 if [[ ! $HELP && ! "${COMMAND[*]}" ]]; then
-	echo "[X] No command supplied"
-	HELP=1
+    echo "[X] No command supplied"
+    HELP=1
 fi
 
 if [[ $HELP ]]; then
-	cat <<EOF
-Usage: $(basename $0) [OPTIONS] [--] COMMAND ...
+    cat << EOF
+Usage: $(basename "$0") [OPTIONS] [--] COMMAND ...
 
 Sanitize commands for cron.
 
@@ -72,7 +73,7 @@ COMMAND                 The command to run, with arguments
 Options:
 -h|--help       Print out this message.
 -q|--quiet      Silence the command, unless it exits with an error (to prevent
-                useless cron emails from chatty programs). Can be given more 
+                useless cron emails from chatty programs). Can be given more
                 than once to also silence errors
 -l|--log LOG    Append any output to LOG as well (includes timestamp & exit
                 code; path LOG is *not* relative to --directory argument)
@@ -84,35 +85,35 @@ Options:
                 change to DIRECTORY before executing command
 EOF
 
-	exit 1
+    exit 1
 fi
 
 if [[ $TIMEOUT ]]; then
-	sleep $((RANDOM % TIMEOUT))
+    sleep $((RANDOM % TIMEOUT))
 fi
 
 if [[ $DIRECTORY ]]; then
-	pushd $DIRECTORY &>/dev/null || die "could not change directory to ($DIRECTORY)"
+    pushd "$DIRECTORY" &> /dev/null || die "could not change directory to ($DIRECTORY)"
 fi
 
-output="$(eval "${COMMAND[@]}" 2>&1)"
+output=$("${COMMAND[@]}" 2>&1)
 status=$?
 
 if [[ $DIRECTORY ]]; then
-	popd &>/dev/null
+    popd &> /dev/null || die "could return to starting directory"
 fi
 
 if [[ ! $QUIET || ($QUIET -lt 2 && $status -ne 0) ]]; then
-	[[ $output ]] && echo "$output"
+    [[ $output ]] && echo "$output"
 fi
 
 if [[ $LOG ]]; then
-	[[ $output ]] || output='(no output)'
-	{
-		date
-		echo "$output"
-		echo "exit code $status"
-	} >>$LOG
+    [[ $output ]] || output='(no output)'
+    {
+        date
+        echo "$output"
+        echo "exit code $status"
+    } >> "$LOG"
 fi
 
 exit $status

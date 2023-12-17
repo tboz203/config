@@ -5,18 +5,24 @@
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-alias tree='tree -C --dirsfirst'
-# alias diff='diff --color=auto'
+
+# make sure `diff` *has* color before trying to use it
+diff --help 2>&1 | grep -q -- '--color' && alias diff='diff --color=auto'
+
+if tree --help 2>&1 | grep -q -- '--gitignore'; then
+    alias tree='tree -C --dirsfirst --gitignore'
+else
+    alias tree='tree -C --dirsfirst'
+fi
 
 # some aliases based off ls
-alias ls='ls --color=auto --ignore-backups --group-directories-first'
+alias ls='ls --color=auto --ignore-backups --group-directories-first --sort=version'
 alias ll='ls -lhF'
 alias la='ls -A'
 alias lf='ll -S'
-alias lv='ls --sort=v'
 alias l='ls -CF'
 alias lla='ll -A'
-alias lt='ll --sort=t'
+alias lt='ll --sort=time'
 alias l.='ls -d .*'
 alias ll.='ll -d .*'
 
@@ -34,6 +40,8 @@ for _ in $(seq 1 20); do
     alias $_dots=$_dirs
 done
 unset _dots _dirs
+
+alias files='fd . -t f'
 
 # alias vim='vim -Xp'
 # alias vim='nvim'
@@ -58,7 +66,8 @@ alias qgit=git
 
 # make du and df a bit more readable
 alias df='df -h'
-alias du='du -shc'
+# this is now function `dush`
+# alias du='du -shc'
 
 alias dfx='df -h -t xfs'
 
@@ -84,12 +93,14 @@ alias vimrc='$EDITOR ~/.vimrc'
 # alias gvimrc='$EDITOR ~/.gvimrc'
 alias aliases='$EDITOR ~/.bash_aliases'
 alias bashrc='$EDITOR ~/.bashrc'
+alias functions='$EDITOR ~/.bash_functions'
 alias nvconfig='$EDITOR ~/.config/nvim/lua/config/lazy.lua'
 alias nvrc='$EDITOR ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show"'
+alias nvimrc=nvrc
 alias rmf='rm -rf'
 alias ps='ps -H'
 # alias listening='lsof -i -s TCP:Listen'
-alias ports='sudo ss -tlnp | column -t'
+alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
 alias docker-prune='docker system prune -f --volumes'
 alias docker-halt='docker container ls -a --format "{{.Names}}" | xargs -r docker container rm -f'
 alias docker-scrub='docker-halt && docker-prune'
@@ -101,6 +112,11 @@ alias xclip='xclip -selection clipboard'
 alias curl='curl -w "\n"'
 
 alias http='http --ignore-stdin'
+
+alias ncdu='ncdu --exclude-caches --exclude=node_modules --exclude=cache --exclude=.cache --exclude=venv'
+
+# become root, but with all my bells and whistles (not well tested)
+alias super='sudo env HOME=$HOME /usr/local/bin/bash --login -i'
 
 if [[ -f /usr/local/lib/antlr-4.9-complete.jar ]]; then
     alias grun='java -Xmx500M -cp "/usr/local/lib/antlr-4.9-complete.jar:$CLASSPATH" org.antlr.v4.gui.TestRig'
@@ -127,5 +143,3 @@ alias eureka='eureka -s'
 # shellcheck disable=SC2154
 alias xenv='compgen -v | grep -v "^_" | sort | while read -r item; do declare -p $item ; done'
 
-# become root, but with all my bells and whistles (not well tested)
-alias super='sudo env HOME=$HOME /usr/local/bin/bash --login -i'

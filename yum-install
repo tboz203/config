@@ -6,11 +6,7 @@ in general
 - nmap
 - nc
 
-from source
-- python
-- vim
-- tmux
-- git
+- moreutils
 
 for python `secrets`
 - glib2-devel

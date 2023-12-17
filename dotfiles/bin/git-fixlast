@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# vim: et ts=4 sw=4
+
+help()
+{
+    cat >&2 <<- 'EOF'
+		git fixlast: Amend the most recent commit.
+		Usage: git fixlast [GIT_COMMIT_ARGS...]
+
+		(for a while this command was just an alias to `git commit --amend --no-edit`,
+		but i wanted just a bit of error checking.)
+	EOF
+    exit 1
+}
+
+# print a help if asked
+for item in "$@"; do
+    case $item in
+        --) break ;;
+        -h | --help) help ;;
+    esac
+done
+
+# if called with no args & an empty index; print a warning & halt
+if [[ -z $* ]] && git diff --staged --quiet; then
+    echo "[!] Refusing to fix last commit with an empty index"
+    exit 1
+fi
+
+# call our glorified alias
+git commit --amend --no-edit "$@"

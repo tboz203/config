@@ -5,31 +5,24 @@ set -euo pipefail
 PATTERNS=()
 OPTIONS=()
 while [[ $# -gt 0 ]]; do
-    arg="$1"; shift
+    arg="$1"
+    shift
     case $arg in
-        (--)
-            # all remaining arguments are passed to `docker container ls`
-            OPTIONS+=( "$@" )
-            break ;;
-        (-*=*)
-            # split --var=value pairs into separate tokens
-            # but only replacing the first '='!
-            set -- $(echo $arg | sed 's/=/ /' ) "$@" ;;
-        (--host)
-            HOST="$1"; shift ;;
-        (-a|--all)
-            ALL=1 ;;
-        (-j|--json)
-            JSON=1 ;;
-        (-h|--help)
-            HELP=1 ;;
-        (*)
-            PATTERNS+=( $arg ) ;;
+        --) break ;;
+        # split --var=value pairs
+        -*=*) set -- "${arg%%=*}" "${arg#*=}" "$@" ;;
+        --host) HOST="$1" && shift ;;
+        -a | --all) ALL=1 ;;
+        -j | --json) JSON=1 ;;
+        -h | --help) HELP=1 ;;
+        *) PATTERNS+=("$arg") ;;
     esac
 done
 
+OPTIONS=("$@")
+
 if [[ -v HELP ]]; then
-    cat <<EOF
+    cat << EOF
 $0: print abbreviated docker containers
 Usage: $0 [-h|--host HOST] [PATTERN ...] [-- OPTIONS ...]
 
@@ -56,12 +49,11 @@ JQ_FILTER='.Labels |= ( split(",") | .[] |= ( split("=") | {(.[0]): .[1]}) | add
 
 [[ -v HOST ]] && export DOCKER_HOST=$HOST
 
-[[ -v ALL ]] && OPTIONS+=( --all )
+[[ -v ALL ]] && OPTIONS+=(--all)
 
 for pattern in "${PATTERNS[@]}"; do
-    OPTIONS+=( --filter "name=$pattern" )
+    OPTIONS+=(--filter "name=$pattern")
 done
-
 
 if [[ -v JSON ]]; then
     docker container ls "${OPTIONS[@]}" --no-trunc --format "$JSON_FORMAT" |

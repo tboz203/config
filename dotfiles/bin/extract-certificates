@@ -1,0 +1,5 @@
+#!/usr/bin/awk -f
+
+/^-----BEGIN/ { cert=1 }
+{ if (cert) print }
+/^-----END/ { cert=0 }

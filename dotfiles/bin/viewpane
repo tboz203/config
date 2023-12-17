@@ -1,10 +1,14 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python3
+"""
+A quick little program somewhere between `watch` and `less`
+"""
 
 from __future__ import annotations
 
 import argparse
 import curses
 import logging
+import re
 import subprocess
 import time
 import traceback
@@ -25,19 +29,19 @@ if TYPE_CHECKING:
     # a dictionary mapping foreground/background pairs to curses color registry ids
     ColorMap = dict[tuple[int, int], int]
 
-root = Path(__file__).parent
-logfile = f"{root}/viewpane.log"
+# root = Path(__file__).parent
+root = Path(".")
+logfile = root.joinpath("viewpane.log")
 logging.root.addHandler(logging.NullHandler())
 logging.basicConfig(
-    filename=logfile,
+    filename=logfile.as_posix(),
     format="[%(asctime)s %(levelname)-8s %(name)s] %(message)s",
     level=logging.DEBUG,
 )
-# logging.basicConfig(handlers=[logging.NullHandler()])
 logger = logging.getLogger("viewpane")
 
 DEFAULT_DRAW_RATE = 2
-DEFAULT_READ_RATE = 0.05
+DEFAULT_CHECK_RATE = 0.2
 
 
 class StransiInstructionStreamTranslator:
@@ -74,9 +78,7 @@ class StransiInstructionStreamTranslator:
 
         self._color_map = color_map or {}
 
-    def translate_ansi_instruction_stream(
-        self, stream: InstructionStream
-    ) -> OutputStream:
+    def translate_ansi_instruction_stream(self, stream: InstructionStream) -> OutputStream:
         """
         Translate a stransi instruction stream into a sequence of attr/text pairs
         (with the intention of being fed to `stdscr.addstr(y, x, text, attr)`).
@@ -96,10 +98,13 @@ class StransiInstructionStreamTranslator:
                 # combine attr & color right as they go out
                 yield (item, attr | curses.color_pair(color_num))
             elif isinstance(item, SetColor):
+                if not item.color:
+                    logger.warning("colorless color??")
+                    continue
                 if item.role == ColorRole.FOREGROUND:
-                    fg = item.color.code
+                    fg = item.color.ansi256.code
                 elif item.role == ColorRole.BACKGROUND:
-                    bg = item.color.code
+                    bg = item.color.ansi256.code
                 else:
                     logger.warning("unrecognized setcolor instruction: %s", item)
                     continue
@@ -108,9 +113,7 @@ class StransiInstructionStreamTranslator:
                     color_num = self._color_map[(fg, bg)]
                 else:
                     # get the next available color number
-                    color_num = (
-                        (max(self._color_map.values()) + 1) if self._color_map else 1
-                    )
+                    color_num = (max(self._color_map.values()) + 1) if self._color_map else 1
                     # tell curses about it
                     curses.init_pair(color_num, fg, bg)
                     # store the mapping
@@ -196,24 +199,27 @@ class PadManager:
             # ansi translation magic
             instructions = line.instructions()
             # turn our instructions into text/attr pairs
-            stream = iter(
-                self._translator.translate_ansi_instruction_stream(instructions)
-            )
+            stream = iter(self._translator.translate_ansi_instruction_stream(instructions))
             # get the first pair and put it explicitly at (y, 0)
-            text, attr = next(stream)
-            self._pad.addstr(y, 0, text, attr)
+            try:
+                text, attr = next(stream)
+                self._pad.addstr(y, 0, text, attr)
+            except StopIteration:
+                continue
             # the rest are positioned implicitly
             for text, attr in stream:
                 self._pad.addstr(text, attr)
+
+        logger.debug("lines written")
 
     def _resize(self, ansi_lines: list[Ansi]) -> None:
         """
         make our pad fit these lines
         """
-
         lines_y = len(ansi_lines) or 1
         lines_x = max(map(ansi_length, ansi_lines)) if ansi_lines else 1
 
+        logger.debug("resizing pad to %s, %s", lines_y, lines_x)
         self._pad.resize(lines_y, lines_x + 1)
 
     def move_by(self, move_y: int, move_x: int):
@@ -225,12 +231,12 @@ class PadManager:
             y += move_y
         if (move_x > 0 and x + move_x < pad_x) or (move_x < 0 and x + move_x >= 0):
             x += move_x
-        logger.info("moving pad coordinates to (%s, %s)", y, x)
+        logger.debug("moving pad coordinates to (%s, %s)", y, x)
         self._coords = (y, x)
 
     def refresh(self):
         """display the pad"""
-        logger.info("drawing pad")
+        logger.info("refreshing the pad")
         y, x = self._coords
         # self._stdscr.clear()
         self._stdscr.erase()
@@ -241,11 +247,16 @@ class PadManager:
         curses.doupdate()
 
 
-def win_main(stdscr: CursesWindow, command: list[str], draw_rate=None):
+def win_main(stdscr: CursesWindow, command: Union[str, list[str]], draw_rate=None, check_rate=None):
+    logger.debug("entering win_main")
     draw_rate = draw_rate or DEFAULT_DRAW_RATE
+    check_rate = check_rate or DEFAULT_CHECK_RATE
+
+    logger.debug("draw rate is %s", draw_rate)
+    logger.debug("check rate is %s", check_rate)
 
     curses.use_default_colors()
-    curses.halfdelay(1)
+    curses.halfdelay(int(check_rate * 10))
 
     pad = curses.newpad(24, 80)
     pad.keypad(True)
@@ -256,10 +267,17 @@ def win_main(stdscr: CursesWindow, command: list[str], draw_rate=None):
     v_shift = 1
     h_shift = 10
 
+    # command may be passed as a list of tokens, or as a single string
+    if isinstance(command, list):
+        command = quote_str_list(command)
+
     def draw():
-        logger.info("calling draw!")
-        proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        text = proc.stdout.decode("utf-8")
+        logger.debug("calling command (%s)!", command)
+        # proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # text = proc.stdout.decode("utf-8")
+        status, text = subprocess.getstatusoutput(command)
+        if status:
+            raise RuntimeError("command failed", command, text)
         lines = [Ansi(line) for line in text.splitlines()]
 
         manager.write(lines)
@@ -269,13 +287,17 @@ def win_main(stdscr: CursesWindow, command: list[str], draw_rate=None):
 
     mark = time.monotonic()
     while True:
+        # logger.debug("top of tight loop")
         now = time.monotonic()
+        # logger.debug("now = %s, mark = %s", now, mark)
         if (now - mark) > draw_rate:
             mark = now
             draw()
 
         try:
+            # logger.debug("getting key")
             c = pad.getkey()
+            # logger.debug("got key %s", c)
         except curses.error as exc:
             if exc.args == ("no input",):
                 # logger.debug("no input")
@@ -284,7 +306,6 @@ def win_main(stdscr: CursesWindow, command: list[str], draw_rate=None):
                 raise
 
         if c == "q":
-            # time to goodbye
             break
         elif c == "KEY_UP":
             manager.move_by(-v_shift, 0)
@@ -299,9 +320,10 @@ def win_main(stdscr: CursesWindow, command: list[str], draw_rate=None):
             manager.move_by(0, h_shift)
             manager.refresh()
         elif c == "KEY_RESIZE":
-            logger.info("refreshing for resize")
             curses.update_lines_cols()
             manager.refresh()
+
+    logger.debug("leaving win_main")
 
 
 def ansi_length(ansi: Ansi):
@@ -309,21 +331,37 @@ def ansi_length(ansi: Ansi):
     return sum(len(item) for item in ansi.instructions() if isinstance(item, str))
 
 
+def quote_str_list(values: list[str]) -> str:
+    """
+    Quote a list of strings for a shell, preserving whitespace but still
+    allowing for shell parameter expansion.
+    """
+    output = []
+    for item in values:
+        # using `re` is the fastest way to do this; i checked
+        if re.search("[\\s'\"\\\\]", item):
+            item = '"' + re.sub(r'("|\\)', r"\\\1", item) + '"'
+        output.append(item)
+    return " ".join(output)
+
+
 def main():
     logger.info("starting")
 
-    parser = argparse.ArgumentParser(
-        description="A quick little program somewhere between `watch` and `less`"
-    )
-    parser.add_argument(
-        "-d", "--delay", type=float, help="How frequently to run the watched command"
-    )
-    parser.add_argument("command", nargs="+", help="the command to watch")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-d", "--delay", type=float, help="How frequently to run the watched command")
+
+    parser.add_argument("command", nargs="*", help="the command to watch")
+    parser.add_argument("-c", "--command", dest="command_str", help="the command to watch (as a quoted string)")
 
     args = parser.parse_args()
 
+    # we require command XOR command_str
+    if bool(args.command) == bool(args.command_str):
+        parser.error("Must pass `command` or `--command`, but not both")
+
     try:
-        curses.wrapper(win_main, args.command, draw_rate=args.delay)
+        curses.wrapper(win_main, args.command or args.command_str, draw_rate=args.delay)
     except KeyboardInterrupt:
         pass
     except Exception as exc:

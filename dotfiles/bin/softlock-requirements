@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+set -eEuo pipefail
+trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
+
+while [[ $# -gt 0 ]]; do
+    arg="$1"
+    shift
+    case $arg in
+        -h | --help)
+            HELP=1
+            ;;
+        -u | --unlock)
+            UNLOCK=1
+            ;;
+        -?*)
+            # taking special care with this pattern to not catch `-`
+            echo "I don't understand this argument: $arg"
+            FAIL=1
+            ;;
+        *)
+            if [[ ! -v REQUIREMENTS_IN ]]; then
+                REQUIREMENTS_IN="$arg"
+            elif [[ ! -v REQUIREMENTS_TXT ]]; then
+                REQUIREMENTS_TXT="$arg"
+            else
+                echo "[X] too many parameters"
+                FAIL=1
+            fi
+            ;;
+    esac
+done
+
+if [[ -v HELP ]]; then
+    cat << EOF
+$(basename "$0"): extract soft-lock requirements
+Usage: $(basename "$0") [options] REQUIREMENTS_IN REQUIREMENTS_TXT
+
+REQUIREMENTS_IN and REQUIREMENTS_TXT should be requirements files of the form
+understood by pip. You may use '-' to specify stdin.
+
+options:
+
+-h | --help     Print this message and exit
+-u | --unlock   Extract unlocked requirements. REQUIREMENTS_TXT not required in this mode
+
+EOF
+    exit 1
+fi
+
+if [[ ! -v REQUIREMENTS_IN || ! (-v REQUIREMENTS_TXT || -v UNLOCK) ]]; then
+    echo "[X] not enough parameters"
+    FAIL=1
+fi
+
+[[ -v FAIL ]] && exit 1
+
+# disabling SC2002 (useless use of cat) because
+# 1) `while ...; do ...; done < FILE` reads very poorly, and
+# 2) cat correctly interprets `-` as stdin, while `<` does not
+# shellcheck disable=SC2002
+cat "$REQUIREMENTS_IN" | while read -r line; do
+    specifier=$(grep -o '^\w[^<>~=]*[<>~=]\+.*$' <<< "$line" || true)
+    if [[ -z $specifier ]]; then
+        # this line is something other than a requirement
+        echo "$line"
+        continue
+    fi
+    requirement=$(grep -o '^\w[^<>~=]*' <<< "$specifier" || true)
+    if [[ -v UNLOCK ]]; then
+        # echo requirement without lock
+        echo "$requirement"
+        continue
+    fi
+    # escape bracketed extras for grep
+    safe=$(echo "$requirement" | sed 's/\[/\\[/' | sed 's/\]/\\]/')
+    # find exact versions from requirements.txt
+    version=$(grep -E "^$safe==" "$REQUIREMENTS_TXT" | cut -d= -f3) || {
+        echo "no $requirement"
+        continue
+    }
+    # chop off the patch version
+    truncated=$(echo "$version" | cut -d. -f-2)
+    # print a requirement soft-lock
+    echo "$requirement~=$truncated"
+done

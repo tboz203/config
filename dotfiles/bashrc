@@ -31,6 +31,13 @@ export PIPENV_VENV_IN_PROJECT=1
 export DOCKER_HIDE_LEGACY_COMMANDS=1
 export DOCKER_BUILDKIT=1
 export EDITOR=vim
+export PAGER=less
+
+# attempt to set some options for LESS LESS="-SRFXJ"
+export LESS="-SRFi"
+# (less --mouse |& grep -q "no mouse option") || LESS+=" --mouse --wheel-lines=3"
+(less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
+export LESSCHARSET=utf-8
 
 # [[ -x $HOME/.local/bin/vim ]] && export EDITOR=$HOME/.local/bin/vim
 # [[ -x $HOME/.local/bin/less ]] && export PAGER=$HOME/.local/bin/less
@@ -47,6 +54,7 @@ LOCAL_BASH_COMPLETION=/usr/local/share/bash-completion/bash_completion
 [[ -f $HOME/.bash_functions ]] && . "$HOME/.bash_functions"
 
 # counter-intuitively, later lines will be higher in the path
+pathmungex PATH "/usr/local/go/bin"
 pathmungex PATH "$HOME/.local/share/node/bin"
 pathmungex PATH "$HOME/.local/share/flyway"
 pathmungex PATH "$HOME/.local/share/groovy/bin"
@@ -61,21 +69,12 @@ pathmungex PATH "$HOME/.nodenv/bin"
 pathmungex PATH "$HOME/.tfenv/bin"
 pathmungex PATH "$HOME/.tgenv/bin"
 pathmungex PATH "$HOME/.bin"
-pathmungex PATH "$HOME/.maxar-bin"
 
-# pathmungex --after PATH $HOME/.bootstrap/bin
-# pathmungex --after PATH $HOME/.bootstrap/java/default/bin
-# pathmungex --after PATH $HOME/.bootstrap/maven/default/bin
-# pathmungex --after PATH $HOME/.bootstrap/gradle/default/bin
-# pathmungex --after PATH $HOME/.bootstrap/miniconda/bin
-
-pathmungex --after PATH /usr/pgsql-12/bin
-
-export PERL_MB_OPT="--install_base /home/tbozeman/perl5"
-export PERL_MM_OPT="INSTALL_BASE=/home/tbozeman/perl5"
-pathmungex PATH /home/tbozeman/perl5/bin
-pathmungex -e -a PERL_LOCAL_LIB_ROOT "$HOME/perl5"
-pathmungex -e PERL5LIB "$HOME/perl5/lib/perl5"
+# export PERL_MB_OPT="--install_base $HOME/perl5"
+# export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
+# pathmungex PATH "$HOME/perl5/bin"
+# pathmungex -e -a PERL_LOCAL_LIB_ROOT "$HOME/perl5"
+# pathmungex -e PERL5LIB "$HOME/perl5/lib/perl5"
 
 pathmungex -e PYTHONPATH "$HOME/.pymodules"
 
@@ -102,51 +101,39 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=
-HISTFILESIZE=
-HISTTIMEFORMAT="%h %d %H:%M:%S> "
+# bash 4.2 doesn't seem to like negative values here...
+# HISTSIZE="-1"
+# HISTFILESIZE="-1"
+HISTSIZE=$((2 ** 20))
+HISTFILESIZE=$HISTSIZE
 HISTIGNORE="ls:la:lf:ll:l"
+# HISTTIMEFORMAT="%h %d %H:%M:%S> "
+HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S> "
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
-
-# use a specific key for rsync over ssh
-export RSYNC_RSH="ssh -i $HOME/.ssh/rsync_key"
-
 # set autocd: if command is a directory, cd to it
 shopt -s autocd
 # set recursive globbing w/ "**"
 shopt -s globstar
-
-# attempt to set some options for LESS LESS="-SRFXJ"
-export LESS="-SRFi"
-# (less --mouse |& grep -q "no mouse option") || LESS+=" --mouse --wheel-lines=3"
-(less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
+# I wanna set this, but it seems like it would probably break things...
+# shopt -s nocaseglob
+# if any command in a pipeline fails, the pipeline should be considered to have failed
+shopt -so pipefail
 
 # these have been written to disk in order to reduce bash startup time. the
 # bash completion ones are in ~/.local/share/bash-completion/completions and
 # are lazily loaded at first use
 
-doihave kubectl && eval "$(kubectl completion bash)"
-doihave helm && eval "$(helm completion bash)"
-doihave kind && eval "$(kind completion bash)"
+# doihave kubectl && eval "$(kubectl completion bash)"
+# doihave helm && eval "$(helm completion bash)"
+# doihave kind && eval "$(kind completion bash)"
 # doihave poetry && eval "$(poetry completions bash)"
 # doihave pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
 # doihave oc && eval "$(oc completion bash)"
 # doihave yq && eval "$(yq shell-completion bash)"
 
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-
-# [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
-
-# export M2_HOME=/home/tbozeman/.bootstrap/maven/default
-# export JAVA_HOME=$HOME/.bootstrap/java/default
 
 # When set to "1" suggest all commands, including plumbing commands
 # which are hidden by default (e.g. "cat-file" on "git ca<TAB>").
@@ -176,15 +163,19 @@ export DOCKER_COMPLETION_SHOW_PLUGIN_IDS=yes
 export DOCKER_COMPLETION_SHOW_SECRET_IDS=yes
 export DOCKER_COMPLETION_SHOW_SERVICE_IDS=yes
 
-pathmungex -e PKG_CONFIG_PATH "$HOME/local/lib/pkgconfig"
-pathmungex -e PKG_CONFIG_PATH "$HOME/local/lib64/pkgconfig"
-pathmungex -e PKG_CONFIG_PATH "$HOME/local/share/pkgconfig"
-pathmungex -e PKG_CONFIG_PATH /usr/local/lib/pkgconfig
-pathmungex -e PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
-pathmungex -e PKG_CONFIG_PATH /usr/local/share/pkgconfig
+# export PKG_CONFIG_PATH
+# pathmungex PKG_CONFIG_PATH /usr/share/pkgconfig
+# pathmungex PKG_CONFIG_PATH /usr/lib64/pkgconfig
+# pathmungex PKG_CONFIG_PATH /usr/lib/pkgconfig
+# pathmungex PKG_CONFIG_PATH /usr/local/share/pkgconfig
+# pathmungex PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
+# pathmungex PKG_CONFIG_PATH /usr/local/lib/pkgconfig
+# pathmungex PKG_CONFIG_PATH "$HOME/local/share/pkgconfig"
+# pathmungex PKG_CONFIG_PATH "$HOME/local/lib64/pkgconfig"
+# pathmungex PKG_CONFIG_PATH "$HOME/local/lib/pkgconfig"
 
 for item in ~/.profile.d/*.{sh,bash}; do
-    [[ -f $item && -r $item ]] && . $item
+    [[ -f $item && -r $item ]] && . "$item"
 done
 unset item
 

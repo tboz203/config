@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 # 2013-05-15
 # Tommy Bozeman (tboz203)
 # refactor of an earlier script
@@ -23,93 +23,95 @@
 from __future__ import print_function
 
 import argparse
-from os import path
-from sys import argv, stdin
-from collections import OrderedDict
+import fileinput
+import json
+from collections import Counter
+from operator import itemgetter
 
-# lzip = lambda l: list(zip(list(l)))
-lreversed = lambda l: list(reversed(list(l)))
 
-def get_args():
+def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-c', '--count', action='store_true',
-            help='prefix each item with its count')
-    parser.add_argument('-r', '--reverse', action='store_true',
-            help='reverse order')
-    parser.add_argument('files', nargs='*', default=['-'],
-            help="the list of files to read in. '-' (stdin) by default")
+    parser.add_argument("-c", "--count", action="store_true", help="prefix each item with its count")
+    parser.add_argument("-r", "--reverse", action="store_true", help="reverse order")
+    parser.add_argument(
+        "files",
+        nargs="*",
+        default=["-"],
+        help="the list of files to read in. '-' (stdin) by default",
+    )
 
     vq_group = parser.add_mutually_exclusive_group()
-    vq_group.add_argument('-v', '--verbose', action='store_true',
-            help='turn on verbose output')
-    vq_group.add_argument('-q', '--quiet', action='store_true',
-            help='turn off output')
+    vq_group.add_argument("-v", "--verbose", action="store_true", help="turn on verbose output")
+    vq_group.add_argument("-q", "--quiet", action="store_true", help="turn off output")
 
     sort_group = parser.add_mutually_exclusive_group()
-    sort_group.add_argument('-a', '--alphabetical', action='store_true',
-            help='sort output alphabetically')
-    sort_group.add_argument('-n', '--numeric', action='store_true',
-            help='sort output by number of occurences')
+    sort_group.add_argument("-a", "--alphabetical", action="store_true", help="sort output alphabetically")
+    sort_group.add_argument(
+        "-n",
+        "--numeric",
+        action="store_true",
+        help="sort output by number of occurences",
+    )
 
     show_group = parser.add_mutually_exclusive_group()
-    show_group.add_argument('-d', '--duplicated', action='store_true',
-            help='show only duplicated items')
-    show_group.add_argument('-u', '--unique', action='store_true',
-            help='show only unique items')
+    show_group.add_argument("-d", "--duplicated", action="store_true", help="show only duplicated items")
+    show_group.add_argument("-u", "--unique", action="store_true", help="show only unique items")
+
+    parser.add_argument("-j", "--json", action="store_true", help="output json")
 
     return parser.parse_args()
 
-def get_items(args):
-    lines = []
-    for item in args.files:
-        if item == '-':
-            lines += stdin.readlines()
-        else:
-            with open(item) as file:
-                lines += file.readlines()
 
-    # i feel like there's a way to not repeat the setdefault step each time
-    d = OrderedDict()
-    for item in lines:
-        item = item.rstrip()
-        d.setdefault(item, 0)
-        d[item] += 1
+def get_counts(files: list[str]) -> list[tuple[str, int]]:
+    lines = list(fileinput.input(files))
+    counter = Counter([line.strip("\n") for line in lines])
+    return list(counter.items())
 
-    return d.items()
 
-def output(args, items):
+def output(args, counts: list[tuple[str, int]]) -> None:
     if args.unique:
-        items = filter((lambda x: x[1] == 1), items)
+        # items = filter((lambda x: x[1] == 1), items)
+        counts = [(line, count) for line, count in counts if count == 1]
     elif args.duplicated:
-        items = filter((lambda x: x[1] != 1), items)
+        # counts = filter((lambda x: x[1] != 1), counts)
+        counts = [(line, count) for line, count in counts if count != 1]
 
-    if items == []:
-        exit()
+    if not counts:
+        return
 
     if args.alphabetical:
-        items = sorted(items)
+        # sorts by line, then by count
+        counts.sort()
     elif args.numeric:
-        # this part just feels silly
-        items = sorted(zip(*lreversed(zip(*items))))
-        items = lreversed(zip(*lreversed(zip(*items))))
+        # sorts by count, preserving order otherwise
+        counts.sort(key=itemgetter(1))
 
     if args.reverse:
-        items = lreversed(items)
+        counts.reverse()
+
+    if args.json:
+        if args.count:
+            print(json.dumps([(count, line) for line, count in counts], indent=2))
+        else:
+            print(json.dumps([line for line, _ in counts], indent=2))
+        return
 
     if args.count:
-        n = str(1 + len(str(max(map((lambda x: x[1]), items)))))
-        for item in zip(*lreversed(zip(*items))):
-            print(('{: ' + n + '}: {}').format(*item))
+        largest_count = max([count for _, count in counts])
+        width = len(str(largest_count)) + 1
+        for line, count in counts:
+            print(f"{count:>{width}}: {line}")
     else:
-        for item in items:
-            print(item[0])
+        for line, _ in counts:
+            print(line)
 
 
 def main():
-    args = get_args()
-    items = get_items(args)
-    output(args, items)
+    args = parse_arguments()
+    counts = get_counts(args.files)
+    output(args, counts)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

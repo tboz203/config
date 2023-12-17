@@ -1,50 +1,64 @@
 #!/bin/bash
 
-trap 'echo >&2 "[!] eureka: got ($?) on line $LINENO: $BASH_COMMAND"' ERR
-
 set -eEuo pipefail
+trap 'echo >&2 "[!] got ($?) on line $LINENO: $BASH_COMMAND"' ERR
 
 while [[ $# -gt 0 ]]; do
-    arg="$1" ; shift
+    arg="$1"
+    shift
     case $arg in
-        (-h|--help)
-            HELP=1 ;;
-        (-v|--verbose)
-            VERBOSE=1 ;;
-        (-m|--multi|--multiple)
-            MULTI=1 ;;
-        (--no-multi|--no-multiple)
-            unset MULTI ;;
-        (-e|--env|--environ|--environment)
-            ENVIRONMENT=$1 ; shift ;;
-        (-d|--dump)
-            DUMP=1 ;;
-        (--no-dump)
-            unset DUMP ;;
-        (-s|--suggest)
-            MAKE_SUGGESTIONS=1 ;;
-        (-S|--services?)
-            MAKE_SERVICE=1 ;;
-        (--no-suggest)
-            unset MAKE_SUGGESTIONS ;;
-        (-f|--field)
-            FIELD=$1 ; shift ;;
-        (-*)
+        -h | --help)
+            HELP=1
+            ;;
+        -v | --verbose)
+            VERBOSE=1
+            ;;
+        -m | --multi | --multiple)
+            MULTI=1
+            ;;
+        --no-multi | --no-multiple)
+            unset MULTI
+            ;;
+        -e | --env | --environ | --environment)
+            ENVIRONMENT=$1
+            shift
+            ;;
+        -d | --dump)
+            DUMP=1
+            ;;
+        --no-dump)
+            unset DUMP
+            ;;
+        -s | --suggest)
+            MAKE_SUGGESTIONS=1
+            ;;
+        -S | --services?)
+            MAKE_SERVICE=1
+            ;;
+        --no-suggest)
+            unset MAKE_SUGGESTIONS
+            ;;
+        -f | --field)
+            FIELD=$1
+            shift
+            ;;
+        -*)
             echo >&2 "I don't understand this argument: $arg"
             HELP=1
             ;;
-        (*)
-            SERVICES+=( "$arg" ) ;;
+        *)
+            SERVICES+=("$arg")
+            ;;
     esac
 done
 
 if [[ -v HELP || ! -v SERVICES ]]; then
-    cat >&2 <<EOF
-$(basename $0): look up maxar services via eureka
+    cat >&2 << EOF
+$(basename "$0"): look up maxar services via eureka
 
-Usage: $(basename $0) [-h|--help] [(-e|--env|--environment) ENV] SERVICE...
+Usage: $(basename "$0") [-h|--help] [(-e|--env|--environment) ENV] SERVICE...
 
-General Options: 
+General Options:
 
 -h|--help       This help output.
 -s|--suggest    suggest other possible service names when none are found
@@ -70,69 +84,92 @@ fi
 [[ -v EUREKA_SERVER_URL && -v SERVICE_DISCOVERY_MAP ]] || . ~/.ssh/P2020
 
 if [[ -v ENVIRONMENT ]]; then
-    try_url="$( jq -re --arg env $ENVIRONMENT '.[$env]?' <<< $SERVICE_DISCOVERY_MAP )" \
-        && EUREKA_SERVER_URL=$try_url \
-        || { echo >&2 "[!] could not match environment '$ENVIRONMENT'" ; true ; }
+    if try_url="$(jq -re --arg env "$ENVIRONMENT" '.[$env]?' <<< "$SERVICE_DISCOVERY_MAP")"; then
+        EUREKA_SERVER_URL=$try_url
+    else
+        echo >&2 "[!] could not match environment '$ENVIRONMENT'"
+    fi
 fi
 
-
-build_service_url() {
-    # we'll read a json payload from stdin
+build_service_url()
+{
+    : 'read one or more service json payloads from stdin & output a service url for each'
     jq -r '"service://\(.app | ascii_downcase)/\(.metadata.version)/\(.metadata.environment)"'
 }
 
-fail() {
+fail()
+{
+    : 'die, potentially emitting some service name suggestions'
     [[ -v MAKE_SUGGESTIONS ]] && make_suggestions
     exit 1
 }
 
-make_suggestions() {
+make_suggestions()
+{
+    : 'extract all found service urls & emit them as suggestions'
     echo >&2 "[!] service not found; perhaps one of these?"
     build_service_url <<< "$original" >&2
 }
 
+split_service()
+{
+    : 'split a service into parts; accepts http urls, service urls, and bare service names'
+    : 'creates no output; sets `service_*` variables'
+    local IFS=/
+    read -r service_proto _ service_name service_vers service_env service_path <<< "$1"
+    if [[ -z $service_name ]]; then
+        service_name=$service_proto
+    fi
+}
+
 for service in "${SERVICES[@]}"; do
 
-    if grep -q '^service://' <<< $service ; then
-        # in the form of "service://ancillary-image-tracker-backend-v2/1.0/devint-us-east-1/events"
-        service_name=$( cut -d/ -f3 <<< $service )
-        service_vers=$( cut -d/ -f4 <<< $service )
-        service_env=$( cut -d/ -f5 <<< $service )
-        service_path=$( cut -d/ -f6- <<< $service )
-    else
-        # assumed to be a bare service name
-        service_name=$service
-        service_vers=
-        service_env=
-        service_path=
-    fi
+    # if grep -q '^service://' <<< "$service"; then
+    #     # in the form of "service://ancillary-image-tracker-backend-v2/1.0/devint-us-east-1/events"
+    #     service_name=$(cut -d/ -f3 <<< "$service")
+    #     service_vers=$(cut -d/ -f4 <<< "$service")
+    #     service_env=$(cut -d/ -f5 <<< "$service")
+    #     service_path=$(cut -d/ -f6- <<< "$service")
+    # else
+    #     # assumed to be a bare service name
+    #     service_name=$service
+    #     service_vers=
+    #     service_env=
+    #     service_path=
+    # fi
+
+    split_service "$service"
 
     # hit the eureka server itself, & get json payload for our service name
-    payload="$( curl -Ssf -H "Accept: application/json" "$EUREKA_SERVER_URL/eureka/apps/$service_name" )" || {
+    payload="$(curl -Ssf -H "Accept: application/json" "$EUREKA_SERVER_URL/eureka/apps/$service_name")" || {
         echo >&2 "[!] error caught while looking up '$service'"
         exit 1
     }
 
     # first unwrap
-    payload="$( jq -c '.application.instance[]?' <<< "$payload" )"
+    payload="$(jq -c '.application.instance[]?' <<< "$payload")"
     # save a copy for finding suggestions
     original="$payload"
 
     if [[ -v DUMP ]]; then
-        jq . <<< $payload
+        jq . <<< "$payload"
     else
-        # turn our version number $(potentially w/ shell wildcards) into a regex, kinda
-        service_vers="^$( sed 's/\*/.*/g' <<< $service_vers | sed 's/\./\\./g' )"
+        # turn our version number (potentially w/ shell wildcards) into a regex, kinda
+        service_vers="^$(sed -r -e 's/\./\\./g' -e 's/\*/.*/g' <<< "$service_vers")"
         # filter based on that version number
-        [[ $service_vers ]] && { payload="$( jq -sce --arg vers "$service_vers" '.[] | select( .metadata.version | try tostring catch "" | test( $vers ))' <<< "$payload" )" || fail ; }
+        [[ $service_vers ]] && {
+            payload="$(jq -sce --arg vers "$service_vers" '.[] | select( .metadata.version | try tostring catch "" | test( $vers ))' <<< "$payload")" || fail
+        }
         # clean up our service environment
         [[ $service_env =~ ^(dev|int|devint|reg|prod|ft)$ ]] && service_env="${service_env}-us-east-1"
         # filter by that, if it exists
-        [[ $service_env ]] && { payload="$( jq -sce --arg env "$service_env" '.[] | select( .metadata.environment == $env )' <<< "$payload" )" || fail ; }
+        [[ $service_env ]] && {
+            payload="$(jq -sce --arg env "$service_env" '.[] | select( .metadata.environment == $env )' <<< "$payload")" || fail
+        }
         # sort instances by version number (highest to lowest)
-        payload="$( jq -sce 'sort_by([.metadata.version // "" | split(".")[] | try tonumber catch 0]) | reverse[]' <<< "$payload" )"
+        payload="$(jq -sce 'sort_by([.metadata.version // "" | split(".")[] | try tonumber catch 0]) | reverse[]' <<< "$payload")"
         # potentially take the top one
-        [[ -v MULTI ]] || payload="$( jq -sce '.[0]' <<< "$payload" )"
+        [[ -v MULTI ]] || payload="$(jq -sce '.[0]' <<< "$payload")"
         # and display
         if [[ -v VERBOSE ]]; then
             jq -e . <<< "$payload"

@@ -1,133 +1,226 @@
 # .bash_functions
-# vim: ft=sh
+# shellcheck disable=SC2016
+# vim: ft=sh ts=4 sw=4 et
 
-realwhich() {
-    realpath "$(command which "$@")"
+realwhich()
+{
+    : '`which` without aliases or functions, dereferencing symlinks'
+    # {
+    #     command which "$@" || return
+    # } | xargs -r realpath
+    declare -a items
+    local item failures
+    for item in "$@"; do
+        # i just don't like the error output of `which`...
+        items+=("$(command which "$item" 2> /dev/null)") || {
+            echo >&2 "[X] realwhich: did not find $item"
+            failures=1
+        }
+    done
+    [[ -v failures ]] && return 1
+    realpath "${items[@]}"
 }
 
-doihave() {
-    command which "$@" &>/dev/null
+doihave()
+{
+    : 'silently test whether a command is in the path'
+    command which "$@" &> /dev/null
 }
 # so i can type `if ihave program; ...`
 alias ihave=doihave
 
-heregit() {
-    # execute a git command in every child directory
-    local item
-    for item in *; do
-        echo -e "\e[30;43m> $item\e[0m"
-        git -C "$item" "$@"
-        echo
-    done
-}
-
-# files() {
-# 	# like `find -type f`, but exclude hidden files
-# 	find "$@" -iregex ".*/\.[^/].*" -prune -o -type f -print
+# this is a script now
+# heregit()
+# {
+#     : 'execute a git command in every child directory'
+#     local item
+#     for item in *; do
+#         echo -e "\e[30;43m> $item\e[0m"
+#         git -C "$item" "$@"
+#         echo
+#     done
 # }
 
-files() {
-    # list regular files, here or at given paths
-    fd . -t f "$@"
+# this is an alias now (using `fd`)
+# files() {
+#   : 'like "find -type f", but exclude hidden files'
+#   find "$@" -iregex ".*/\.[^/].*" -prune -o -type f -print
+# }
+
+get_array()
+{
+    : '`readarray` with error handling'
+    : 'usage: get_array [READARRAY_ARGS...] ARRAY -- COMMAND...'
+    declare -a mapargs
+    while [[ $# -gt 0 ]]; do
+        local arg=$1
+        shift
+        case $arg in
+            --) break ;;
+            *) mapargs+=("$arg") ;;
+        esac
+    done
+    if [[ $# -eq 0 ]]; then
+        echo >&2 "[X] get_array: no command given"
+        return 1
+    elif [[ ${#mapargs[*]} -eq 0 ]]; then
+        # technically you could call like `get_array -d : -- echo $PATH` and
+        # pass this check, but if you've gotten that far, i'll assume you know
+        # what you're doing
+        echo >&2 "[X] get_array: no array given"
+        return 1
+    fi
+
+    # execute the command
+    local fulltext
+    fulltext=$("$@") || {
+        local err=$?
+        echo >&2 -n "$fulltext"
+        return $err
+    }
+
+    # map the array
+    readarray -t "${mapargs[@]}" <<< "$fulltext"
 }
 
-vimfiles() {
-    vim -p $(files "$@")
+with_files()
+{
+    : 'run a command & pass `files` as parameters'
+    : 'usage: with_files COMMAND [COMMAND_ARGS...] [-- FILES_ARGS...]'
+    # split our params into command and files_args
+    declare -a command files
+    while [[ $# -gt 0 ]]; do
+        local arg="$1"
+        shift
+        case $arg in
+            --) break ;;
+            *) command+=("$arg") ;;
+        esac
+    done
+    #
+    # remaining args, if any, go to `fd`
+    get_array files -- fd -t f . "$@" || return
+    # check for empty set
+    [[ ${#files[*]} -eq 0 ]] && {
+        echo >&2 "[X] no files"
+        return 1
+    }
+    # handoff
+    "${command[@]}" "${files[@]}"
+}
+
+vimfiles()
+{
+    : 'edit all regular files (in $@ or .) with vim'
+    with_files vim -- "$@"
 }
 # if we have `_filedir` from bash completion, use it
-declare -F _filedir &>/dev/null && complete -F _filedir -d vimfiles
+declare -F _filedir &> /dev/null && complete -F _filedir -d vimfiles
 
-vimwhich() {
-    vim $(realwhich "$@")
+vimwhich()
+{
+    declare -a targets
+    get_array targets -- realwhich "$@" || return
+    vim "${targets[@]}"
 }
 complete -c vimwhich
 
-nvfiles() {
-    nv $(files "$@")
+nvfiles()
+{
+    with_files nvim -- "$@"
 }
 # if we have `_filedir` from bash completion, use it
-declare -F _filedir &>/dev/null && complete -F _filedir -d nvfiles
+declare -F _filedir &> /dev/null && complete -F _filedir -d nvfiles
 
-nvwhich() {
-    nv $(realwhich "$@")
+nvwhich()
+{
+    declare -a targets
+    # mapfile -t targets < <(realwhich "$@") || return
+    # targets=($(realwhich "$@"))
+    get_array targets -- realwhich "$@" || return
+    nvim "${targets[@]}"
 }
 complete -c nvwhich
 
-# mnemonic "move with"
-# move a file & cd to that directory
-mw() {
-    if [[ $# -lt 2 || " $@ " =~ " -h " || " $@ " =~ " --help " ]]; then
+mw()
+{
+    : 'move a file & cd to that directory'
+    # mnemonic "move with"
+    if [[ $# -lt 2 || " $* " =~ " -h " || " $* " =~ " --help " ]]; then
         echo "mw: FILE... DIR -> mv FILE... DIR && cd DIR"
         exit 1
     fi
     # the last parameter
-    local dest="${@: -1}"
+    local dest="${*: -1}"
     # everything but the last parameter, as an array
     local files=("${@:1:$#-1}")
     [[ -d $dest ]] || {
         echo "last parameter should be a directory"
         return 1
     }
-    mv -t "$dest" "${files[@]}" && cd "$dest"
+    mv -t "$dest" "${files[@]}" && cd "$dest" || return
 }
 # if we have `_filedir` from bash completion, use it
-declare -F _filedir &>/dev/null && complete -F _filedir mw
+declare -F _filedir &> /dev/null && complete -F _filedir mw
 
-repeat() {
-    # usage: repeat TEXT COUNT
-    # does something a bit like `TEXT * COUNT`
+repeat()
+{
+    : 'usage: repeat TEXT COUNT'
+    : 'does something a bit like `TEXT * COUNT`'
     local text="$1"
     local count="$2"
-    printf "${text}%.0s" $(seq 1 $count)
+    printf "${text}%.0s" $(seq 1 "$count")
 }
 
-pathmunge() {
-    # add a directory to the PATH if not already present
+pathmunge()
+{
+    : 'add a directory to the PATH if not already present'
     case ":${PATH}:" in
-    *:"$1":*) ;;
-    *)
-        if [ -d "$1" ]; then
-            if [ "$2" = "after" ]; then
-                PATH=$PATH:$1
-            else
-                PATH=$1:$PATH
+        *:"$1":*) ;;
+        *)
+            if [ -d "$1" ]; then
+                if [ "$2" = "after" ]; then
+                    PATH=$PATH:$1
+                else
+                    PATH=$1:$PATH
+                fi
             fi
-        fi
-        ;;
+            ;;
     esac
 }
 
-pathmungex() {
-    # like pathmunge, but better
+pathmungex()
+{
+    : 'like pathmunge, but better'
     local params arg PATHVAR DIR EXPORT AFTER HELP
     params=(PATHVAR DIR)
     while [[ $# -gt 0 ]]; do
         arg="$1"
         shift
         case $arg in
-        -e | --export) EXPORT=1 ;;
-        -a | --after) AFTER=1 ;;
-        -h | --help) HELP=1 ;;
-        -*)
-            echo >&2 "[X] I don't understand \"$arg\""
-            HELP=1
-            ;;
-        *)
-            : "setting a positional parameter: ${params[0]} -> $arg"
-            if [[ ${#params[@]} -gt 0 ]]; then
-                param="${params[0]}"
-                declare "$param=$arg"
-                params=("${params[@]:1}")
-            else
-                echo >&2 "[X] Too many parameters: \"$arg\""
+            -e | --export) EXPORT=1 ;;
+            -a | --after) AFTER=1 ;;
+            -h | --help) HELP=1 ;;
+            -*)
+                echo >&2 "[X] pathmungex: I don't understand \"$arg\""
                 HELP=1
-            fi
-            ;;
+                ;;
+            *)
+                : "setting a positional parameter: ${params[0]} -> $arg"
+                if [[ ${#params[@]} -gt 0 ]]; then
+                    param="${params[0]}"
+                    declare "$param=$arg"
+                    params=("${params[@]:1}")
+                else
+                    echo >&2 "[X] pathumngex: Too many parameters: \"$arg\""
+                    HELP=1
+                fi
+                ;;
         esac
     done
 
     if [[ ${#params[@]} -gt 0 ]]; then
-        echo >&2 "[X] Not enough parameters"
+        echo >&2 "[X] pathumngex: Not enough parameters"
         HELP=1
     fi
 
@@ -155,47 +248,50 @@ pathmungex() {
             declare -g "$PATHVAR=$DIR:${!PATHVAR}"
         fi
         if [[ -v EXPORT ]]; then
-            export $PATHVAR
+            export "${PATHVAR?}"
         fi
     fi
 }
 
-showmounts() {
-    # list mounts in a table, and cut off the options
+showmounts()
+{
+    : 'list mounts in a table, and cut off the options'
     mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
 }
 
-flash_message() {
+flash_message()
+{
+    : 'breifly print a message to the screen'
     local arg message HELP
     local sleep=1
     while [[ $# -gt 0 ]]; do
         arg="$1"
         shift
         case $arg in
-        -s | --sleep)
-            sleep="$1"
-            shift
-            ;;
-        -h | --help)
-            HELP=1
-            ;;
-        -*)
-            echo >&2 "Unrecognized option: $arg"
-            ;;
-        *)
-            message+="$arg "
-            ;;
+            -s | --sleep)
+                sleep="$1"
+                shift
+                ;;
+            -h | --help)
+                HELP=1
+                ;;
+            -*)
+                echo >&2 "Unrecognized option: $arg"
+                ;;
+            *)
+                message+="$arg "
+                ;;
         esac
     done
 
     if [[ -v HELP ]]; then
-        command cat <<EOF
-flash_message: briefly print a message to the screen.
+        command cat <<-EOF
+		flash_message: briefly print a message to the screen.
 
-Usage: flash_message [-s|--sleep SLEEP] MESSAGE...
+		Usage: flash_message [-s|--sleep SLEEP] MESSAGE...
 
-	-s|--sleep: how long to sleep (currently $sleep)
-EOF
+			-s|--sleep: how long to sleep (currently $sleep)
+		EOF
         return 1
     fi
 
@@ -206,7 +302,8 @@ EOF
     tput ed
 }
 
-# function vim() {
+# vim()
+# {
 #     flash_message -s 2 '!!! use nv !!!'
 #     nvim "$@"
 #     return $?
@@ -215,17 +312,21 @@ EOF
 # don't wanna set pager globally, but do wanna pick one for these
 doihave bat && _pager=bat || _pager=less
 
-# mnemonic: `jq | less`
-function jql() {
+jql()
+{
+    : 'mnemonic: `jq | less`'
     jq -C "${@:-.}" | $_pager
 }
 
-# mnemonic: `jq | less`
-function yql() {
+yql()
+{
+    : 'mnemonic: `yq | less`'
     yq -C "${@:-.}" | $_pager
 }
 
-pkg-config-vars() {
+pkg-config-vars()
+{
+    : 'display all pkg-config variables for a name'
     for name in "$@"; do
         pkg-config "$name" --print-variables | while read -r var; do
             value=$(pkg-config "$name" --variable "$var")
@@ -234,13 +335,180 @@ pkg-config-vars() {
     done
 }
 
-pkg-config-names() {
-    pkg-config --list-all | cut -f1 -d" "
+pkg-config-names()
+{
+    pkg-config --list-all | cut -f1 -d" " | sort
 }
 
-_complete-pkg-config-names() {
-    COMPREPLY=($(compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}"))
-    return 0
+_complete-pkg-config-names()
+{
+    # mapfile -t COMPREPLY < <(compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}")
+    get_array COMPREPLY -- compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}"
 }
 
 complete -F _complete-pkg-config-names pkg-config-vars
+
+dush()
+{
+    : 'like alias dush=`du -shxc`'
+    command du -shxc "$@" | sort -h
+}
+
+dfh()
+{
+    : 'like alias dfh=`df -hT -t xfs -t ext4`'
+    df -hT -t xfs -t ext4 "$@" | sort -h -k 4
+}
+
+each()
+{
+    for item in "$@"; do
+        echo "$item"
+    done
+}
+
+showpaths()
+{
+    : 'pretty print pathlike variables'
+    : 'usage: showpaths [PATHVAR...]'
+    status=0
+
+    # make a list of parameters, defaulting to just "PATH"
+    paths=("${@:-PATH}")
+
+    for item in "${paths[@]}"; do
+        if [[ ! -v $item ]]; then
+            # if there's no variable with that name, warn & continue
+            echo >&2 "[X] showpaths: $item unset"
+            status=1
+            continue
+        fi
+
+        # if more than one argument, print a header
+        [[ ${#paths[@]} -gt 1 ]] && echo "===== $item ====="
+        # echo path variable contents, one per line
+        echo "${!item}" | tr : "\n"
+    done
+    return $status
+}
+complete -v showpaths
+
+searchpath()
+{
+    : 'search a pathlike variable'
+    : 'usage: searchpath PATHVAR name [name...]'
+
+    [[ $# -lt 2 ]] && return 1
+
+    pathvar="$1"
+    shift
+    names=("$@")
+
+    if [[ ! -v $pathvar ]]; then
+        # if there's no variable with that name, explode
+        echo >&2 "[X] searchpath: $pathvar unset"
+        return 1
+    fi
+
+    # read contents of variable named by `pathvar` into array, separated by colons
+    mapfile -td: pathlist <<< "${!pathvar}"
+
+    for path in "${pathlist[@]}"; do
+        for name in "${names[@]}"; do
+            # expand any globs & print existing files
+            compgen -G "$path/$name"
+        done
+    done
+
+}
+complete -v searchpath
+
+fatal()
+{
+    : 'display an error with an optional message; stacktrace; exit 1'
+    echo >&2 "[X] ${*:-Fatal Error}"
+    stacktrace
+    exit 1
+}
+
+stacktrace()
+{
+    : 'print the current call stack'
+    local idx filename subroutine lineno context lines ctx_lineno prefix
+
+    context=2
+    top=1
+    bottom=1
+
+    local opt OPTARG OPTIND help
+    while getopts :hc:t:b: opt; do
+        case $opt in
+            h)
+                help=1
+                ;;
+            c)
+                context=$OPTARG
+                ;;
+            t)
+                top=$OPTARG
+                ;;
+            b)
+                bottom=$OPTARG
+                ;;
+            :)
+                echo >&2 "[X] stacktrace: required argument not found: $OPTARG"
+                help=1
+                ;;
+            ?)
+                echo >&2 "[X] stacktrace: invalid option: $OPTARG"
+                help=1
+                ;;
+            *)
+                echo >&2 "[X] stacktrace: unexpected input"
+                declare -p opt OPTARG
+                help=1
+                ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+
+    if [[ -v help ]]; then
+        cat >&2 << EOF
+${FUNCNAME[0]}: print a bash function stacktrace
+Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]
+
+Options:
+-c CONTEXT      print CONTEXT number of lines of context (currently $context)
+-b BOTTOM       trim BOTTOM frames from the bottom of the stack (currently $bottom)
+-t TOP          trim TOP frames from the top of the stack (currently $top)
+EOF
+        return 1
+    fi
+
+    echo "  Call stack (starting with oldest frame):"
+    # iterating through 3 related arrays in reverse; -1 for array end ; idx > 0 to skip this function
+    for ((idx = ${#BASH_SOURCE[@]} - bottom; idx >= top; idx--)); do
+        filename=${BASH_SOURCE[$idx]}
+        subroutine=${FUNCNAME[$idx]}
+        lineno=${BASH_LINENO[$idx - 1]}
+
+        unset lines
+        # read into array $lines from $filename at $lineno
+        # (such that $index = $lineno) with $context surrounding lines
+        mapfile -s $((lineno - context - 1)) -O $((lineno - context)) -n $((context * 2 + 1)) -t lines < "$filename"
+
+        echo "    $filename($subroutine):"
+        for ctx_lineno in "${!lines[@]}"; do
+            ((ctx_lineno == lineno)) && prefix="   >>" || prefix="     "
+            echo "$prefix $ctx_lineno ${lines[$ctx_lineno]}"
+        done
+
+    done
+}
+
+faketty()
+{
+    : 'convince a command that it is attached to a tty'
+    script -qefc "$(printf "%q " "$@")" /dev/null
+}
+complete -c faketty

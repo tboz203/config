@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# search STDIN for 'END' lines & add a null character
+sed 's/^-----END .*$/\0\x00/' |
+    # read certs delimited by null into '$item'
+    while read -d $'\0' -r item; do
+        # feed each cert into openssl
+        openssl x509 --noout --alias <<< "$item"
+    done

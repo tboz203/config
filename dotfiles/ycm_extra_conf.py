@@ -20,7 +20,7 @@ LOGGING_CONFIG = {
             "level": "DEBUG",
             "formatter": "verbose",
             "class": "logging.FileHandler",
-            "filename": "/home/tbozeman/ycm_extra_conf.log",
+            "filename": Path("~/ycm_extra_conf.log").expanduser().as_posix(),
         },
     },
     "loggers": {

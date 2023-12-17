@@ -1,11 +1,11 @@
 ; vim: ft=gitconfig sw=8 ts=8 noet
-[color]
-	ui = true
 [user]
 	name = Thomas Bozeman th026106
 	email = thomas.bozeman@digitalglobe.com
+[color]
+	ui = true
 [core]
-	editor = nvim
+	editor = vim
 	autocrlf = false
 	excludesfile = ~/.gitignore
 	pager = less
@@ -14,23 +14,54 @@
 	conflictstyle = diff3
 	ff = false
 [mergetool]
+	; tool itself goes in `merge`
 	prompt = false
-	tool = vimdiff
+	keepBackup = false
 [diff]
 	tool = vimdiff
 	algorithm = histogram
 	colorMoved = default
 	whitespace = ignore
 [difftool]
+	; tool itself goes in `diff`
 	prompt = false
 	trustExitCode = true
-[push]
-	default = current
+[advice]
+	detachedHead = false
+[checkout]
+	defaultRemote = origin
+[column]
+; 	ui = auto column dense
+	tag = auto column dense
 [credential]
 	helper = cache
 [fetch]
 	recursesubmodules = on-demand
 	prune = true
+[init]
+; 	templatedir = ~/.git_template
+	defaultBranch = main
+[log]
+	date = relative
+	initialDecorationSet = all
+[mailmap]
+	file = ~/.git-mailmap
+[pull]
+	ff = only
+[push]
+	default = current
+[rebase]
+	autoStash = true
+	autoSquash = true
+	rebaseMerges = true
+	updateRefs = false
+	missingCommitsCheck = error
+[rerere]
+	enabled = true
+[revert]
+	reference = true
+[tag]
+	sort = version:refname
 [pretty]
 	myline = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %s
 	long = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%B
@@ -38,20 +69,23 @@
 	loud = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %C(black brightyellow)%s%C(reset)
 	myshort = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s
 	committer = %C(auto)%h %C(cyan)%aN %C(green)%ad %C(reset)(%C(blue)%cN %C(red)%cd%C(reset))%C(auto)%d %s
-	contrast = %C(black blue)%h %aN %ad%d %s
+	contrast = %C(black blue)COMMIT %h %aN %ad%d %s%n%B
 	; no colors here b/c `column` can't count characters correctly
 	tableable = & %h & %aN & %ad & %<(80,trunc)%s & %d
 	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %gs - %C(dim blue)%s
 [alias]
 	s = status
 	si = status --ignored
-	d = diff
-	ch = checkout
-	co = commit
+	d = diff --stat
+	ds = d --staged
 	l = log --graph --date-order --date=relative --pretty=myline
-	la = l --all
+	; "almost all"
+	la = l --branches --tags --remotes=origin HEAD
+	; "really all"
+	laa = l --all
 	ll = l --date=human --format=long
-	lla = ll --all
+	lla = ll --branches --remotes=origin
+	llaa = ll --all
 	lg = log --walk-reflogs --format=reflog
 	lgd = log --walk-reflogs --format=reflog --date=relative
 	ls = la --simplify-by-decoration
@@ -65,48 +99,29 @@
 	lprune = !git pruneable | xargs -r git branch -D
 	ctags = !.git/hooks/ctags
 	; pull-all = "!git refs refs/heads | while read item ; do git fetch origin $item:$item & done ; wait"
-	logdiff = l --pretty=contrast --no-graph --reverse --patch
+	logdiff = log --pretty=contrast --no-graph --reverse --patch
 	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
-	logwatch = !viewpane -- git la --color
-	fixup = commit -n --amend --no-edit
+	; logwatch = !viewpane -- git la --color
+	logwatch = !viewpane -- git la --color -n '$(tput lines)'
 	logtab = !git l --pretty=tableable | column -t -s '&'
-[pull]
-	ff = only
-[rerere]
-	enabled = true
-; [init]
-; 	templatedir = ~/.git_template
-[rebase]
-	autoStash = true
-[init]
-	defaultBranch = main
-[mailmap]
-	file = ~/.git-mailmap
-[log]
-	date = relative
-	initialDecorationSet = all
-[advice]
-	detachedHead = false
-[checkout]
-	defaultRemote = origin
-[column]
-; 	ui = auto column dense
-	tag = auto column dense
-[tag]
-	sort = version:refname
+	; this is a script now
+	; fixlast = git commit --amend --no-edit
 [color "diff"]
 	meta = "bold #000000 brightblue"
 	frag = "bold #000000 yellow"
 [interactive]
-	diffFilter = delta --color-only --features=interactive
+	diffFilter = delta --features=interactive
+	; diffFilter = delta --color-only
 [delta]
 	features = decorations
-[delta "interactive"]
 	dark = true
+	syntax-theme = Coldark-Dark
+	true-color = always
+[delta "interactive"]
+	color-only = true
 	keep-plus-minus-markers = false
 [delta "decorations"]
 	; diff-so-fancy = true
-	dark = true
 	; side-by-side = true
 	commit-decoration-style = blue ol
 	commit-style = raw

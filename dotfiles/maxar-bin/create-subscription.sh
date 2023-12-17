@@ -4,7 +4,7 @@
 
 ESCP=$(eureka -e reg event-service-consumer-proxy)
 
-mxcurl -v $ESCP/subscriptions -H "Content-Type: application/json" \
+mxcurl -v "$ESCP/subscriptions" -H "Content-Type: application/json" \
     -d '{
             "name": "MCS.AMS.newAncillaryMetadata_reg-tbozeman-k8s_AIT_BACKEND_SERVICE_V2_testing",
             "eventSubscription": "MCS.AMS.newAncillaryMetadata",
@@ -16,7 +16,7 @@ mxcurl -v $ESCP/subscriptions -H "Content-Type: application/json" \
             }
         }'
 
-mxcurl -v $ESCP/subscriptions -H "Content-Type: application/json" \
+mxcurl -v "$ESCP/subscriptions" -H "Content-Type: application/json" \
     -d '{
             "name": "IMS.AcquisitionGroundStateChange_reg-tbozeman-k8s_AIT_BACKEND_SERVICE_V2_testing",
             "eventSubscription": "IMS.AcquisitionGroundStateChange",
