@@ -1,5 +1,10 @@
 #!/bin/bash -eu
 
+# move to script directory
+cd $(dirname $0)
+
+CONFIG_ROOT=$(pwd)
+
 # remove dotfiles (either uninstalling a previous "wireup", or clearing out the initial "skel")
 
 BACKUP_DIR=$HOME/dotfiles
@@ -17,28 +22,33 @@ function maybe_delete {
     fi
 }
 
-# regular files
-maybe_delete ~/.bash_profile
-maybe_delete ~/.bashrc
-maybe_delete ~/.vimrc
-maybe_delete ~/.gvimrc
-maybe_delete ~/.inputrc
-maybe_delete ~/.bash_aliases
-maybe_delete ~/.bash_functions
-maybe_delete ~/.bash_logout
-maybe_delete ~/.gitconfig
-maybe_delete ~/.git-prompt
-maybe_delete ~/.vim
-maybe_delete ~/.tmux.conf
-maybe_delete ~/.tmux-powerline.conf
-maybe_delete ~/.ssh/config
-maybe_delete ~/.pythonrc.py
-maybe_delete ~/.pretty_prompt.sh
-maybe_delete ~/.ackrc
+for repo_file in $CONFIG_ROOT/dotfiles/*; do
+    dot_file=~/.$(basename $repo_file)
+    maybe_delete $dot_file
+done
 
-# directories
-maybe_delete ~/.bin
-maybe_delete ~/.maxar-bin
-maybe_delete ~/.config/htop
-maybe_delete ~/.config/powerline
-maybe_delete ~/.pymodules
+# # regular files
+# maybe_delete ~/.bash_profile
+# maybe_delete ~/.bashrc
+# maybe_delete ~/.vimrc
+# maybe_delete ~/.gvimrc
+# maybe_delete ~/.inputrc
+# maybe_delete ~/.bash_aliases
+# maybe_delete ~/.bash_functions
+# maybe_delete ~/.bash_logout
+# maybe_delete ~/.gitconfig
+# maybe_delete ~/.git-prompt
+# maybe_delete ~/.vim
+# maybe_delete ~/.tmux.conf
+# maybe_delete ~/.tmux-powerline.conf
+# maybe_delete ~/.ssh/config
+# maybe_delete ~/.pythonrc.py
+# maybe_delete ~/.pretty_prompt.sh
+# maybe_delete ~/.ackrc
+# 
+# # directories
+# maybe_delete ~/.bin
+# maybe_delete ~/.maxar-bin
+# maybe_delete ~/.config/htop
+# maybe_delete ~/.config/powerline
+# maybe_delete ~/.pymodules
