@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python
 """Clean extracted packages.
 
 This script examines tar & zip packages, and removes files and directories that

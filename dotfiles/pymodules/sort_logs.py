@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python
 """sort logs by timestamp (as long as its the first field)"""
 
 import argparse

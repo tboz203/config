@@ -43,12 +43,13 @@ unset _dots _dirs
 
 alias files='fd . -t f'
 
-# alias vim='vim -Xp'
+alias vim='vim -p'
 # alias vim='nvim'
 # alias nvim='nvim -p'
 # alias vim='vim -p'
 # alias view='view -p'
-alias nv=nvim
+# alias nv=nvim
+alias nv=vim
 alias nvimdiff='nvim -d'
 alias nvdiff=nvimdiff
 
