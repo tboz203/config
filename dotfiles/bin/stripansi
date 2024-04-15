@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# strip ANSI color sequences
+exec sed -r 's/\x1b\[[0-9]+(;[0-9]+)*m//g' "$@"

@@ -9,10 +9,9 @@ alias egrep='egrep --color=auto'
 # make sure `diff` *has* color before trying to use it
 diff --help 2>&1 | grep -q -- '--color' && alias diff='diff --color=auto'
 
+alias tree='tree -phugs -C --metafirst --dirsfirst'
 if tree --help 2>&1 | grep -q -- '--gitignore'; then
-    alias tree='tree -C --dirsfirst --gitignore'
-else
-    alias tree='tree -C --dirsfirst'
+    BASH_ALIASES['tree']+=' --gitignore'
 fi
 
 # some aliases based off ls
@@ -145,3 +144,4 @@ alias eureka='eureka -s'
 # shellcheck disable=SC2154
 alias xenv='compgen -v | grep -v "^_" | sort | while read -r item; do declare -p $item ; done'
 
+alias help2man='help2man -N -L $LC_ALL'

@@ -113,7 +113,7 @@
 	diffFilter = delta --features=interactive
 	; diffFilter = delta --color-only
 [delta]
-	features = decorations
+	; features = decorations
 	dark = true
 	syntax-theme = Coldark-Dark
 	true-color = always

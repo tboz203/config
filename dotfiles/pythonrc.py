@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-def install():
+def _tbozeman_pythonrc():
     import shutil
     import sys
     import traceback
@@ -50,5 +50,4 @@ def install():
     sys.excepthook = new_excepthook
 
 
-install()
-del install
+_tbozeman_pythonrc()

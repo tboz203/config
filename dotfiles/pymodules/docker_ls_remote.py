@@ -3,11 +3,11 @@
 """List images in a docker registry."""
 
 import argparse
+import dataclasses
 import fnmatch
 import getpass
 import json
 from base64 import b64decode
-from dataclasses import dataclass
 from datetime import datetime
 from functools import cached_property
 from netrc import netrc
@@ -36,7 +36,7 @@ def urljoin(head, *parts):
     return url
 
 
-@dataclass
+@dataclasses.dataclass(frozen=True)
 class Registry:
     """A dataclass representing a docker registry"""
 
@@ -52,9 +52,10 @@ class Registry:
         return self.name == DEFAULT_REGISTRY
 
 
-@dataclass
+@dataclasses.dataclass
 class Image:
     """A dataclass representing a docker image name. may contain wildcards"""
+
     registry: Registry
     path: str
     tag: Optional[str] = None
@@ -64,15 +65,17 @@ class Image:
         if self.registry.is_default:
             name = self.path
         else:
-            name = self.registry.name + '/' + self.path
+            name = self.registry.name + "/" + self.path
         if self.tag:
-            name += ':' + self.tag
+            name += ":" + self.tag
         return name
 
-@dataclass
+
+@dataclasses.dataclass
 class Result(Image):
     """A dataclass representing a docker image. may contain extra metadata,
     may *not* contain wildcards"""
+
     digest: Optional[str] = None
     created: Optional[datetime] = None
 
@@ -148,7 +151,7 @@ def pick_credentials(registry: Registry, user_string: Optional[str] = None) -> A
     return None
 
 
-def _check_docker_config( registry: Registry, username: Optional[str], password: Optional[str]) -> Auth:
+def _check_docker_config(registry: Registry, username: Optional[str], password: Optional[str]) -> Auth:
     config_auth = _get_docker_config_auth()
 
     if not config_auth:
@@ -176,12 +179,12 @@ def _get_docker_config_auth(filename=None) -> dict[Registry, Auth]:
     with open(filename) as fin:
         config_data = json.load(fin)
 
-    if "auth" not in config_data:
+    if "auths" not in config_data:
         return {}
 
-    # return {f'https://{host}': hostdict['auth'] for host, hostdict in config_data.get('auth', {}).items()}
+    # return {f'https://{host}': hostdict['auth'] for host, hostdict in config_data.get('auths', {}).items()}
     config_dict = {}
-    for host, hostdict in config_data["auth"]:
+    for host, hostdict in config_data["auths"].items():
         registry = Registry(host)
         auth = hostdict.get("auth")
         try:
@@ -214,58 +217,61 @@ def prompt_for_creds(user_guess: Optional[str] = None) -> tuple[str, str]:
 
 
 def parse_image_name(name) -> Image:
-    match name.split('/'):
+    match name.split("/"):
         case str():
             host = DEFAULT_REGISTRY
-            path = f'library/{name}'
+            path = f"library/{name}"
         case str(), str():
             host = DEFAULT_REGISTRY
             path = name
         case host, group, item:
-            path = group + '/' + item
+            path = group + "/" + item
         case _:
             raise ValueError("invalid image name", name)
 
-    path, _, tag = path.partition(':')
+    path, _, tag = path.partition(":")
     return Image(Registry(host), path, tag or None)
 
 
-def collect(patterns: list[Image], user_string: Optional[str], verbose: bool = False, tls_verify=True) -> list[Result]:
+def collect(patterns: list[str], user_string: Optional[str], verbose: bool = False, tls_verify=True) -> list[Result]:
 
     conn_table: dict[Registry, Connection] = {}
 
     for pattern in patterns:
-
+        image = parse_image_name(pattern)
         # are there are glob characters in this image path?
-        glob_pattern = bool(set('[]?*') ^ set(pattern.path))
-        if glob_pattern and pattern.registry.is_default:
+        glob_pattern = bool(set("[]?*") ^ set(image.path))
+        if glob_pattern and image.registry.is_default:
             # we can't access the catalog for `docker hub`, so we can't
             # do image path globbing
-            print(f"Cannot glob image paths in default registry: {pattern}")
+            print(f"Cannot glob image paths in default registry: {image}")
             continue
 
-        if not (conn := conn_table.get(pattern.registry)):
-            conn = Connection(pattern.registry, user_string, tls_verify=tls_verify)
-            conn_table[pattern.registry] = conn
+        if not (conn := conn_table.get(image.registry)):
+            conn = Connection(image.registry, user_string, tls_verify=tls_verify)
+            conn_table[image.registry] = conn
 
         partials: list[Image]
         if glob_pattern:
-            matches = fnmatch.filter(conn.catalog, pattern.path)
-            partials = [Image(pattern.registry, match, pattern.tag) for match in matches]
+            matches = fnmatch.filter(conn.catalog, image.path)
+            partials = [Image(image.registry, match, image.tag) for match in matches]
         else:
-            partials = [pattern]
+            partials = [image]
 
-        for pattern in partials:
-            print('gotta get tags & maybe "verbose"')
+        results = []
+        for image in partials:
+            # print('gotta get tags & maybe "verbose"')
+            tags = conn.get_tags(image.path)
+            results += [Result(image.registry, image.path, tag) for tag in tags]
 
-    return []
+    return results
 
     con = Connection(registry, credentials, tls_verify=tls_verify)
 
     catalog = con.get_catalog()
     matches = list()
-    for pattern in names:
-        matches += fnmatch.filter(catalog, pattern)
+    for image in names:
+        matches += fnmatch.filter(catalog, image)
 
     lines = []
     for repo in matches:
@@ -300,28 +306,23 @@ def collect(patterns: list[Image], user_string: Optional[str], verbose: bool = F
     return lines
 
 
-def display_verbose(lines):
-    # don't look directly at this function or you may go insane
-    column_widths = [max(len(str(x)) for x in l) for l in zip(*lines)]
-    for repo, tag, digest, created in lines:
-        print(
-            "{repo!s:{}} | {tag!s:{}} | {digest!s:{}} | {created!s:{}}".format(
-                *column_widths, repo=repo, tag=tag, digest=digest, created=created
-            )
-        )
+def display_verbose(results: list[Result]):
+    rows = [(result.registry, result.path, result.tag, result.digest, result.created) for result in results]
+    columns = zip(*rows)
+    column_widths = [max(len(str(part)) for part in column) for column in columns]
+    for row in rows:
+        parts = sum(zip(row, column_widths), ())
+        print("{registry!s:{}} | {path!s:{}} | {tag!s:{}} | {digest!s:{}} | {created!s:{}}".format(*parts))
 
 
-def display_json(lines):
-    structure = [
-        {"repo": repo, "tag": tag, "digest": digest, "created": created} for repo, tag, digest, created in lines
-    ]
+def display_json(results: list[Result]):
+    structure = [dataclasses.asdict(result) for result in results]
     print(json.dumps(structure, sort_keys=True, indent=2))
 
 
-def display_images(lines):
-    for repo, tag, _, _ in lines:
-        if repo and tag:
-            print(f"{repo}:{tag}")
+def display_images(results: list[Result]):
+    for result in results:
+        print(result.name)
 
 
 class Connection:
@@ -341,13 +342,13 @@ class Connection:
 
         self._retries = retries
 
-    def _get_json(self, url):
+    def _get_json(self, url) -> dict:
         return self._request("get", url).json()
 
-    def _delete(self, url):
+    def _delete(self, url) -> None:
         self._request("delete", url)
 
-    def _request(self, method, url, headers={}, check_status=True):
+    def _request(self, method: str, url: str, headers: dict = {}, check_status: bool = True) -> requests.Response:
         last_exc = None
         for i in range(self._retries):
             resp = None

@@ -3,8 +3,9 @@
 """Parse and format datetimes"""
 
 import argparse
-import datetime
 import sys
+from datetime import datetime
+from typing import Callable, Iterable
 
 import _strptime
 
@@ -15,7 +16,7 @@ except ImportError:
     du_parser = None
     gettz = None
 
-reference = """
+REFERENCE = """
 %a      Weekday as locale’s abbreviated name.
 %A      Weekday as locale’s full name.
 %w      Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
@@ -52,57 +53,75 @@ reference = """
 """.strip()
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-f", "--format", help="output format. if absent, ISO-8601")
     parser.add_argument("-d", "--datetime", nargs="+", help="datetime to parse. if absent, read stdin. repeatable")
     parser.add_argument("-r", "--reference", action="store_true", help="output a reference, and halt")
     parser.add_argument("-z", "--timezone", help="convert output to this timezone")
 
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-p", "--parse", help="parse datetime with this format. (the default is to guess)")
-    group.add_argument(
+    input_group = parser.add_mutually_exclusive_group()
+    input_group.add_argument("-f", "--format", help="output datetime with this format. (the default is ISO-8601)")
+    input_group.add_argument(
+        "-T",
+        "--format-timestamp",
+        action="store_true",
+        help="format datetime as seconds since unix epoch (1970-01-01 00:00:00)",
+    )
+
+    output_group = parser.add_mutually_exclusive_group()
+    output_group.add_argument("-p", "--parse", help="parse datetime with this format. (the default is to guess)")
+    output_group.add_argument(
         "-t",
-        "--timestamp",
+        "--parse-timestamp",
         action="store_true",
         help="parse datetime as seconds since unix epoch (1970-01-01 00:00:00)",
     )
 
     args = parser.parse_args()
 
-    def _parse_from_arg(item):
-        return datetime.datetime.strptime(item, args.parse)
+    def _parse_from_arg(item: str) -> datetime:
+        return datetime.strptime(item, args.parse)
 
-    def _parse_epoch_seconds(item):
-        return datetime.datetime.fromtimestamp(int(item))
+    def _parse_epoch_seconds(item: str) -> datetime:
+        return datetime.fromtimestamp(int(item))
 
-    def _format_from_arg(item):
+    def _format_from_arg(item: datetime) -> str:
         return item.strftime(args.format)
 
+    def _format_epoch_seconds(item: datetime) -> str:
+        return str(item.timestamp())
+
     if args.timezone and not gettz:
-        exit("[X] cannot interpret timezone: `python-dateutil` not installed")
+        sys.exit("[X] cannot interpret timezone: `python-dateutil` not installed")
 
     if args.reference:
-        print(reference)
-        exit()
+        print(REFERENCE)
+        sys.exit()
+
+    parse_func: Callable[[str], datetime]
+    format_func: Callable[[datetime], str]
+    items: Iterable[str]
+    output: Iterable[str]
 
     if args.parse:
         try:
             _strptime._TimeRE_cache.compile(args.parse)
         except KeyError:
-            exit(f"[X] Invalid parse format: {args.parse}")
-        parse = _parse_from_arg
-    elif args.timestamp:
-        parse = _parse_epoch_seconds
+            sys.exit(f"[X] Invalid parse format: {args.parse}")
+        parse_func = _parse_from_arg
+    elif args.parse_timestamp:
+        parse_func = _parse_epoch_seconds
     elif du_parser:
-        parse = du_parser.parse
+        parse_func = du_parser.parse
     else:
-        exit("[X] cannot guess format: `python-dateutil` not installed")
+        sys.exit("[X] cannot guess format: `python-dateutil` not installed")
 
     if args.format:
-        format = _format_from_arg
+        format_func = _format_from_arg
+    elif args.format_timestamp:
+        format_func = _format_epoch_seconds
     else:
-        format = str
+        format_func = str
 
     if args.datetime:
         items = args.datetime
@@ -110,7 +129,7 @@ def main():
         try:
             items = sys.stdin.read().splitlines()
         except KeyboardInterrupt:
-            exit()
+            sys.exit()
 
     timezone = None
     if args.timezone:
@@ -118,15 +137,15 @@ def main():
             raise RuntimeError("impossible")
         timezone = gettz(args.timezone)
         if timezone is None:
-            exit(f'[X] Could not interpret timezone "{args.timezone}"')
+            sys.exit(f'[X] Could not interpret timezone "{args.timezone}"')
 
     output = []
     for item in items:
         try:
-            dt = parse(item)
+            dt = parse_func(item)
             if timezone:
                 dt = dt.astimezone(timezone)
-            output.append(format(dt))
+            output.append(format_func(dt))
         except ValueError as exc:
             output.append(str(exc))
 

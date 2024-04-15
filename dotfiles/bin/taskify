@@ -1,21 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# i want to take all the little snippets i've been throwing into cron jobs and
-# collect and modularize them. i'm imagining a script that wraps around another
-# command and does things like squelching all output on success, wait some
-# random amount of time before starting, include a timestamp, etc.
+# All the little snippets I've thrown into cron jobs, collected and modularized.
 
-# i think i'm going to do my best to write the script in such a way that it can
-# be either used as a wrapper, or copied & pasted into other projects
-
-# - random wait
-# - output only on error
-# - logrotate?
+MY_NAME="$(basename "$0")"
 
 die()
 {
-    echo "taskify: $*"
-    [[ $LOG ]] && echo "taskify: $*" >> "$LOG"
+    echo "$MY_NAME: $*"
+    [[ $LOG ]] && echo "$MY_NAME: $*" >> "$LOG"
     exit 1
 }
 
@@ -63,7 +55,7 @@ fi
 
 if [[ $HELP ]]; then
     cat << EOF
-Usage: $(basename "$0") [OPTIONS] [--] COMMAND ...
+Usage: $MY_NAME [OPTIONS] [--] COMMAND ...
 
 Sanitize commands for cron.
 
@@ -100,7 +92,7 @@ output=$("${COMMAND[@]}" 2>&1)
 status=$?
 
 if [[ $DIRECTORY ]]; then
-    popd &> /dev/null || die "could return to starting directory"
+    popd &> /dev/null || die "could not return to starting directory"
 fi
 
 if [[ ! $QUIET || ($QUIET -lt 2 && $status -ne 0) ]]; then

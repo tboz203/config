@@ -143,6 +143,12 @@ HISTIGNORE="ls:la:lf:ll:l"
 # HISTTIMEFORMAT="%h %d %H:%M:%S> "
 HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S> "
 
+if [[ $SUDO_USER ]]; then
+    HISTFILE=/root/.bash_history.${SUDO_USER}
+    history -c
+    history -r
+fi
+
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize

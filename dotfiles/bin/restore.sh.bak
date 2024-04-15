@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set +x -euo pipefail
+trap 'echo "err ($?) on line ($LINENO): $BASH_COMMAND"' ERR
+
+: ${NFS_ROOT:=/nfshome/testdev/$USER}
+
+INPUT=$(find $NFS_ROOT/backups -type f -name '*.tar.zst.aes'| sort | tail -n 1)
+
+read -sp "password: " PASSWORD
+echo
+
+echo "starting: $(date)"
+
+PASSWORD="$PASSWORD" $NFS_ROOT/bin/openssl aes-256-cbc -d -pbkdf2 -pass env:PASSWORD -in "$INPUT" \
+    | $NFS_ROOT/bin/zstd -d \
+    | tar -C / -x --overwrite
+    # > $HOME/restore.tar
+    # | tar -C / -t
+
+echo "complete: $(date)"
