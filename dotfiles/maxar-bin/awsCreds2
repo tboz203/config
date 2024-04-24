@@ -1,0 +1,275 @@
+#!/bin/bash
+# vim: tabstop=4 shiftwidth=0 expandtab
+
+cleanup()
+{
+    # unset various things at startup and shutdown
+    # developing a script for `source` is a divine punishment
+    unset _HELP _USAGE _ROOT _FILENAME _FORCE _OKTA_PROFILE _REGION _UNUSED _MY_NAME _EXPLICIT_PARAMS _NOW _JSON_RESPONSE _AWS_PROFILE arg opt param
+    if [[ $1 = starting ]]; then
+        unset AWS_OKTA_PROFILE AWS_REGION
+    else
+        unset cleanup
+    fi
+}
+
+cleanup starting
+
+declare -a _UNUSED
+
+while [[ $# -gt 0 ]]; do
+    arg="$1"
+    shift
+    case $arg in
+        -h | --help)
+            _HELP=1
+            ;;
+        -F | --force)
+            _FORCE=1
+            ;;
+        -r | --root)
+            _ROOT=$1
+            shift
+            ;;
+        -f | --file | --filename)
+            _FILENAME=$1
+            shift
+            ;;
+        -*)
+            echo "[X] I don't understand $arg"
+            _USAGE=1
+            ;;
+        *)
+            if [[ ! -v _OKTA_PROFILE ]]; then
+                _OKTA_PROFILE=$arg
+            elif [[ ! -v _REGION ]]; then
+                _REGION=$arg
+            else
+                _UNUSED+=("$arg")
+            fi
+            ;;
+    esac
+done
+
+# flags from input:
+# 1. explicit PROFILE & REGION?
+# 2. --file passed?
+# 3. --force passed?
+
+# branch points
+# 1. try read file?
+# 2. file exists (and valid)? -- treated as two separate branch points
+# 4. file and explicit PROFILE & REGION don't match?
+# 5. short-circuit for good cached credentials?
+
+# possible input combinations:
+# 1: no explicit,  no --file,  no --force:  error
+# 2: yes explicit, no --file,  no --force:  read & write to generated filename
+# 3: no explicit,  yes --file, no --force:  read from file (or error); if reauthenticating, use file's PROFILE & REGION
+# 4: yes explicit, yes --file, no --force:  read from file if exists; error if file and explicit PROFILE & REGION don't match
+# 5: no explicit,  no --file,  yes --force: error
+# 6: yes explicit, no --file,  yes --force: write to generated filename
+# 7: no explicit,  yes --file, yes --force: read from file (or error); reauthenticate using file's PROFILE & REGION
+# 8: yes explicit, yes --file, yes --force: reload using explicit PROFILE & REGION; write to file
+
+# automatic error: !(explicit | file)
+# try read file?: !(force & explicit)
+# require file exists/valid?: !(explicit)
+# require file matches?: explicit & !(force)
+# short-circuit?: !(force)
+
+# if we weren't told to force reauthentication with explicit parameters, try to read our file
+#     if our file exists, read it
+#         if our file seems valid...
+#             if we have explicit parameters, compare the parameters
+#                 if they don't match our file, return failure
+#             otherwise, use parameters from our file
+#             if our file's credentials are not expired, and we're not being `--force`d, return success
+#         otherwise, if we don't have explicit parameters, return failure
+#     otherwise, if we don't have explicit parameters, return failure
+# reauthenticate with AWS
+# write the parameters and credentials to our file
+# read our file
+
+# if we weren't explicitly asked for help, do some checks
+if [[ ! -v _HELP ]]; then
+    if [[ ${#_UNUSED[*]} -gt 0 ]]; then
+        echo >&2 "[!] Too many parameters: ${_UNUSED[*]}"
+        _USAGE=1
+    fi
+
+    if [[ -v _OKTA_PROFILE && ! -v _REGION ]]; then
+        echo >&2 "[!] PROFILE and REGION are mutually dependent"
+        _USAGE=1
+    fi
+
+    if [[ ! (-v _OKTA_PROFILE || -v _FILENAME) ]]; then
+        echo >&2 "[!] Either --file or PROFILE and REGION are required"
+        _USAGE=1
+    fi
+
+    if [[ -v _FILENAME && -v _ROOT ]]; then
+        echo >&2 "[!] --root and --file are mutually exclusive"
+        _USAGE=1
+    fi
+fi
+
+_MY_NAME=${BASH_SOURCE[0]}
+
+# compare program name ($0) against script name (${BASH_SOURCE[0]});
+# if they're the same, we're being executed as a script
+if [[ $0 = "$_MY_NAME" ]]; then
+    echo >&2 "[!] $_MY_NAME must be sourced (not executed)"
+    _USAGE=1
+fi
+
+if [[ -v _HELP || -v _USAGE ]]; then
+    # if _USAGE, we've printed other messages already, so print a blank line
+    [[ -v _USAGE ]] && echo >&2
+
+    # _HELP includes the _USAGE header
+    command cat <<- EOF
+	Set required AWS environment variables, reauthenticating if necessary.
+	Usage: . $_MY_NAME [OPTIONS] PROFILE REGION
+	EOF
+
+    # full help output requested
+    if [[ -v _HELP ]]; then
+        command cat <<- EOF
+
+		Parameters:
+
+		PROFILE             The Okta profile (to be passed to gimme-aws-creds).
+		REGION              The AWS region to use.
+
+		Options:
+
+		-h | --help         Print this help output and return.
+		-F | --force        Do not examine curent or cached credentials; always reload them.
+		-r | --root ROOT    The directory root to read & write cached credential files from.
+		-f | --file FILE    The specific filename to read and write cached credentials from.
+
+		If --file is pointed to an existing profile file, PROFILE and REGION are not required.
+
+		EOF
+    fi
+
+    # can't call cleanup first, b/c it clears _HELP and _USAGE
+    if [[ -v _HELP ]]; then
+        cleanup
+        return 0
+    else
+        cleanup
+        return 1
+    fi
+fi
+
+[[ -v _OKTA_PROFILE && -v _REGION ]] && _EXPLICIT_PARAMS=1
+
+# if we weren't given an explicit filename, generate one
+if [[ ! -v _FILENAME ]]; then
+    # set a default _ROOT directory if necessary
+    : "${_ROOT:=$HOME/.aws}"
+
+    if [[ ! -d $_ROOT ]]; then
+        echo >&2 "[X] Profile root directory does not exist: $_ROOT"
+        cleanup
+        return 1
+    fi
+
+    _FILENAME=$_ROOT/${_OKTA_PROFILE}_${_REGION}_profile
+fi
+
+# if we weren't told to force reauthentication with explicit parameters, try to read our file
+if [[ ! (-v _FORCE && -v _EXPLICIT_PARAMS) ]]; then
+
+    # if we don't have explicit parameters and our file doesn't exist, return failure
+    # if we don't have explicit parameters and our file is missing required values, return failure
+    # if we *do* have explicit parameters, and they don't match our file, return failure
+    # if we aren't being `--force`d, and our file's credentials aren't expired, return success
+
+    # if our file exists, read it
+    if [[ -f $_FILENAME ]]; then
+        source "$_FILENAME"
+
+        # if our file sets the appropriate parameter variables...
+        if [[ -v AWS_OKTA_PROFILE && -v AWS_REGION ]]; then
+            # if we were given explicit parameters, make sure they match our file
+            if [[ -v _EXPLICIT_PARAMS ]]; then
+                if [[ $_OKTA_PROFILE != "$AWS_OKTA_PROFILE" || $_REGION != "$AWS_REGION" ]]; then
+                    echo >&2 "[X] Cached credentials do not match given PROFILE and REGION: $_FILENAME"
+                    echo >&2 "    Use --force to overwrite"
+                    cleanup
+                    return 1
+                fi
+            else
+                # if we were *not* given explicit parameters, use the values from our file
+                _OKTA_PROFILE=$AWS_OKTA_PROFILE
+                _REGION=$AWS_REGION
+            fi
+
+            if [[ -v _FORCE ]]; then
+                # if we were told to force reauthentication, continue
+                true
+            elif [[ ! (-v AWS_SESSION_TOKEN && -v AWS_CREDENTIAL_EXPIRATION) ]]; then
+                # otherwise, if our file does not set required credential variables, continue to reauthentication
+                echo "[.] Cached credentials appear invalid: $_FILENAME"
+            elif [[ $AWS_CREDENTIAL_EXPIRATION < $(date --iso-8601=seconds) ]]; then
+                # otherwise, if our file's credentials appear to be expired, continue to reauthentication
+                echo "[.] Cached credentials appear expired: $_FILENAME"
+            else
+                # otherwise, return success
+                echo "[.] Cached credentials appear valid (use --force to force reauthentication)"
+                echo "[.] Assumed AWS profile: $AWS_OKTA_PROFILE ($AWS_REGION): $AWS_PROFILE"
+                cleanup
+                return 0
+            fi
+
+        elif [[ ! -v _EXPLICIT_PARAMS ]]; then
+            # if our file does not set required parameter variables, and we don't have explicit parameters, return failure
+            echo >&2 "[X] Profile file seems to be missing required values: $_FILENAME"
+            echo >&2 "    Pass PROFILE and REGION to reauthenticate"
+            cleanup
+            return 1
+        fi
+
+    elif [[ ! -v _EXPLICIT_PARAMS ]]; then
+        # if our file doesn't exist, and we don't have explicit parameters, return failure
+        echo >&2 "[X] Profile file does not exist: $_FILENAME"
+        echo >&2 "    Pass PROFILE and REGION to reauthenticate"
+        cleanup
+        return 1
+    fi
+fi
+
+echo "[.] Reauthenticating with PROFILE=$_OKTA_PROFILE, REGION=$_REGION"
+
+echo "[.] Caching credentials to $_FILENAME"
+return 0
+
+# perform request
+_JSON_RESPONSE=$(gimme-aws-creds --profile="${_OKTA_PROFILE}" --output-format=json)
+_AWS_PROFILE=$(jq -r '.profile.name' <<< "$_JSON_RESPONSE")
+
+echo "[.] Caching credentials to $_FILENAME"
+
+# write file
+command cat << EOF > "$_FILENAME"
+export AWS_OKTA_PROFILE="$_OKTA_PROFILE"
+export AWS_DEFAULT_PROFILE="$_AWS_PROFILE"
+export AWS_PROFILE="$_AWS_PROFILE"
+export AWS_REGION="$_REGION"
+export AWS_ACCESS_KEY_ID="$(jq -r '.credentials.aws_access_key_id' <<< "$_JSON_RESPONSE")"
+export AWS_SECRET_ACCESS_KEY="$(jq -r '.credentials.aws_secret_access_key' <<< "$_JSON_RESPONSE")"
+export AWS_SESSION_TOKEN="$(jq -r '.credentials.aws_session_token' <<< "$_JSON_RESPONSE")"
+export AWS_SECURITY_TOKEN="$(jq -r '.credentials.aws_security_token' <<< "$_JSON_RESPONSE")"
+export AWS_CREDENTIAL_EXPIRATION="$(jq -r '.credentials.expiration' <<< "$_JSON_RESPONSE")"
+EOF
+
+chmod 600 "$_FILENAME"
+
+source "$_FILENAME"
+declare AWS_OKTA_PROFILE AWS_REGION AWS_PROFILE
+echo "[.] Assumed AWS profile: $AWS_OKTA_PROFILE ($AWS_REGION): $AWS_PROFILE"
+cleanup
+return 0
