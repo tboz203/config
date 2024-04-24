@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+# keep the few most recent backup files uploaded to s3
+
+set -eEuo pipefail
+trap 'echo >&2 "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
+
+BACKUP_COUNT=3
+S3_BUCKET=th026106-s3-bucket
+S3_PARAMS=(mcs-gov us-gov-west-1)
+BACKUP_DIR=$HOME/backups
+BACKUP_PATTERN="^backup-.*\.tar\.zst\.gpg$"
+
+# --------------------
+
+fatal()
+{
+    echo "[X] $*"
+    exit 1
+}
+
+make_set()
+{
+    # make an associative array to be used as a set
+    # to_set NAME [VALUE...]
+
+    name=$1
+    shift
+    declare -g -A "$name"
+    declare -n my_set="$name"
+
+    for key in "$@"; do
+        my_set+=(["$key"]=1)
+    done
+}
+
+pick_wanted_backups()
+{
+    # pick which backups should be kept in s3
+    # shellcheck disable=2010 # using `grep` to keep filtering symmetric between filesystem & s3 bucket
+    ls | grep "$BACKUP_PATTERN" | sort | tail -n $BACKUP_COUNT
+}
+
+check_held_backups()
+{
+    # see what backups are currently in s3
+    aws s3api list-objects-v2 --bucket "$S3_BUCKET" | jq -r '.Contents[].Key' | grep "$BACKUP_PATTERN" | sort
+}
+
+# --------------------
+
+# ensure that BUCKET itself does not have the s3:// prefix
+S3_BUCKET=$(basename $S3_BUCKET)
+
+cd "$BACKUP_DIR" || fatal could not cd to backup directory
+
+# . awsCreds2 "${S3_PARAMS[@]}"
+
+# shellcheck disable=2046 # intentionally spreading the results
+make_set WANTED_BACKUPS $(pick_wanted_backups)
+# shellcheck disable=2046 # intentionally spreading the results
+make_set HELD_BACKUPS $(check_held_backups)
+
+for key in "${!HELD_BACKUPS[@]}"; do
+    [[ -v WANTED_BACKUPS[$key] ]] && continue
+    TO_DELETE+=("$key")
+done
+
+for key in "${!WANTED_BACKUPS[@]}"; do
+    [[ -v HELD_BACKUPS[$key] ]] && continue
+    TO_UPLOAD+=("$key")
+done
+
+if [[ -v TO_DELETE || -v TO_UPLOAD ]]; then
+    [[ -v TO_DELETE ]] && echo "[!] Would delete: ${TO_DELETE[*]}"
+    [[ -v TO_UPLOAD ]] && echo "[!] Would upload: ${TO_UPLOAD[*]}"
+    for _ in {1..3}; do
+        read -r -e -t 30 -p "Continue? [yN]: " || echo
+        case $REPLY in
+            [yY])
+                CONTINUE=1
+                break
+                ;;
+            [nN] | "")
+                break
+                ;;
+        esac
+    done
+    [[ -v CONTINUE ]] || fatal "halting"
+else
+    echo "[.] Nothing to do"
+    exit 0
+fi
+
+for item in "${TO_DELETE[@]}"; do
+    aws s3 rm "s3://$S3_BUCKET/$item"
+done
+
+for item in "${TO_UPLOAD[@]}"; do
+    aws s3 cp "./$item" "s3://$S3_BUCKET"
+done
+
+echo "[.] All done"

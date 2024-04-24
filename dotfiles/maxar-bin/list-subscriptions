@@ -11,7 +11,7 @@ while [[ $# -gt 0 ]]; do
         -*=*)
             # split --var=value pairs into separate tokens
             # but only replacing the first '='!
-            # set -- $(echo $arg | sed 's/=/ /') "$@"
+            # shellcheck disable=SC2086 # intentionally splitting token
             set -- ${arg/=/ } "$@"
             ;;
         -d | --dump)
