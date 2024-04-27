@@ -102,7 +102,9 @@
 	logdiff = log --pretty=contrast --no-graph --reverse --patch
 	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
 	; logwatch = !viewpane -- git la --color
-	logwatch = !viewpane -- git l --color -n '$(tput lines)'
+	lw = !viewpane -- git l --color -n '$(tput lines)'
+	lwa = !viewpane -- git la --color -n '$(tput lines)'
+	logwatch = lwa
 	logtab = !git l --pretty=tableable | column -t -s '&'
 	; this is a script now
 	; fixlast = git commit --amend --no-edit
