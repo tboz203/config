@@ -68,6 +68,9 @@ def parse_args(arg_strings: Optional[Sequence[str]] = None) -> argparse.Namespac
     output_group = parser.add_mutually_exclusive_group()
     output_group.add_argument("-o", "--output", help="write output to file")
     output_group.add_argument("-a", "--append", help="append output to file")
+    # output_group.add_argument(
+    #     "-I", "--in-place", action="store_true", help="modify input files in place, or write to stdout"
+    # )
 
     parser.add_argument("files", nargs="*", default="-", help='Files to be read from. "-" means stdin.')
     return parser.parse_args(arg_strings)

@@ -6,7 +6,7 @@ cleanup()
     # unset various things at startup and shutdown
     # developing a script for `source` is a divine punishment
     unset _HELP _USAGE _ROOT _FILENAME _FORCE _OKTA_PROFILE _REGION _UNUSED _MY_NAME _EXPLICIT_PARAMS _NOW _JSON_RESPONSE _AWS_PROFILE arg opt param
-    if [[ $1 = starting ]]; then
+    if [[ -v 1 && $1 = starting ]]; then
         unset AWS_OKTA_PROFILE AWS_REGION
     else
         unset cleanup
@@ -93,7 +93,7 @@ done
 
 # if we weren't explicitly asked for help, do some checks
 if [[ ! -v _HELP ]]; then
-    if [[ ${#_UNUSED[*]} -gt 0 ]]; then
+    if [[ -v _UNUSED ]]; then
         echo >&2 "[!] Too many parameters: ${_UNUSED[*]}"
         _USAGE=1
     fi
@@ -243,9 +243,6 @@ if [[ ! (-v _FORCE && -v _EXPLICIT_PARAMS) ]]; then
 fi
 
 echo "[.] Reauthenticating with PROFILE=$_OKTA_PROFILE, REGION=$_REGION"
-
-echo "[.] Caching credentials to $_FILENAME"
-return 0
 
 # perform request
 _JSON_RESPONSE=$(gimme-aws-creds --profile="${_OKTA_PROFILE}" --output-format=json)

@@ -3,7 +3,7 @@
 # keep the few most recent backup files uploaded to s3
 
 set -eEuo pipefail
-trap 'echo >&2 "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
+# trap 'echo >&2 "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
 
 BACKUP_COUNT=3
 S3_BUCKET=th026106-s3-bucket
@@ -39,12 +39,14 @@ pick_wanted_backups()
     # pick which backups should be kept in s3
     # shellcheck disable=2010 # using `grep` to keep filtering symmetric between filesystem & s3 bucket
     ls | grep "$BACKUP_PATTERN" | sort | tail -n $BACKUP_COUNT
+    return $?
 }
 
 check_held_backups()
 {
     # see what backups are currently in s3
-    aws s3api list-objects-v2 --bucket "$S3_BUCKET" | jq -r '.Contents[].Key' | grep "$BACKUP_PATTERN" | sort
+    aws s3api list-objects-v2 --bucket "$S3_BUCKET" 2> /dev/null | jq -r '.Contents[].Key' | grep "$BACKUP_PATTERN" | sort
+    return $?
 }
 
 # --------------------
@@ -54,12 +56,14 @@ S3_BUCKET=$(basename $S3_BUCKET)
 
 cd "$BACKUP_DIR" || fatal could not cd to backup directory
 
-# . awsCreds2 "${S3_PARAMS[@]}"
+. awsCreds2 "${S3_PARAMS[@]}" || fatal could not acquire aws creds
 
-# shellcheck disable=2046 # intentionally spreading the results
-make_set WANTED_BACKUPS $(pick_wanted_backups)
-# shellcheck disable=2046 # intentionally spreading the results
-make_set HELD_BACKUPS $(check_held_backups)
+# intentionally split into two stanzas in order to let errors propagate correctly
+WANTED_BACKUPS_LIST=($(pick_wanted_backups)) || fatal could not determine wanted backups
+HELD_BACKUPS_LIST=($(check_held_backups)) || fatal could not determine held backups
+
+make_set WANTED_BACKUPS "${WANTED_BACKUPS_LIST[@]}"
+make_set HELD_BACKUPS "${HELD_BACKUPS_LIST[@]}"
 
 for key in "${!HELD_BACKUPS[@]}"; do
     [[ -v WANTED_BACKUPS[$key] ]] && continue
