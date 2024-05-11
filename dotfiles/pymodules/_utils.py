@@ -15,6 +15,7 @@ from functools import reduce
 from itertools import zip_longest
 from pprint import pprint
 from shutil import get_terminal_size
+from textwrap import dedent
 
 SI_SUFFIXES = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
 
@@ -81,18 +82,16 @@ def format_timedelta(delta, use_suffix=True):  # pylint: disable=too-many-branch
 
 
 def time_since(timestamp, utc=True):
+    now = datetime.now()
     if utc:
-        now = datetime.utcnow()
-    else:
-        now = datetime.now()
+        now = now.astimezone()
     return format_timedelta(timestamp - now)
 
 
 def color_time_since(timestamp, utc=True):
+    now = datetime.now()
     if utc:
-        now = datetime.utcnow()
-    else:
-        now = datetime.now()
+        now = now.astimezone()
 
     delta = timestamp - now
     if abs(delta) < timedelta(0, 60 * 60):
@@ -264,41 +263,23 @@ def format_seconds(seconds):
     if not isinstance(seconds, (int, float, Decimal)):
         raise TypeError("seconds must be a number", seconds)
 
-    if seconds == 0:
-        return "0s"
+    absval = abs(seconds)
+    cutoff = 1 / 3
 
-    if seconds > 120:
+    if absval == 0 or absval > cutoff:
         return str(timedelta(seconds=float(seconds)))
-    elif seconds > 0.1:
-        return f"{seconds:.3g}s"
 
     suffixes = ["ms", "μs", "ns", "ps"]
 
-    value = seconds
+    sign = int(seconds > 0) or -1
     del seconds
 
     for suffix in suffixes:
-        value *= 1000
-        if abs(value) > 0.1:
+        absval *= 1000
+        if absval > cutoff:
             break
 
-    return f"{value:.3g}{suffix}"
-
-    # value = abs(seconds)
-    # unit = "s"
-    # if value != 0:
-    #     if value < 1:
-    #         unit = "ms"
-    #         value *= 1000
-    #     if value < 1:
-    #         unit = "μs"
-    #         value *= 1000
-    #     if value < 1:
-    #         unit = "ns"
-    #         value *= 1000
-    #     if value < 1:
-    #         unit = "ns, please stop"
-    # return f"{value:.6g}{unit}"
+    return f"{absval * sign:.3g}{suffix}"
 
 
 def just_timeit(stmt, **kwargs):
@@ -313,15 +294,26 @@ def just_timeit(stmt, **kwargs):
         frame = frame.f_back if frame else None
         kwargs["globals"] = frame.f_globals if frame else None
     timer = timeit.Timer(stmt, **kwargs)
-    n, _ = timer.autorange()
-    n *= 5
-    results = timer.repeat(number=n)
-    return {
-        "iterations": n,
-        "min": format_seconds(min(results) / n),
-        "max": format_seconds(max(results) / n),
-        "avg": format_seconds((sum(results) / len(results)) / n),
-    }
+    try:
+        # pick a count where duration > 0.2 sec
+        count, duration = timer.autorange()
+        results = [duration]
+        # take 19 samples (for 20 total) of `count` loops
+        results += timer.repeat(19, count)
+    except Exception:
+        timer.print_exc()
+        return
+
+    # take aggregates
+    min_r, avg_r, max_r = min(results), sum(results) / len(results), max(results)
+
+    summary = f"""
+        iterations: {count}
+        min: {min_r:.3f} ({format_seconds(min_r / count)})
+        avg: {avg_r:.3f} ({format_seconds(avg_r / count)})
+        max: {max_r:.3f} ({format_seconds(max_r / count)})
+        """
+    print(dedent(summary).strip())
 
 
 def jql(data, expr=".") -> None:
