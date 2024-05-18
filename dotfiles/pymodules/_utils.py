@@ -308,7 +308,7 @@ def just_timeit(stmt, **kwargs):
     min_r, avg_r, max_r = min(results), sum(results) / len(results), max(results)
 
     summary = f"""
-        iterations: {count}
+        iterations: {count} (~ 2**{round(math.log(count, 2))})
         min: {min_r:.3f} ({format_seconds(min_r / count)})
         avg: {avg_r:.3f} ({format_seconds(avg_r / count)})
         max: {max_r:.3f} ({format_seconds(max_r / count)})

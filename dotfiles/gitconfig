@@ -17,6 +17,7 @@
 	; tool itself goes in `merge`
 	prompt = false
 	keepBackup = false
+	hideResolved = true
 [diff]
 	tool = nvimdiff
 	algorithm = histogram
@@ -76,8 +77,7 @@
 [alias]
 	s = status
 	si = status --ignored
-	d = diff --stat
-	ds = d --staged
+	ds = diff --staged
 	l = log --graph --date-order --date=relative --pretty=myline
 	; "almost all"
 	la = l --branches --tags --remotes=origin HEAD
