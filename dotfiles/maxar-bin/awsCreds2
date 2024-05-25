@@ -7,7 +7,7 @@ cleanup()
     # developing a script for `source` is a divine punishment
     unset _HELP _USAGE _ROOT _FILENAME _FORCE _OKTA_PROFILE _REGION _UNUSED _MY_NAME _EXPLICIT_PARAMS _NOW _JSON_RESPONSE _AWS_PROFILE arg opt param
     if [[ -v 1 && $1 = starting ]]; then
-        unset AWS_OKTA_PROFILE AWS_REGION
+        unset AWS_OKTA_PROFILE AWS_PROFILE AWS_REGION
     else
         unset cleanup
     fi
@@ -193,7 +193,7 @@ if [[ ! (-v _FORCE && -v _EXPLICIT_PARAMS) ]]; then
         source "$_FILENAME"
 
         # if our file sets the appropriate parameter variables...
-        if [[ -v AWS_OKTA_PROFILE && -v AWS_REGION ]]; then
+        if [[ -v AWS_OKTA_PROFILE && -n $AWS_OKTA_PROFILE && -v AWS_REGION && -n $AWS_REGION ]]; then
             # if we were given explicit parameters, make sure they match our file
             if [[ -v _EXPLICIT_PARAMS ]]; then
                 if [[ $_OKTA_PROFILE != "$AWS_OKTA_PROFILE" || $_REGION != "$AWS_REGION" ]]; then
@@ -245,8 +245,18 @@ fi
 echo "[.] Reauthenticating with PROFILE=$_OKTA_PROFILE, REGION=$_REGION"
 
 # perform request
-_JSON_RESPONSE=$(gimme-aws-creds --profile="${_OKTA_PROFILE}" --output-format=json)
-_AWS_PROFILE=$(jq -r '.profile.name' <<< "$_JSON_RESPONSE")
+_JSON_RESPONSE=$(gimme-aws-creds --profile="${_OKTA_PROFILE}" --output-format=json) || {
+    echo >&2 "[X] Failed to gather credentials"
+    cleanup
+    return 1
+}
+
+_AWS_PROFILE=$(jq -r '.profile.name' <<< "$_JSON_RESPONSE") || {
+    echo >&2 "[X] Response seems invalid"
+    echo >&2 "$_JSON_RESPONSE"
+    cleanup
+    return 1
+}
 
 echo "[.] Caching credentials to $_FILENAME"
 
