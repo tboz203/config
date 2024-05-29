@@ -172,22 +172,22 @@ repeat()
     printf "${text}%.0s" $(seq 1 "$count")
 }
 
-pathmunge()
-{
-    : 'add a directory to the PATH if not already present'
-    case ":${PATH}:" in
-        *:"$1":*) ;;
-        *)
-            if [ -d "$1" ]; then
-                if [ "$2" = "after" ]; then
-                    PATH=$PATH:$1
-                else
-                    PATH=$1:$PATH
-                fi
-            fi
-            ;;
-    esac
-}
+# pathmunge()
+# {
+#     : 'add a directory to the PATH if not already present'
+#     case ":${PATH}:" in
+#         *:"$1":*) ;;
+#         *)
+#             if [ -d "$1" ]; then
+#                 if [ "$2" = "after" ]; then
+#                     PATH=$PATH:$1
+#                 else
+#                     PATH=$1:$PATH
+#                 fi
+#             fi
+#             ;;
+#     esac
+# }
 
 pathmungex()
 {

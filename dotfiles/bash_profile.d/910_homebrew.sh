@@ -12,4 +12,7 @@ pathmungex PATH "$HOMEBREW_PREFIX/bin"
 pathmungex MANPATH "$HOMEBREW_PREFIX/share/man"
 pathmungex INFOPATH "$HOMEBREW_PREFIX/share/info"
 
-pathmungex BASH_COMPLETION_DIRS "$HOMEBREW_PREFIX/etc/bash_completion.d"
+pathmungex BASH_COMPLETION_PATHS "$HOMEBREW_PREFIX/etc/bash_completion.d"
+
+# handling periodic updates as a cron job
+export HOMEBREW_NO_AUTO_UPDATE=1

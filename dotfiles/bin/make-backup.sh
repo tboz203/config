@@ -35,6 +35,9 @@ cd "$WORKSPACE"
 yumdb search command_line '*' > installs.txt
 (yum history info '*' || echo "[X] could not read history") &> yum-history.txt
 
+# and of brew installs
+which brew &> /dev/null && brew list --installed-on-request > brew-installs.txt
+
 # grab crontabs
 crontab -u "$USER" -l > "$USER.crontab" || true
 crontab -l > "$USER.crontab" || true

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# script for cron to update brew & brew packages
+
+brew update && brew upgrade

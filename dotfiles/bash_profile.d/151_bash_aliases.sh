@@ -1,6 +1,24 @@
 # .bash_aliases
 # vim: ft=bash
 
+alias rmf='rm -rf'
+alias curl='curl -w "\n"'
+alias cd='cd -P'
+alias make='make -j $(nproc)'
+
+# some aliases for date in a sortable format
+alias day='date +%Y-%m-%d'
+alias full='date "+%Y.%m.%d-%H.%M.%S"'
+
+# print out all variables, even if not exported
+# sh*llcheck sees `$item` being used, but not defined 🙄
+# shellcheck disable=SC2154
+alias xenv='compgen -v | grep -v "^_" | sort | while read -r item; do declare -p $item ; done'
+
+# If not running interactively, stop here
+# ========================================
+[[ $- == *i* ]] || return
+
 # color aliases
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
@@ -65,7 +83,6 @@ alias cdd=cd
 alias dfn=dnf
 alias qgit=git
 
-
 # make du and df a bit more readable
 alias df='df -h'
 # this is now function `dush`
@@ -79,16 +96,11 @@ alias mv='mv -vi'
 alias cp='cp -vri'
 alias rm='rm -vI --one-file-system'
 
-# some aliases for date in a sortable format
-alias day='date +%Y-%m-%d'
-alias full='date "+%Y.%m.%d-%H.%M.%S"'
-
 # set some default flags
 # alias tidy='tidy -f /dev/null -iqmw'
 # alias astyle='astyle -sajcn'
 # alias find='find 2>/dev/null'
 alias nl='nl -ba'
-alias make='make -j $(nproc)'
 alias figlet='figlet -t'
 # alias rgrep='grep -r'
 alias vimrc='vim ~/.vimrc'
@@ -99,7 +111,6 @@ alias functions='nv ~/.bash_functions'
 alias nvconfig='nv ~/.config/nvim/lua/config/lazy.lua'
 alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show"'
 alias nvimrc=nvrc
-alias rmf='rm -rf'
 alias ps='ps -H'
 # alias listening='lsof -i -s TCP:Listen'
 alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
@@ -110,8 +121,6 @@ alias docker-purge='docker-halt && docker-prune -a'
 alias loud='BASH_ENV=~/.bash_loud '
 alias verbose='BASH_ENV=~/.bash_verbose '
 alias xclip='xclip -selection clipboard'
-
-alias curl='curl -w "\n"'
 
 alias http='http --ignore-stdin'
 
@@ -127,22 +136,11 @@ if [[ -f /usr/local/lib/antlr-4.9-complete.jar ]]; then
     # alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.7-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
 fi
 
-
-# resolve symlinks
-alias cd='cd -P'
+alias help2man='help2man -N -L $LC_ALL'
 
 # maxar specific
 
 # this is a script now
 # alias mxcurl='curl -s -H "Authorization: $(token)" -H "Accept: application/json, */*"'
-# # bootstrap depends on an old version of yq, so i've installed yq 4 as "yq-4"
-# alias yq='yq-4'
 
 alias eureka='eureka -s'
-
-# print out all variables, even if not exported
-# sh*llcheck sees `$item` being used, but not defined 🙄
-# shellcheck disable=SC2154
-alias xenv='compgen -v | grep -v "^_" | sort | while read -r item; do declare -p $item ; done'
-
-alias help2man='help2man -N -L $LC_ALL'

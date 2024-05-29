@@ -1,16 +1,16 @@
 #!/bin/bash
 # scriptlet to be sourced by bashrc to start ssh, tmux, and powerline
 
-# compgen -v | sort | while read name; do declare -p $name ; done
-# set -vx
+# If not running interactively, do nothing
+[[ $- == *i* ]] || return
 
 # fix TERM for tmux
 # if [[ $TERM != *256color && $COLORTERM == @(gnome-terminal|xfce4-terminal|truecolor) ]]; then
-# 	export TERM=xterm-256color
+#     export TERM=xterm-256color
 # elif [[ $COLORTERM == rxvt-xpm ]]; then
-# 	export TERM=rxvt-256color
+#     export TERM=rxvt-256color
 # fi
-#
+
 if [[ ! -v SSH_CONNECTION && ! -v HAS_POWERLINE_FONTS ]] && (fc-list | grep -iqE "powerline|nerd"); then
     export HAS_POWERLINE_FONTS=1
 fi
@@ -32,23 +32,24 @@ fi
 # `HAS_POWERLINE_FONTS` survives the ssh connection
 
 if [[ $HAS_POWERLINE ]]; then
-    _DIRS=(
-        $HOME/.local/lib/python*
+    dirs=(
+        "$HOME"/.local/lib/python*
         /usr/local/lib/python*
         /usr/lib/python*
     )
-    for _dir in "${_DIRS[@]}"; do
-        if [[ -d $_dir/site-packages/powerline ]]; then
-            export POWERLINE_ROOT=$_dir/site-packages/powerline
+    for dir in "${dirs[@]}"; do
+        candidate="$dir/site-packages/powerline"
+        if [[ -d $dir && -d $candidate ]]; then
+            export POWERLINE_ROOT="$candidate"
             break
         fi
     done
     if [[ -z $POWERLINE_ROOT ]]; then
-        echo >&2 "[-] Powerline root not found"
-        read -p "press enter to continue: "
+        echo >&2 "[!] Powerline root not found"
+        read -rp "press enter to continue: "
         unset HAS_POWERLINE
     fi
-    unset _DIRS _dir
+    unset dirs dir
 fi
 
 # if we have tmux and we're not nested, change process to new session

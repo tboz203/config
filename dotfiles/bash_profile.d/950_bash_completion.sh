@@ -24,7 +24,26 @@ complete -F _minimal .
 
 # ---
 
-for item in ~/.bash_completion.d/*; do
-    [[ -f $item ]] || continue
-    . "$item"
+[[ ! -v BASH_COMPLETION_PATHS ]] && BASH_COMPLETION_PATHS=(~/.bash_completion.d/)
+
+files=()
+
+for path in "${BASH_COMPLETION_PATHS[@]}"; do
+    if [[ -d $path && -r $path ]]; then
+        files+=("$path"/*)
+    elif [[ -f $path && -r $path ]]; then
+        files+=("$path")
+    else
+        echo >&2 "[!] bash completion paths: invalid path: $path"
+    fi
 done
+
+for path in "${files[@]}"; do
+    if [[ -f $path && -r $PATH ]]; then
+        . "$path"
+    else
+        echo >&2 "[!] bash completion: cannot source file: $path"
+    fi
+done
+
+unset path files
