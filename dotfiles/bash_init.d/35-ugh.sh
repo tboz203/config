@@ -3,6 +3,8 @@
 # If not running interactively, don't do anything
 [[ $- == *i* ]] || return
 
+haveexe thefuck || return
+
 function ugh()
 {
     TF_PYTHONIOENCODING=$PYTHONIOENCODING

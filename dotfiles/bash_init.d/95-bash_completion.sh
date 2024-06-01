@@ -3,6 +3,12 @@
 # user completion file
 # expects to be sourced by the tail end of bash_completion script
 
+# bash completion is not exportable
+[[ -v EXPORT_ONLY ]] && return
+
+# If not running interactively, do nothing
+[[ $- == *i* ]] || return
+
 # have we been sourced too early?
 [[ -v BASH_COMPLETION_VERSINFO ]] || return
 
@@ -31,7 +37,7 @@ files=()
 for path in "${BASH_COMPLETION_PATHS[@]}"; do
     if [[ -d $path && -r $path ]]; then
         files+=("$path"/*)
-    elif [[ -f $path && -r $path ]]; then
+    elif [[ -r $path ]]; then
         files+=("$path")
     else
         echo >&2 "[!] bash completion paths: invalid path: $path"
@@ -39,11 +45,7 @@ for path in "${BASH_COMPLETION_PATHS[@]}"; do
 done
 
 for path in "${files[@]}"; do
-    if [[ -f $path && -r $PATH ]]; then
-        . "$path"
-    else
-        echo >&2 "[!] bash completion: cannot source file: $path"
-    fi
+    . "$path"
 done
 
 unset path files

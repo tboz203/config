@@ -61,11 +61,10 @@ unset _dots _dirs
 
 alias files='fd . -t f'
 
-# alias vim='vim -Xp'
+alias vim='vim -p'
+alias view='view -p'
 # alias vim='nvim'
 # alias nvim='nvim -p'
-# alias vim='vim -p'
-# alias view='view -p'
 alias nv=nvim
 alias nvimdiff='nvim -d'
 alias nvdiff=nvimdiff
@@ -105,8 +104,8 @@ alias figlet='figlet -t'
 # alias rgrep='grep -r'
 alias vimrc='vim ~/.vimrc'
 # alias gvimrc='gvim ~/.gvimrc'
+alias bashrc='nv ~/.bashrc ~/.bash_init.d/*'
 alias aliases='nv ~/.bash_aliases'
-alias bashrc='nv ~/.bashrc'
 alias functions='nv ~/.bash_functions'
 alias nvconfig='nv ~/.config/nvim/lua/config/lazy.lua'
 alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show"'
@@ -114,12 +113,15 @@ alias nvimrc=nvrc
 alias ps='ps -H'
 # alias listening='lsof -i -s TCP:Listen'
 alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
+
 alias docker-prune='docker system prune -f --volumes'
 alias docker-halt='docker container ls -a --format "{{.Names}}" | xargs -r docker container rm -f'
 alias docker-scrub='docker-halt && docker-prune'
 alias docker-purge='docker-halt && docker-prune -a'
+
 alias loud='BASH_ENV=~/.bash_loud '
 alias verbose='BASH_ENV=~/.bash_verbose '
+
 alias xclip='xclip -selection clipboard'
 
 alias http='http --ignore-stdin'

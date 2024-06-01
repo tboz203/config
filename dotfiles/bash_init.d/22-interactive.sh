@@ -6,9 +6,7 @@ if [[ ${BASH_VERSINFO[0]} -lt 5 ]]; then
     echo >&2 "Hi! go update your bash please..."
 fi
 
-# export LESS="-SRFXJ"
-export LESS="-SRFi"
-# (less --mouse |& grep -q "no mouse option") || LESS+=" --mouse --wheel-lines=3"
+export LESS="-SRi"
 (less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
 export LESSCHARSET=utf-8
 
@@ -64,13 +62,13 @@ shopt -so pipefail
 # bash completion ones are in ~/.local/share/bash-completion/completions and
 # are lazily loaded at first use
 
-doihave kubectl && eval "$(kubectl completion bash)"
-doihave helm && eval "$(helm completion bash)"
-doihave kind && eval "$(kind completion bash)"
-# doihave poetry && eval "$(poetry completions bash)"
-# doihave pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
-# doihave oc && eval "$(oc completion bash)"
-# doihave yq && eval "$(yq shell-completion bash)"
+haveexe kubectl && eval "$(kubectl completion bash)"
+haveexe helm && eval "$(helm completion bash)"
+haveexe kind && eval "$(kind completion bash)"
+# haveexe poetry && eval "$(poetry completions bash)"
+# haveexe pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
+# haveexe oc && eval "$(oc completion bash)"
+# haveexe yq && eval "$(yq shell-completion bash)"
 
 # When set to "1" suggest all commands, including plumbing commands
 # which are hidden by default (e.g. "cat-file" on "git ca<TAB>").
@@ -99,3 +97,6 @@ export DOCKER_COMPLETION_SHOW_NODE_IDS=yes
 export DOCKER_COMPLETION_SHOW_PLUGIN_IDS=yes
 export DOCKER_COMPLETION_SHOW_SECRET_IDS=yes
 export DOCKER_COMPLETION_SHOW_SERVICE_IDS=yes
+
+PS1='\[\e[1;33m\]\u@\h \w \$ \[\e[0m\]'
+sourcepath ~/.pretty_prompt.sh

@@ -8,12 +8,8 @@ while [[ $# -gt 0 ]]; do
     arg="$1"
     shift
     case $arg in
-        -*=*)
-            # split --var=value pairs into separate tokens
-            # but only replacing the first '='!
-            # shellcheck disable=SC2086 # intentionally splitting token
-            set -- ${arg/=/ } "$@"
-            ;;
+        # split --var=value pairs
+        -*=*) set -- "${arg%%=*}" "${arg#*=}" "$@" ;;
         -d | --dump)
             DUMP=1
             ;;

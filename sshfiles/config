@@ -9,3 +9,4 @@ Host github.digitalglobe.com
   IdentityFile /home/th026106/.ssh/git_key
 Host localhost
   SendEnv DBUS_SESSION_BUS_ADDRESS DISPLAY TMUX
+  RequestTTY yes

@@ -1,51 +1,6 @@
 # .bash_functions
-# vim: ft=sh
+# vim: filetype=sh tabstop=4 shiftwidth=0 softtabstop=-1 expandtab
 # shellcheck disable=SC2016
-
-realwhich()
-{
-    : '`which` without aliases or functions, dereferencing symlinks'
-    # {
-    #     command which "$@" || return
-    # } | xargs -r realpath
-    declare -a items
-    local item failures
-    for item in "$@"; do
-        # i just don't like the error output of `which`...
-        items+=("$(command which "$item" 2> /dev/null)") || {
-            echo >&2 "[X] realwhich: did not find $item"
-            failures=1
-        }
-    done
-    [[ -v failures ]] && return 1
-    realpath "${items[@]}"
-}
-
-doihave()
-{
-    : 'silently test whether a command is in the path'
-    command which "$@" &> /dev/null
-}
-# so i can type `if ihave program; ...`
-alias ihave=doihave
-
-# this is a script now
-# heregit()
-# {
-#     : 'execute a git command in every child directory'
-#     local item
-#     for item in *; do
-#         echo -e "\e[30;43m> $item\e[0m"
-#         git -C "$item" "$@"
-#         echo
-#     done
-# }
-
-# this is an alias now (using `fd`)
-# files() {
-#   : 'like "find -type f", but exclude hidden files'
-#   find "$@" -iregex ".*/\.[^/].*" -prune -o -type f -print
-# }
 
 get_array()
 {
@@ -53,7 +8,7 @@ get_array()
     : 'usage: get_array [READARRAY_ARGS...] ARRAY -- COMMAND...'
     declare -a mapargs
     while [[ $# -gt 0 ]]; do
-        local arg=$1
+        declare arg=$1
         shift
         case $arg in
             --) break ;;
@@ -72,9 +27,9 @@ get_array()
     fi
 
     # execute the command
-    local fulltext
+    declare fulltext
     fulltext=$("$@") || {
-        local err=$?
+        declare err=$?
         echo >&2 -n "$fulltext"
         return $err
     }
@@ -90,7 +45,7 @@ with_files()
     # split our params into command and files_args
     declare -a command files
     while [[ $# -gt 0 ]]; do
-        local arg="$1"
+        declare arg="$1"
         shift
         case $arg in
             --) break ;;
@@ -120,7 +75,7 @@ declare -F _filedir &> /dev/null && complete -F _filedir -d vimfiles
 vimwhich()
 {
     declare -a targets
-    get_array targets -- realwhich "$@" || return
+    get_array targets -- type -P "$@" || return
     vim "${targets[@]}"
 }
 complete -c vimwhich
@@ -135,9 +90,7 @@ declare -F _filedir &> /dev/null && complete -F _filedir -d nvfiles
 nvwhich()
 {
     declare -a targets
-    # mapfile -t targets < <(realwhich "$@") || return
-    # targets=($(realwhich "$@"))
-    get_array targets -- realwhich "$@" || return
+    get_array targets -- type -P "$@" || return
     nvim "${targets[@]}"
 }
 complete -c nvwhich
@@ -151,9 +104,9 @@ mw()
         exit 1
     fi
     # the last parameter
-    local dest="${*: -1}"
+    declare dest="${*: -1}"
     # everything but the last parameter, as an array
-    local files=("${@:1:$#-1}")
+    declare files=("${@:1:$#-1}")
     [[ -d $dest ]] || {
         echo "last parameter should be a directory"
         return 1
@@ -167,97 +120,221 @@ repeat()
 {
     : 'usage: repeat TEXT COUNT'
     : 'does something a bit like `TEXT * COUNT`'
-    local text="$1"
-    local count="$2"
+    declare text="$1"
+    declare count="$2"
     printf "${text}%.0s" $(seq 1 "$count")
 }
 
-# pathmunge()
-# {
-#     : 'add a directory to the PATH if not already present'
-#     case ":${PATH}:" in
-#         *:"$1":*) ;;
-#         *)
-#             if [ -d "$1" ]; then
-#                 if [ "$2" = "after" ]; then
-#                     PATH=$PATH:$1
-#                 else
-#                     PATH=$1:$PATH
-#                 fi
-#             fi
-#             ;;
-#     esac
-# }
+pathmunge()
+{
+    if [[ $# -lt 1 || $# -gt 2 ]]; then
+        echo "[X] pathmunge: bad arguments:$*"
+        echo "Usage: pathmunge DIR [after]"
+        return 1
+    fi
+
+    [[ :$PATH: != *:$1:* && -d $1 ]] || return
+
+    if [[ ${2:-} = after ]]; then
+        PATH=$PATH:$1
+    else
+        PATH=$1:$PATH
+    fi
+}
 
 pathmungex()
 {
     : 'like pathmunge, but better'
-    local params arg PATHVAR DIR EXPORT AFTER HELP
-    params=(PATHVAR DIR)
+
+    # PATHVAR: indirect reference to a global PATH-like variable
+    # (not a `declare -n` reference; all indirection is explicit)
+    # EXPORT: whether to export PATHVAR
+    # HELP: whether to print help & halt
+    declare PATHVAR EXPORT HELP
+    # CHECK: how to check entries; one of "nocheck", "silent", or "fail"
+    declare CHECK=silent
+    # WHERE: where to put directories; one of "insert", "before", or "after"
+    declare WHERE=insert
+    # MARKER: pattern used find entry in PATHVAR where ENTRIES should be inserted
+    declare MARKER="^/usr/"
+    # ENTRIES: a list of dirs to be added to PATHVAR
+    declare -a ENTRIES
+
     while [[ $# -gt 0 ]]; do
-        arg="$1"
+        declare arg="$1"
         shift
         case $arg in
+            # split --var=value pairs, preserving spaces
+            -*=*) set -- "${arg%%=*}" "${arg#*=}" "$@" ;;
+            -[^-]?*)
+                # split arguments like `-aef` into `-a -e -f`
+                # shellcheck disable=SC2046  # intentionally splitting token
+                set -- $(sed -e 's/^-//' -e 's/./-\0 /g' <<< "$arg") "$@"
+                ;;
             -e | --export) EXPORT=1 ;;
-            -a | --after) AFTER=1 ;;
+            -b | --before) WHERE=before ;;
+            -a | --after) WHERE=after ;;
+            -f | --fail | --fatal) CHECK=fail ;;
+            -n | --no-check | --nocheck) CHECK=nocheck ;;
             -h | --help) HELP=1 ;;
+            -m | --marker)
+                if [[ -v 1 && ! ($1 =~ ^-) ]]; then
+                    MARKER="$1"
+                else
+                    echo >&2 "[X] Argument required: $arg"
+                    HELP=1
+                fi
+                ;;
             -*)
                 echo >&2 "[X] pathmungex: I don't understand \"$arg\""
                 HELP=1
                 ;;
             *)
-                : "setting a positional parameter: ${params[0]} -> $arg"
-                if [[ ${#params[@]} -gt 0 ]]; then
-                    param="${params[0]}"
-                    declare "$param=$arg"
-                    params=("${params[@]:1}")
+                if [[ ! -v PATHVAR ]]; then
+                    PATHVAR=$arg
                 else
-                    echo >&2 "[X] pathumngex: Too many parameters: \"$arg\""
-                    HELP=1
+                    ENTRIES+=("$arg")
                 fi
                 ;;
         esac
     done
 
-    if [[ ${#params[@]} -gt 0 ]]; then
-        echo >&2 "[X] pathumngex: Not enough parameters"
+    if [[ ${#ENTRIES[@]} -eq 0 ]]; then
+        echo >&2 "[X] pathumngex: Not enough arguments"
         HELP=1
     fi
 
-    : "PATHVAR is ${PATHVAR:-<unset>}"
-    : "DIR is ${DIR:-<unset>}"
-    : "AFTER is ${AFTER:-<unset>}"
-    : "EXPORT is ${EXPORT:-<unset>}"
+    (shopt -oq verbose || shopt -oq xtrace) && declare -p PATHVAR EXPORT HELP CHECK WHERE MARKER ENTRIES
 
     if [[ -v HELP ]]; then
-        echo "usage: pathmungex [-e|--export] [-a|--after] PATHVAR DIR"
-        echo
-        echo "Add a directory to a path variable if that directory exists, and is not already in that path"
-        echo "example: pathmungex -a PATH $HOME/.bin -e"
+        cat <<- 'EOF'
+			Add entries to a PATH-like list variable, for each entry that exists on disk
+			and is not already in the list. By default, entries are inserted in order into
+			PATHVAR before the first entry that begins with "/usr/".
+
+			Usage: pathmungex [OPTIONS] PATHVAR ENTRIES...
+
+			Parameters:
+			PATHVAR     The name of a PATH-like list variable
+			ENTRIES     One or more entries to add to PATHVAR
+
+			Options:
+			-e | --export       Export PATHVAR
+			-a | --after        Append entries to the end of PATHVAR
+			-b | --before       Prepend entries to the front of PATHVAR
+			-f | --fail         Fail with an error and leave PATHVAR unmodified if any
+			                    ENTRIES do not exist
+			-n | --no-check     Do not check whether entries exist on disk
+			-h | --help         Print this message and halt
+
+			Optional arguments:
+			-m | --marker MARKER    A pattern to use to find the entry in PATHVAR where
+			                        ENTRIES should be inserted
+			EOF
         return 1
     fi
 
-    # DIR=$( realpath -msq "$DIR")
+    if [[ -v EXPORT ]]; then
+        export "${PATHVAR?}"
+    fi
 
-    if [[ ! (:${!PATHVAR}: =~ :$DIR:) && -d $DIR ]]; then
-        if [[ ! -v $PATHVAR ]]; then
-            declare -g "$PATHVAR=$DIR"
-        elif [[ -v AFTER ]]; then
-            declare -g "$PATHVAR=${!PATHVAR}:$DIR"
+    # collect good entries
+    declare -a GOOD
+    for item in "${ENTRIES[@]}"; do
+        # if item is not in PATHVAR
+        if [[ ! :${!PATHVAR:-}: =~ :$item: ]]; then
+            if [[ $CHECK = nocheck || -e $item ]]; then
+                GOOD+=("$item")
+            elif [[ $CHECK = fail ]]; then
+                echo >&2 "[!] pathmungex: entry does not exist: $item"
+                return 1
+            fi
+        fi
+    done
+
+    # join all good entries
+    # shellcheck disable=SC2155
+    declare JOINED=$(
+        IFS=:
+        echo "${GOOD[*]}"
+    )
+
+    (shopt -oq verbose || shopt -oq xtrace) && declare -p GOOD JOINED
+
+    # nothing to add?
+    [[ -z $JOINED ]] && return
+
+    # if PATHVAR is unset or empty...
+    if [[ ! -v $PATHVAR || -z ${!PATHVAR} ]]; then
+        # declare new global from PATHVAR reference set to joined entries
+        declare -g "$PATHVAR=$JOINED"
+        return
+    elif [[ $WHERE = after ]]; then
+        # modify global PATHVAR reference with joined entries appended
+        declare -g "$PATHVAR=${!PATHVAR}:$JOINED"
+        return
+    elif [[ $WHERE = before ]]; then
+        # modify global PATHVAR reference with joined entries prepended
+        declare -g "$PATHVAR=$JOINED:${!PATHVAR}"
+        return
+    fi
+
+    # not empty, before, or after; we'll have to split PATHVAR
+
+    declare -a PATHARRAY FRONT BACK
+    IFS=: read -ra PATHARRAY <<< "${!PATHVAR}"
+
+    declare found
+    for item in "${PATHARRAY[@]}"; do
+        if [[ -v found || $item =~ $MARKER ]]; then
+            found=1
+            BACK+=("$item")
         else
-            declare -g "$PATHVAR=$DIR:${!PATHVAR}"
+            FRONT+=("$item")
         fi
-        if [[ -v EXPORT ]]; then
-            export "${PATHVAR?}"
-        fi
+    done
+
+    # first build up an array
+    PATHARRAY=("${FRONT[@]}" "${GOOD[@]}" "${BACK[@]}")
+
+    (shopt -oq verbose || shopt -oq xtrace) && declare -p FRONT GOOD BACK
+
+    # then join it together
+    JOINED=$(
+        IFS=:
+        echo "${PATHARRAY[*]}"
+    )
+
+    declare -g "$PATHVAR=$JOINED"
+}
+
+setpath()
+{
+    if [[ $# -ne 2 ]]; then
+        echo >&2 "Set a variable to a path if that path exists"
+        echo >&2 "Usage: setpath VAR PATH"
+        return 1
+    elif [[ -e $2 ]]; then
+        export "$1=$2"
     fi
 }
 
-showmounts()
+sourcepath()
 {
-    : 'list mounts in a table, and cut off the options'
-    mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
+    if [[ $# -ne 1 || $1 =~ ^- ]]; then
+        echo >&2 "Source a script if it exists"
+        echo >&2 "Usage: sourcepath PATH"
+        return 1
+    elif [[ -e $1 ]]; then
+        source "$1"
+    fi
 }
+
+# showmounts()
+# {
+#     : 'list mounts in a table, and cut off the options'
+#     mount -l "$@" | cut -d "(" -f 1 | sed -r "s/\<(on|type)\>/% \0/g" | column -t -s %
+# }
 
 flash_message()
 {
@@ -285,13 +362,12 @@ flash_message()
     done
 
     if [[ -v HELP ]]; then
-        command cat << EOF
-flash_message: briefly print a message to the screen.
+        command cat <<- EOF
+			flash_message: briefly print a message to the screen.
 
-Usage: flash_message [-s|--sleep SLEEP] MESSAGE...
-
-    -s|--sleep: how long to sleep (currently $sleep)
-EOF
+			Usage: flash_message [-s|--sleep SLEEP] MESSAGE...
+			    -s|--sleep: how long to sleep (currently $sleep)
+			EOF
         return 1
     fi
 
@@ -310,7 +386,7 @@ EOF
 # }
 
 # don't wanna set pager globally, but do wanna pick one for these
-doihave bat && _pager=bat || _pager=less
+haveexe bat && _pager=bat || _pager=less
 
 jql()
 {
@@ -362,6 +438,7 @@ dfh()
 
 each()
 {
+    : 'echo each argument'
     for item in "$@"; do
         echo "$item"
     done
@@ -434,54 +511,44 @@ fatal()
 stacktrace()
 {
     : 'print the current call stack'
-    local idx filename subroutine lineno context lines ctx_lineno prefix
+    local idx filename subroutine lineno lines ctx_lineno prefix
 
-    context=2
-    top=1
-    bottom=1
+    local context=2 top=1 bottom=1
 
-    local opt OPTARG OPTIND help
+    local opt OPTARG OPTIND HELP
     while getopts :hc:t:b: opt; do
         case $opt in
-            h)
-                help=1
-                ;;
-            c)
-                context=$OPTARG
-                ;;
-            t)
-                top=$OPTARG
-                ;;
-            b)
-                bottom=$OPTARG
-                ;;
+            h) HELP=1 ;;
+            c) context=$OPTARG ;;
+            t) top=$OPTARG ;;
+            b) bottom=$OPTARG ;;
             :)
                 echo >&2 "[X] stacktrace: required argument not found: $OPTARG"
-                help=1
+                HELP=1
                 ;;
             ?)
                 echo >&2 "[X] stacktrace: invalid option: $OPTARG"
-                help=1
+                HELP=1
                 ;;
             *)
                 echo >&2 "[X] stacktrace: unexpected input"
                 declare -p opt OPTARG
-                help=1
+                HELP=1
                 ;;
         esac
     done
     shift $((OPTIND - 1))
 
-    if [[ -v help ]]; then
-        cat >&2 << EOF
-${FUNCNAME[0]}: print a bash function stacktrace
-Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]
+    if [[ -v HELP ]]; then
+        cat >&2 <<- EOF
+			${FUNCNAME[0]}: print a bash function stacktrace
+			Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]
 
-Options:
--c CONTEXT      print CONTEXT number of lines of context (currently $context)
--b BOTTOM       trim BOTTOM frames from the bottom of the stack (currently $bottom)
--t TOP          trim TOP frames from the top of the stack (currently $top)
-EOF
+			Options:
+			-c CONTEXT      print CONTEXT number of lines of context (currently $context)
+			-b BOTTOM       trim BOTTOM frames from the bottom of the stack (currently $bottom)
+			-t TOP          trim TOP frames from the top of the stack (currently $top)
+			EOF
         return 1
     fi
 
@@ -518,4 +585,11 @@ mxtime()
     : 'get timestamps for maxar'
     [[ $# -gt 0 ]] && args=(--date "$*")
     date -Iseconds "${args[@]}" | sed 's/+0000/Z/'
+}
+
+# wrapper for pstree default arguments
+pstree()
+{
+    [[ $# -eq 0 ]] && set -- -H $$ $$
+    command pstree -Uas "$@"
 }

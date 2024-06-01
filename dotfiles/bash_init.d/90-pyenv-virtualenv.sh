@@ -1,6 +1,7 @@
 #!/bin/bash
 
-/usr/bin/which pyenv &>/dev/null || return
+haveexe pyenv || return
+
 eval "$(pyenv virtualenv-init -)"
 
 # PATH="$(bash --norc -ec 'IFS=:; paths=($PATH); for i in ${!paths[@]}; do if [[ ${paths[i]} == "'"$HOME/.pyenv/plugins/pyenv-virtualenv/shims"'" ]]; then unset '\''paths[i]'\''; fi; done; echo "${paths[*]}"')"
