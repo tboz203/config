@@ -1,26 +1,25 @@
 # ensure PATH is populated
 
-# _start_debug_trace
+# _debug_trace
 
-pathmungex PATH \
+# [[ -v _BASH_INIT_TMUX ]] && return
+
+pathmungex --replace PATH \
     "$HOME/.local/bin" \
     "$HOME/.local/share/go/bin" \
     "$HOME/.local/share/groovy/bin" \
     "$HOME/.local/share/node/bin" \
     "$HOME/.cargo/bin" \
     "$HOME/.poetry/bin" \
+    "$HOME/.tgenv/bin" \
+    "$HOME/.tfenv/bin" \
     "$HOME/go/bin" \
     "$HOME/workspace/maxar/dodev" \
     "/usr/local/go/bin"
 
 pathmungex --before PATH \
     "$HOME/.maxar-bin" \
-    "$HOME/.bin" \
-    "$HOME/.tgenv/bin" \
-    "$HOME/.tfenv/bin" \
-    "$HOME/.pyenv/bin" \
-    "$HOME/.nodenv/bin" \
-    "$HOME/.rbenv/bin"
+    "$HOME/.bin"
 
 pathmungex --after PATH \
     "$HOME/.local/share/idea/bin" \

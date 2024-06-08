@@ -12,6 +12,8 @@
 
 # if we have tmux and we're not nested, change process to new session
 if haveexe tmux && [[ ! -v TMUX && -v TURBO_MODE ]]; then
+    export _BASH_INIT_TMUX=1
+    replace_exec
     exec tmux new-session -A -s main || {
         echo >&2 "[!] exec tmux failed"
         return 1

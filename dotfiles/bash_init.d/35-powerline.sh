@@ -1,7 +1,7 @@
 # setup powerline
 
-# If not running interactively, do nothing
-[[ $- == *i* ]] || return
+# If not running interactively or powerline already defined, do nothing
+[[ $- != *i* ]] && return
 
 # set powerline availability flag (for all programs)
 if haveexe powerline && [[ ($TERM == *256color || $COLORTERM == truecolor) && $HAS_POWERLINE_FONTS ]]; then
@@ -11,7 +11,7 @@ fi
 # if this isn't working and you don't know why, make sure that
 # `HAS_POWERLINE_FONTS` survives the ssh connection
 
-if [[ -v HAS_POWERLINE ]]; then
+if [[ -v HAS_POWERLINE && ! -v POWERLINE_ROOT ]]; then
     dirs=(
         "$HOME"/.local/lib/python*
         /usr/local/lib/python*
@@ -39,5 +39,8 @@ if [[ -v HAS_POWERLINE ]]; then
     powerline-daemon -q || true
     # export POWERLINE_BASH_CONTINUATION=1
     # export POWERLINE_BASH_SELECT=1
-    . "$POWERLINE_ROOT/bindings/bash/powerline.sh"
+
+    # gross hack to skip slow, redundant checks
+    POWERLINE_CONFIG_COMMAND=true
+    . "${POWERLINE_ROOT?}/bindings/bash/powerline.sh"
 fi

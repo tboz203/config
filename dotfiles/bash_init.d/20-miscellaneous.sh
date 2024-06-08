@@ -1,5 +1,11 @@
 # miscellaneous bash profile cruft
 
+export MAILTO=thomas.bozeman@cgifederal.com
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export EDITOR=nvim
+export PAGER=less
+
 export ANSIBLE_NOCOWS=1
 export PIPENV_VENV_IN_PROJECT=1
 export DOCKER_HIDE_LEGACY_COMMANDS=1
@@ -21,16 +27,16 @@ setpath SSL_CERT_FILE /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem || true
 export PERL_MB_OPT="--install_base $HOME/perl5"
 export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
 
-pathmungex PATH "$HOME/perl5/bin"
-pathmungex -e -a PERL_LOCAL_LIB_ROOT "$HOME/perl5"
+pathmungex -a PATH "$HOME/perl5/bin"
 pathmungex -e PERL5LIB "$HOME/perl5/lib/perl5"
+setpath PERL_LOCAL_LIB_ROOT "$HOME/perl5"
 
 pathmungex -e PYTHONPATH "$HOME/.pymodules"
 
 pathmungex -eb PKG_CONFIG_PATH \
-    "$HOME/local/lib/pkgconfig" \
-    "$HOME/local/lib64/pkgconfig" \
-    "$HOME/local/share/pkgconfig" \
+    ~/.local/lib/pkgconfig \
+    ~/.local/lib64/pkgconfig \
+    ~/.local/share/pkgconfig \
     /usr/local/lib/pkgconfig \
     /usr/local/lib64/pkgconfig \
     /usr/local/share/pkgconfig \
