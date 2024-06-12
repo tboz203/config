@@ -9,8 +9,8 @@ _debug_var()
 {
     # print variable state
     [[ $# -gt 0 ]] || return 1
-    inlist debug "${_BASH_INIT_DEBUG-}" || return 0
-    _debug "(${FUNCNAME[1]}) $*"
+    [[ -o xtrace ]] || inlist trace "${_BASH_INIT_DEBUG-}" || inlist debug "${_BASH_INIT_DEBUG-}" || return 0
+    echo >&2 "[.] ${FUNCNAME[0]} (${FUNCNAME[1]}) $*"
     local declarations=$(declare -p -- "$@" 2>&1 || true)
     echo >&2 "    ${declarations//$'\n'/&    }"
 }
@@ -35,18 +35,19 @@ _debug_reset()
     fi
 }
 
-source_verbose()
-{
-    # print names of sourced files when entering and exiting
-    inlist source "${_BASH_INIT_DEBUG-}" && echo "# sourcing $*" || true
-    local retval=0
-    builtin source "$@" || retval=$?
-    inlist source "${_BASH_INIT_DEBUG-}" && echo "# leaving $* (return $retval)" || true
-    return $retval
-}
-
-alias source=source_verbose
-alias .=source_verbose
+# The need for this is largely obsoleted by the PS4 set above
+# source_verbose()
+# {
+#     # print names of sourced files when entering and exiting
+#     inlist source "${_BASH_INIT_DEBUG-}" && echo "# sourcing $*" || true
+#     local retval=0
+#     builtin source "$@" || retval=$?
+#     inlist source "${_BASH_INIT_DEBUG-}" && echo "# leaving $* (return $retval)" || true
+#     return $retval
+# }
+#
+# alias source=source_verbose
+# alias .=source_verbose
 
 replace_exec()
 {
@@ -67,16 +68,29 @@ replace_exec()
 print_stack()
 {
     local i=0
-    # echo "$LINENO $FUNCNAME $BASH_SOURCE"
+    echo "$LINENO $FUNCNAME $BASH_SOURCE"
     while caller $i; do ((i++)); done
+}
+
+stack()
+{
+    print_stack | while read -r lineno funcname filename; do
+        echo "$funcname ($filename:$lineno)"
+    done
 }
 
 stackline()
 {
-    inlist debug "${_BASH_INIT_DEBUG-}" || return 0
-    local stack="$(print_stack)"
-    stack=${stack#*$'\n'}
-    echo "${stack//$'\n'/ < }"
+    inlist verbose "${_BASH_INIT_DEBUG-}" || inlist debug "${_BASH_INIT_DEBUG-}" || return 0
+    for ((i = ${#BASH_SOURCE[@]} - 1; 1; i--)); do
+        echo -n "${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i - 1]})"
+        if ((i > 1)); then
+            echo -n " > "
+        else
+            break
+        fi
+    done
+    echo
 }
 
 inlist stacktrace "${_BASH_INIT_DEBUG-}" && trap 'print_stack' EXIT || true

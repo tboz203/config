@@ -41,6 +41,7 @@ if [[ -v HAS_POWERLINE ]]; then
     # export POWERLINE_BASH_SELECT=1
 
     # gross hack to skip slow, redundant checks
+    POWERLINE_COMMAND=powerline
     POWERLINE_CONFIG_COMMAND=true
     . "${POWERLINE_ROOT?}/bindings/bash/powerline.sh"
 fi

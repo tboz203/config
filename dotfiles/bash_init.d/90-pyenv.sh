@@ -1,10 +1,10 @@
 #!/bin/bash
-#
+
 setpath PYENV_ROOT ~/.pyenv || return 0
 
 pathmungex --before --replace PATH "$PYENV_ROOT/shims"
 pathmungex PATH "$PYENV_ROOT/bin"
-pathmungex -a BASH_COMPLETION_DIRS "$PYENV_ROOT/completions"
+# pathmungex -a BASH_COMPLETION_PATHS "$PYENV_ROOT/completions/pyenv.bash"
 
 export PYENV_SHELL=bash
 

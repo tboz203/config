@@ -12,6 +12,8 @@ export DOCKER_HIDE_LEGACY_COMMANDS=1
 export DOCKER_BUILDKIT=1
 setpath REQUESTS_CA_BUNDLE /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt || true
 
+pathmungex BASH_COMPLETION_USER_DIR ~/.local/share/bash-completion
+
 setpath BOOST_ROOT "$HOME/.local/boost_1_82_0"
 
 setpath SDKMAN_DIR "$HOME/.sdkman"

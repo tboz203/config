@@ -14,7 +14,7 @@ pathmungex INFOPATH "$HOMEBREW_PREFIX/share/info"
 
 # old & breaks things
 # pathmungex --before BASH_COMPLETION_PATHS "$HOMEBREW_PREFIX/etc/bash_completion"
-pathmungex --before BASH_COMPLETION_DIRS "$HOMEBREW_PREFIX/etc/bash_completion.d"
+pathmungex --before BASH_COMPLETION_USER_DIR "$HOMEBREW_PREFIX/etc/bash_completion.d"
 
 # handling periodic updates as a cron job
 export HOMEBREW_NO_AUTO_UPDATE=1

@@ -1,36 +1,40 @@
 # ensure PATH is populated
 
-# _debug_trace
+_debug_trace
 
 # [[ -v _BASH_INIT_TMUX ]] && return
 
+cleanpath
+
 pathmungex --replace PATH \
-    "$HOME/.local/bin" \
-    "$HOME/.local/share/go/bin" \
-    "$HOME/.local/share/groovy/bin" \
-    "$HOME/.local/share/node/bin" \
-    "$HOME/.cargo/bin" \
-    "$HOME/.poetry/bin" \
-    "$HOME/.tgenv/bin" \
-    "$HOME/.tfenv/bin" \
-    "$HOME/go/bin" \
-    "$HOME/workspace/maxar/dodev" \
-    "/usr/local/go/bin"
+    ~/.local/bin \
+    ~/.local/share/go/bin \
+    ~/.local/share/groovy/bin \
+    ~/.local/share/node/bin \
+    ~/.cargo/bin \
+    ~/.poetry/bin \
+    ~/.tgenv/bin \
+    ~/.tfenv/bin \
+    ~/go/bin \
+    ~/workspace/maxar/dodev \
+    /usr/local/go/bin \
+    /usr/local/bin \
+    /usr/bin
 
 pathmungex --before PATH \
-    "$HOME/.maxar-bin" \
-    "$HOME/.bin"
+    ~/.maxar-bin \
+    ~/.bin
 
 pathmungex --after PATH \
-    "$HOME/.local/share/idea/bin" \
-    "$HOME/.local/share/Postman" \
-    "$HOME/.local/share/pycharm/bin" \
-    "$HOME/.local/share/flyway" \
-    "$HOME/.local/share/jdt-language-server/bin" \
-    "$HOME/.local/share/plantuml" \
-    "$HOME/.bootstrap/bin" \
-    "$HOME/.bootstrap/java/default/bin" \
-    "$HOME/.bootstrap/maven/default/bin" \
-    "$HOME/.bootstrap/gradle/default/bin" \
-    "$HOME/.bootstrap/miniconda/bin" \
-    "/usr/pgsql-12/bin"
+    ~/.local/share/idea/bin \
+    ~/.local/share/Postman \
+    ~/.local/share/pycharm/bin \
+    ~/.local/share/flyway \
+    ~/.local/share/jdt-language-server/bin \
+    ~/.local/share/plantuml \
+    ~/.bootstrap/bin \
+    ~/.bootstrap/java/default/bin \
+    ~/.bootstrap/maven/default/bin \
+    ~/.bootstrap/gradle/default/bin \
+    ~/.bootstrap/miniconda/bin \
+    /usr/pgsql-12/bin

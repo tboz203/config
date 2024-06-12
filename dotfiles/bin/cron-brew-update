@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # script for cron to update brew & brew packages
 
-source ~/.bash_init.d/??-homebrew.sh
+source ~/.bashrc
 
 brew update && brew upgrade

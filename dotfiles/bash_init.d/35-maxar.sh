@@ -1,16 +1,20 @@
-#!/bin/bash
-# vim: tabstop=4 shiftwidth=0 expandtab
-# shellcheck disable=2128
+# Wideband Team Tools
+# shellcheck disable=2015,2128
+
+alias eureka='eureka -s '
+alias rake='bundle exec rake '
+
+if setpath WB_TOOLS ~/workspace/maxar/wb-team; then
+    # source $WB_TOOLS/source_all.sh
+    source "$WB_TOOLS/bash_lib/aws_tools/awsCreds.sh"
+    # alias initaws='awsCreds mcs-com us-east-1'
+    alias initaws='awsCreds mcs-gov us-gov-west-1'
+else
+    echo "[X] wb_tools missing"
+fi
 
 awsCreds2()
 {
-    # compare program name ($0) against script name (${BASH_SOURCE[0]});
-    # if they're the same, we're being executed as a script
-    if [[ $0 == "$BASH_SOURCE" ]]; then
-        echo >&2 "[!] $BASH_SOURCE must be sourced (not executed)"
-        USAGE=1
-    fi
-
     local -a POSITIONAL
     local HELP USAGE FORCE
     while [[ $# -gt 0 ]]; do
@@ -25,7 +29,7 @@ awsCreds2()
                 local FILENAME=$1 && shift
                 ;;
             -*)
-                echo >&2 "[X] $BASH_SOURCE: I don't understand $arg"
+                echo >&2 "[X] $FUNCNAME: I don't understand $arg"
                 USAGE=1
                 ;;
             *) POSITIONAL+=("$arg") ;;
@@ -108,7 +112,7 @@ awsCreds2()
 
         # HELP includes the USAGE header
         echo "Set required AWS environment variables, reauthenticating if necessary."
-        echo "Usage: source $BASH_SOURCE [OPTIONS] PROFILE REGION"
+        echo "Usage: $FUNCNAME [OPTIONS] PROFILE REGION"
 
         # full help output requested
         if [[ -v HELP ]]; then
@@ -248,5 +252,3 @@ awsCreds2()
     echo "[.] Assumed AWS profile: ${AWS_OKTA_PROFILE?} (${AWS_REGION?}): ${AWS_PROFILE?}"
     return 0
 }
-
-awsCreds2 "$@"

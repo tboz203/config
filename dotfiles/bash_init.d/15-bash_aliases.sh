@@ -96,9 +96,13 @@ alias ps='ps -H'
 alias df='df -h'
 # alias du='du -shc'
 
+alias py='python'
+alias ipy='ipython'
+
 alias vimrc='vim ~/.vimrc'
 # alias gvimrc='gvim ~/.gvimrc'
-alias bashrc='nv ~/.bashrc ~/.bash_init.d/[0-2]*'
+alias bashrc='nv ~/.bashrc ~/.bash_init.d/*'
+# alias bashrc='nv ~/.bashrc ~/.bash_init.d/[0-2]*'
 alias aliases='nv ~/.bash_init.d/*alias*'
 alias functions='nv ~/.bash_init.d/*function*'
 alias nvconfig='nv ~/.config/nvim/lua/config/lazy.lua'
@@ -141,10 +145,3 @@ for _ in {1..20}; do
     eval alias $pattern
 done
 unset pattern
-
-# maxar specific
-
-# this is a script now
-# alias mxcurl='curl -s -H "Authorization: $(token)" -H "Accept: application/json, */*"'
-
-alias eureka='eureka -s'

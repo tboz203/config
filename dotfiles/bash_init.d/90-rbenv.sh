@@ -2,8 +2,9 @@
 
 setpath RBENV_ROOT ~/.rbenv || return 0
 
-pathmungex --before --replace PATH "$HOME/.rbenv/shims" "$HOME/.rbenv/bin"
-pathmungex -a BASH_COMPLETION_DIRS "$HOME/.rbenv/completions"
+pathmungex --before --replace PATH "$RBENV_ROOT/shims"
+pathmungex PATH "$RBENV_ROOT/bin"
+# pathmungex -a BASH_COMPLETION_PATHS "$RBENV_ROOT/completions/rbenv.bash"
 export RBENV_SHELL=bash
 
 rbenv()
