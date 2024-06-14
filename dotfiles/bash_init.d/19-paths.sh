@@ -1,6 +1,6 @@
 # ensure PATH is populated
 
-_debug_trace
+# _debug_trace
 
 # [[ -v _BASH_INIT_TMUX ]] && return
 

@@ -23,13 +23,13 @@ set ignorecase
 set smartcase
 set shiftround
 set cursorline
-set colorcolumn=
 
 set sidescroll=20
 set sidescrolloff=20
 
+silent !mkdir -p ~/.vim/undodir
 set undofile
-set undodir=$HOME/.vim/undodir
+set undodir=~/.vim/undodir
 
 set tabstop=4
 set shiftwidth=4
@@ -316,6 +316,7 @@ if version > "500"
             \ ]
         let g:ycm_keep_logfiles = 1
 
+        let g:EditorConfig_max_line_indicator = "none"
 
         " mappings for plugins that don't have these nice settings
         noremap <silent> <leader>u :MundoToggle<cr>

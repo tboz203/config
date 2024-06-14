@@ -1,6 +1,6 @@
 # .bash_functions
 # vim: filetype=sh tabstop=4 shiftwidth=0 softtabstop=-1 expandtab
-# shellcheck disable=SC2016,2059
+# shellcheck disable=2016,2059,2120
 
 inlist()
 {
@@ -9,52 +9,130 @@ inlist()
     [[ :$2: == *:"$1":* ]]
 }
 
+each()
+{
+    # print each argument separately
+    printeach "%s\n" "$@"
+}
+
+printeach()
+{
+    # like printf, but does nothing without format arguments
+    (($# >= 1)) || return 2
+    (($# >= 2)) || return 0
+    local format=$1 && shift
+    printf "$format" "$@"
+}
+
 maybe()
 {
     # run a command if it exists
-    (($# > 0)) || return 1
-    if havecmd "$1"; then
-        "$@" || local retval=$?
-    fi
-    return "${retval:-0}"
+    (($# >= 1)) || return 2
+    havecmd "$1" || return 0
+    "$@"
 }
 
 contains()
-(
+{
     # whether or not an element appears in a list
     # usage: contains TARGET [ELEMENTS...]
-    if (($# < 1)); then
-        echo >&2 "[X] ${FUNCNAME[0]}: no values provided"
-        return 1
-    fi
+    (($# >= 1)) || return 2
 
-    target=$1 && shift
+    local target=$1 && shift
+    local item
     for item in "$@"; do
         [[ "$item" == "$target" ]] && return 0
     done
     return 1
-)
+}
+
+clone()
+{
+    # clone a variable
+    # usage: clone SRC DST
+    (($# == 2)) || return 2
+    local src=$1
+    local dst=$2
+    [[ $src != "$dst" ]] || return 2
+
+    local declaration
+    read -r declaration <<< "$(declare -p "$src")"
+    # strip off leading `declare \S+`
+    declaration=${declaration#declare +([^[:space:]]) }
+    eval "${declaration/$src/$dst}"
+
+}
+
+keyof()
+{
+    # print the key of an element in an array
+    # if the element is not found, prints nothing and returns 1
+    # usage: contains ELEMENT ARRAY_NAME
+    (($# >= 1)) || return 2
+
+    local target=$1
+    local arrayref=$2
+
+    local array
+    clone "$arrayref" array
+
+    local key value
+    for key in "${!array[@]}"; do
+        value=${array[$key]}
+        if [[ $target == "$value" ]]; then
+            printf '%s\n' "$key"
+            return 0
+        fi
+    done
+    return 1
+}
 
 declared()
 {
     # like [[ -v NAME ]], but for declarations
-    (($# > 0)) && declare -p "$@" &> /dev/null
+    (($# >= 1)) || return 2
+    declare -p -- "$@" &> /dev/null
 } && complete -v declared
 
 attributes()
 {
     # print attributes of variables as understood by `declare`,
     # with the addition of 'u' to indicate "undefined"
-    (($# > 0)) || return 1
+    (($# >= 1)) || return 2
     declare -p -- "$@" |& while IFS=$IFS:= read -r _ attrs _; do
         if [[ "$attrs" == declare ]]; then
             # got "bash: declare: <name>: not found"
             echo u
         else
-            echo "${attrs#-}"
+            printf "%s\n" "${attrs#-}"
         fi
     done
 } && complete -v attributes
+
+quote()
+{
+    local value clean
+    for value in "$@"; do
+        printf -v clean "%q" "$value"
+        if [[ $value == "$clean" ]]; then
+            # printf says no modifications needed; send the original
+            printf "%s\n" "$value"
+            continue
+        fi
+
+        if [[ $clean == \$* ]]; then
+            # printf used $'...' notation; send the cleaned value
+            printf "%s\n" "$clean"
+            continue
+        fi
+
+        # otherwise, printf gave us the "escape\ every\ \$character\ form",
+        # which we hate. we'll force it to use the other form, and then clean
+        # up the result
+        printf -v clean "%q" $'\n'"$value"
+        printf "%s\n" "'${clean#\$\'\\n}"
+    done
+}
 
 get_array()
 {
@@ -71,13 +149,13 @@ get_array()
 
     if (($# == 0)); then
         echo >&2 "[X] ${FUNCNAME[0]}: no command given"
-        return 1
-    elif ((${#mapargs[*]} == 0)); then
+        return 2
+    elif ((${#mapargs[@]} == 0)); then
         # technically you could call like `get_array -d : -- echo $PATH` and
         # pass this check, but if you've gotten that far, i'll assume you know
         # what you're doing
         echo >&2 "[X] ${FUNCNAME[0]}: no array given"
-        return 1
+        return 2
     fi
 
     # execute the command
@@ -94,25 +172,27 @@ get_array()
 
 from_list()
 {
-    if (($# != 2)); then
+    if [[ $# -ne 2 || $1 == -* ]]; then
         echo "Convert a colon-separated list to a Bash array variable"
         echo "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
-        return 1
+        return 2
     fi
 
-    local -n arrayref=$1 || return
+    local arrayref=$1
     local list=$2
 
-    declared "${!arrayref}" || declare -ga "${!arrayref}"
+    [[ -n $arrayref ]] || return 2
+
+    declared "${arrayref?}" || declare -ga "$arrayref" || return 1
 
     if [[ -z $list ]]; then
-        arrayref=()
+        eval "${arrayref?}=()"
     elif [[ $list == : ]]; then
-        arrayref=("")
+        eval "${arrayref?}=('')"
     else
         # read into arrayref, splitting on `:`
-        # (`read` uses terminator semantics, so add an extra final separator)
-        IFS=: read -ra arrayref <<< "${list}:"
+        # (seems to use terminator semantics, so add an extra final separator)
+        IFS=: read -r -d '' -a "${arrayref?}" < <(printf "%s" "${list}:")
     fi
 }
 
@@ -121,14 +201,14 @@ to_list()
     if [[ $# -lt 1 || $1 == -* ]]; then
         echo "Create a colon-separated list from zero or more elements"
         echo "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
-        return 1
+        return 2
     fi
 
-    local -n listref=$1 && shift || return
-    declared "${!listref}" || declare -g "${!listref}"
+    local listref=$1 && shift
+    [[ -n $listref ]] || return 2
+    declared "$listref" || declare -g "$listref"
 
-    local IFS=:
-    listref="$*"
+    IFS=: eval "$listref"='"$*"'
 }
 
 join()
@@ -137,24 +217,24 @@ join()
     # usage: join SEPARATOR [ELEMENTS...]
 
     # no SEPARATOR?
-    (($# > 0)) || return 1
+    (($# >= 1)) || return 2
     local sep=$1 && shift
     # no ELEMENTS?
-    (($# > 0)) || return 0
+    (($# >= 1)) || return 0
 
-    printf "%s" "$1" && shift
-    printf "${sep}%s" "$@"
-    printf "\n"
+    printf "%s" "$1"
+    printeach "${sep}%s" "${@:1}"
+    echo
 }
 
 repeat()
 {
     # does something a bit like `TEXT * COUNT`
     # usage: repeat TEXT COUNT
-    (($# == 2)) || return 1
+    (($# == 2)) || return 2
     local text=$1 count=$2
     eval printf -- "'${text}%.0s'" "{1..$count}"
-    printf "\n"
+    echo
 }
 
 setpath()
@@ -162,7 +242,7 @@ setpath()
     if (($# != 2)); then
         echo "Set a variable to a path if that path exists"
         echo "Usage: ${FUNCNAME[0]} VAR PATH"
-        return 1
+        return 2
     fi
     [[ -e $2 ]] && export "$1=$2"
 }
@@ -172,23 +252,22 @@ sourcepath()
     if [[ $# -ne 1 || $1 == -* ]]; then
         echo "Source a script if it exists"
         echo "Usage: ${FUNCNAME[0]} PATH"
-        return 1
+        return 2
     elif [[ -e $1 ]]; then
         source "$1"
     fi
 } && complete -f sourcepath
 
-each()
-{
-    printf "%s\n" "$@"
-}
-
 trim()
 (
+    # trim common leading whitespace from non-blank lines
     readarray -t lines
 
+    # no arguments accepted
+    (($# == 0)) || return 2
+
     # short-circuit for empty stdin
-    ((${#lines[@]} > 0)) || return
+    ((${#lines[@]} > 0)) || return 0
 
     # find the common leading whitespace between all non-blank lines
     for curr_line in "${lines[@]}"; do
@@ -213,7 +292,7 @@ trim()
 
         # no match?
         if [[ -z ${common-} ]]; then
-            printf >&2 "[!] ${FUNCNAME[0]}: No common prefix"
+            printf >&2 "[!] ${FUNCNAME[0]}: No common prefix\n"
             printf >&2 "... (%s)\n" "$prefix_line" "$curr_line"
 
             prefix=
@@ -231,65 +310,72 @@ trim()
     printf "%s\n" "${lines[@]#"$prefix"}"
 )
 
-# map()
-# {
-#     local -a template
-#     local item
-#     for item in "$@"; do
-#         [[ $item != -- ]] || break
-#         template+=("$item") && shift
-#     done
-#
-#     if [[ ${1-} != -- ]]; then
-#         echo "[X] ${FUNCNAME[0]}: no command arguments given"
-#         return 1
-#     fi
-#
-#     [[ "${template[*]}" == *%s* ]] || template+=("%s")
-#
-#     declare -p template
-#     echo "${template[@]}"
-#     echo "${template[@]@Q}"
-#
-#     shift
-#     local -a args=("$@")
-#     local item cmd
-#     for item in "${args[@]}"; do
-#         cmd=$(printf "${template[*]}" "$item")
-#         declare -p cmd
-#         echo "$cmd"
-#         echo $cmd
-#         # eval $cmd
-#     done
-# }
-
-spinner()
+fixargs()
 {
-    (($# == 1)) || return 1
-    # local chars='|/-\\'
-    local chars='▁▂▃▄▅▆▇█▉▊▋▌▍▎▏ '
-    local idx=$(($1 % ${#chars}))
-    printf "\e[1K\e[G%s" "${chars:$idx:1}"
+    local -a arguments
+    while (($#)); do
+        case $1 in
+            --)
+                # halt argument parsing; take all remaining args verbatim
+                arguments+=("$@")
+                break
+                ;;
+            -*=*)
+                # split --var=value pairs, preserving whitespace, and re-consider
+                set -- "${1%%=*}" "${1#*=}" "${@:2}"
+                ;;
+            -[^-]?*)
+                # split `-xyz` flags into `-x -y -z`, and re-consider
+                local -a split=()
+                local i
+                for ((i = 1; i < ${#1}; i++)); do
+                    split+=("-${1:$i:1}")
+                done
+                set -- "${split[@]}" "${@:2}"
+                ;;
+            *)
+                # others unmodified
+                arguments+=("$(quote "$1")") && shift
+                ;;
+        esac
+    done
+    echo set -- "${arguments[@]}"
 }
 
 # ====================
+
+spinner()
+{
+    # local chars='|/-\\'
+    local chars='▁▂▃▄▅▆▇█▉▊▋▌▍▎▏ '
+    if (($# == 0)); then
+        declare -g _spinner_idx
+        local idx=$((_spinner_idx = (_spinner_idx + 1) % ${#chars}))
+    elif (($# == 1)); then
+        local idx=$(($1 % ${#chars}))
+    else
+        return 2
+    fi
+    printf "\e[1K\e[G%s" "${chars:$idx:1}"
+}
 
 showpath()
 {
     # pretty print PATH-like lists or list variables
     # usage: showpath [PATH_OR_VAR...]
-
-    # make a list of parameters, defaulting to just "PATH"
-    local args=("${@:-PATH}")
-
     local value
-    for value in "${args[@]}"; do
+    for value in "${@:-PATH}"; do
         if [[ -v $value ]]; then
             # looks like a variable name; let's dereference it
             value=${!value}
         fi
 
-        echo "${value//:/$'\n'}"
+        # echo "${value//:/$'\n'}"
+        # IFS=: eval quote '$value'
+
+        local -a array
+        from_list array "$value"
+        quote "${array[@]}"
     done
 } && complete -v showpath
 
@@ -298,22 +384,25 @@ showarray()
     # pretty print array variables
     # usage: showarray ARRAYVAR...
 
-    local -n arrayref
-    for arrayref in "$@"; do
+    local name
+    for name in "$@"; do
         local attrib
-        attrib=$(attributes "${!arrayref}")
+        attrib=$(attributes "$name")
 
         if [[ ! $attrib =~ [aA] ]]; then
-            echo >&2 "[X] not an array: ${!arrayref}"
+            echo >&2 "[X] not an array: $name"
             continue
         fi
 
-        printf "%s=(\n" "${!arrayref}"
-        local key
-        for key in "${!arrayref[@]}"; do
-            printf "  [%s]=%s\n" "$key" "${arrayref[$key]@Q}"
+        local arraycopy
+        clone "$name" arraycopy
+
+        printf "%s=(\n" "$name"
+        local key value
+        for key in "${!arraycopy[@]}"; do
+            printf "  [%s]=%s\n" "$key" "$(quote "${arraycopy[$key]}")"
         done
-        printf ")\n"
+        echo ")"
     done
 } && complete -A arrayvar showarray
 
@@ -351,6 +440,8 @@ searchpath()
 searchparents()
 {
     local HELP ALL
+    local -a GLOBS
+    eval "$(fixargs "$@")"
     while (($# > 0)); do
         local arg=$1 && shift
         case $arg in
@@ -361,7 +452,7 @@ searchparents()
                 HELP=1
                 ;;
             *)
-                local -a GLOBS+=("$arg")
+                GLOBS+=("$arg")
                 ;;
         esac
     done
@@ -425,7 +516,6 @@ fatal()
     exit 1
 }
 
-# shellcheck disable=2120
 file_context()
 {
     # read lines from $filename at $lineno with $context lines of context
@@ -472,7 +562,7 @@ stacktrace()
                 ;;
             *)
                 echo >&2 "[X] ${FUNCNAME[0]}: unexpected input"
-                local -p opt OPTARG
+                declare -p opt OPTARG
                 HELP=1
                 ;;
         esac
@@ -628,8 +718,8 @@ pathmungex()
 {
     # like pathmunge, but better
 
-    _verbose "$(stackline)"
-    _verbose "[.] ${FUNCNAME[0]} $*"
+    _verbose "[>] ${FUNCNAME[0]} at $(called-at 1)"
+    _verbose "[>] ${FUNCNAME[0]} $*"
 
     # EXPORT: whether to export PATHVAR
     # REPLACE: whether to replace matching entries
@@ -644,17 +734,10 @@ pathmungex()
     # positional arguments
     local -a POSITIONAL
 
+    eval "$(fixargs "$@")"
     while (($# > 0)); do
         local arg=$1 && shift
         case $arg in
-            # split --var=value pairs, preserving spaces
-            -*=*) set -- "${arg%%=*}" "${arg#*=}" "$@" ;;
-            -[^-]?*)
-                # split arguments like `-aef` into `-a -e -f`
-                arg=${arg#-}
-                # shellcheck disable=SC2086  # intentionally splitting token
-                set -- ${arg//?/-& } "$@"
-                ;;
             -e | --export) EXPORT=1 ;;
             -b | --before) WHERE=before ;;
             -a | --after) WHERE=after ;;
@@ -711,142 +794,200 @@ pathmungex()
         return 1
     fi
 
-    # _debug_var EXPORT HELP CHECK WHERE MARKER POSITIONAL
-
-    local -n PATHVAR="${POSITIONAL[0]}" || return
+    local PATHVAR="${POSITIONAL[0]}"
     local -a ENTRIES=("${POSITIONAL[@]:1}")
 
-    # _debug munging "$WHERE" "${!PATHVAR}"
-    # stackline >&2
-    # _print_stack
-    # stacktrace
-    _debug_var ENTRIES "${!PATHVAR}"
+    _debug_var EXPORT HELP CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" ENTRIES
 
     if [[ -v EXPORT ]]; then
-        declare -gx "${!PATHVAR}"
+        declare -gx "$PATHVAR"
     fi
 
-    local ADDITIONS
-    local MATCHVAR=:${PATHVAR-}:
-    # capture whether or not the original pathvar contains a null entry
-    [[ ${PATHVAR-} =~ (^:|::|:$) ]] && local HAS_NULL=1
+    local -a PATHARRAY ADDITIONS
+    from_list PATHARRAY "${!PATHVAR-}"
 
-    local entry
-    for entry in "${ENTRIES[@]}"; do
+    local key item
+    for key in "${!PATHARRAY[@]}"; do
+        item=${PATHARRAY[$key]}
+        # strip a trailing slash, unless the item is `/`
+        [[ $item == / ]] || item=${item%/}
+        PATHARRAY[key]=$item
+    done
+
+    for item in "${ENTRIES[@]}"; do
         # entries with embedded colons are not allowed
-        if [[ $entry =~ : ]]; then
-            echo >&2 "[X] ${FUNCNAME[0]}: invalid entry: \"$entry\""
+        if [[ $item =~ : ]]; then
+            echo >&2 "[X] ${FUNCNAME[0]}: invalid entry: \"$item\""
             return 1
         fi
 
-        # test whether entry is in PATHVAR
-        if [[ -z ${PATHVAR-} ]]; then
-            # no need to compare against empty list
-            true
-        elif [[ -n $entry ]]; then
-            local matchentry=$entry
-            [[ $matchentry == / ]] || matchentry=${matchentry%/}
+        # strip a trailing slash, unless the item is `/`
+        [[ $item == / ]] || item=${item%/}
 
+        # check whether item is in
+        key=$(keyof "$item" PATHARRAY)
+        if [[ -n $key ]]; then
             if [[ -v REPLACE ]]; then
-                # replace `:$entry:` with `:` in MATCHVAR regardless of trailing slashes
-                # shellcheck disable=1001
-                MATCHVAR=${MATCHVAR//:"$matchentry"?(\/):/:}
+                unset "PATHARRAY[key]"
             else
-                # skip this entry if it already exists in MATCHVAR, regardless of trailing slashes
-                [[ ! ${MATCHVAR} =~ :"$matchentry"/?: ]] || continue
-            fi
-        elif [[ -v HAS_NULL ]]; then
-            # special handling for matching or replacing null entries
-            if [[ -v REPLACE ]]; then
-                MATCHVAR=${MATCHVAR//::/:}
-                unset HAS_NULL
-            else
-                [[ $MATCHVAR != *::* ]] || continue
+                continue
             fi
         fi
 
-        # check entry
+        # do any entry checking
         if [[ $CHECK == nocheck ]]; then
             # explicitly not checking file existance
             true
-        elif [[ -z $entry || -e $entry ]]; then
+        elif [[ -z $item || -e $item ]]; then
             # null entry or file exists
             true
         elif [[ $CHECK == fail ]]; then
-            echo >&2 "[!] ${FUNCNAME[0]}: entry does not exist: $entry"
+            echo >&2 "[!] ${FUNCNAME[0]}: entry does not exist: $item"
             return 1
         else
             continue
         fi
 
-        if [[ -v ADDITIONS ]]; then
-            # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
-            [[ :$ADDITIONS: != *:"$entry":* ]] || continue
-            ADDITIONS+=":$entry"
-        else
-            ADDITIONS="$entry"
+        if ! contains "$item" "${ADDITIONS[@]}"; then
+            ADDITIONS+=("$item")
         fi
     done
 
-    _debug_var ADDITIONS
-
-    # nothing to add?
-    [[ -v ADDITIONS ]] || return 0
-
-    if [[ -v REPLACE ]]; then
-        # TL;DR - This is a poor way to implement lists :/
-
-        # /bin:/sbin -> :/bin:/sbin: (0) -> :/bin: (0) -> /bin
-        # /bin::/sbin -> :/bin/::/sbin: (1) -> :/bin:: (1) -> /bin:
-        # /sbin -> :/sbin: (0) -> : (0) -> ""
-        # /sbin: -> :/sbin:: (1) -> :: (1) -> :
-        # : -> ::: (1) -> ::: (1) -> :
-        # "" -> :: (0) -> :: (0) -> ""
-        #
-        # /bin: -> :/bin:: (1) -> :/bin: (0) -> /bin
-        # : -> ::: (1) -> :: (0) -> ""
-        # "" -> :: (0) -> :: (0) -> ""
-
-        # /sbin: -> :/sbin:: (1) -> {{ :: (1) -> : }}
-        # "" -> :: (0) -> {{ :: (0) -> "" }}
-        # : -> {{ ::: (1) -> :: (0) }} -> ""
-        # "" -> {{ :: (0) -> :: (0) }} -> ""
-
-        if [[ -v HAS_NULL && $MATCHVAR == :: ]]; then
-            MATCHVAR=:
-        else
-            MATCHVAR=${MATCHVAR%:}
-            MATCHVAR=${MATCHVAR#:}
-        fi
-        PATHVAR=$MATCHVAR
-    fi
-
-    if [[ -z ${PATHVAR-} ]]; then
-        PATHVAR=$ADDITIONS
-    elif [[ $WHERE = after ]]; then
-        PATHVAR=$PATHVAR:$ADDITIONS
+    if [[ $WHERE = after ]]; then
+        PATHARRAY=("${PATHARRAY[@]}" "${ADDITIONS[@]}")
     elif [[ $WHERE = before ]]; then
-        PATHVAR=$ADDITIONS:$PATHVAR
+        PATHARRAY=("${ADDITIONS[@]}" "${PATHARRAY[@]}")
     else
         # have to split PATHVAR
-        local -a PATHARRAY FRONT BACK
-        from_list PATHARRAY "$PATHVAR"
+        local -a FRONT BACK
 
         for entry in "${PATHARRAY[@]}"; do
             [[ ! $entry =~ $MARKER ]] || break
             FRONT+=("$entry")
             PATHARRAY=("${PATHARRAY[@]:1}")
-            _debug_var PATHARRAY
         done
 
         BACK=("${PATHARRAY[@]}")
 
-        _debug_var FRONT BACK
-        to_list PATHVAR "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
+        PATHARRAY=("${FRONT[@]}" "${ADDITIONS[@]}" "${BACK[@]}")
     fi
-    _debug_var "${!PATHVAR}"
-    _verbose "[.] ${!PATHVAR} ([${PATHVAR//:/], [}])"
+
+    to_list "$PATHVAR" "${PATHARRAY[@]}"
+
+    _debug_var ADDITIONS FRONT BACK PATHARRAY
+    _verbose "[<] ${FUNCNAME[0]} $PATHVAR ([${!PATHVAR//:/], [}])"
     hash -r
+
+    # local ADDITIONS
+    # local MATCHVAR=:${!PATHVAR-}:
+    #
+    # # In PATHVAR, `` represents an empty list, and `:` represents a list with a
+    # # single null element. In MATCHVAR, `:` represents an empty list, and `::`
+    # # represents a list with a single null element.
+    #
+    # # Detect & correct an empty MATCHVAR
+    # [[ $MATCHVAR != :: ]] || MATCHVAR=:
+    #
+    # # replace runs of three or more colons (representing two or more adjacent
+    # # null entries) with a pair of colons (representing a single null entry).
+    # # This allows us to correctly remove null entries
+    # MATCHVAR=${MATCHVAR//::+(:)/::}
+    #
+    # local entry
+    # for entry in "${ENTRIES[@]}"; do
+    #     # entries with embedded colons are not allowed
+    #     if [[ $entry =~ : ]]; then
+    #         echo >&2 "[X] ${FUNCNAME[0]}: invalid entry: \"$entry\""
+    #         return 1
+    #     fi
+    #
+    #     # if the list is not empty, check for our entry
+    #     if [[ MATCHVAR != : ]]; then
+    #         # either the entry is `/`, or we should strip a trailing slash
+    #         local match=$entry
+    #         [[ $match == / ]] || match=${match%/}
+    #         # either the entry is null, or we should match list values with trailing slashes
+    #         local suffix=
+    #         [[ -z $match ]] || suffix="?(/)"
+    #
+    #         if [[ -v REPLACE ]]; then
+    #             # replace `:$entry:` with `:`
+    #             MATCHVAR=${MATCHVAR//:"$match"$suffix:/:}
+    #         else
+    #             # skip this entry if it already exists in the list
+    #             [[ ${MATCHVAR} != *:"$match"$suffix:* ]] || continue
+    #         fi
+    #     fi
+    #
+    #     # do any entry checking
+    #     if [[ $CHECK == nocheck ]]; then
+    #         # explicitly not checking file existance
+    #         true
+    #     elif [[ -z $entry || -e $entry ]]; then
+    #         # null entry or file exists
+    #         # strip a trailing slash (unless entry is `/`)
+    #         [[ $entry == / ]] || entry=${entry%/}
+    #     elif [[ $CHECK == fail ]]; then
+    #         echo >&2 "[!] ${FUNCNAME[0]}: entry does not exist: $entry"
+    #         return 1
+    #     else
+    #         continue
+    #     fi
+    #
+    #     # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
+    #     if [[ -v ADDITIONS ]]; then
+    #         [[ :$ADDITIONS: != *:"$entry":* ]] || continue
+    #         ADDITIONS+=":$entry"
+    #     elif [[ -z $entry ]]; then
+    #         ADDITIONS=:
+    #     else
+    #         ADDITIONS="$entry"
+    #     fi
+    # done
+    #
+    # # nothing to add?
+    # [[ -v ADDITIONS ]] || return 0
+    #
+    # if [[ -v REPLACE ]]; then
+    #     case $MATCHVAR in
+    #         # MATCHVAR is empty
+    #         :) eval "$PATHVAR=" ;;
+    #         # MATCHVAR is a single null entry
+    #         ::) eval "$PATHVAR=:" ;;
+    #         # MATCHVAR has a leading & a trailing separator
+    #         *)
+    #             MATCHVAR=${MATCHVAR%:}
+    #             MATCHVAR=${MATCHVAR#:}
+    #             eval "$PATHVAR=\"$MATCHVAR\""
+    #             ;;
+    #     esac
+    # fi
+    #
+    # if [[ -z ${!PATHVAR-} ]]; then
+    #     eval "$PATHVAR=\"$ADDITIONS\""
+    # elif [[ $WHERE = after ]]; then
+    #     eval "$PATHVAR=\"${!PATHVAR}:$ADDITIONS\""
+    # elif [[ $WHERE = before ]]; then
+    #     eval "$PATHVAR=\"$ADDITIONS:${!PATHVAR}\""
+    # else
+    #     # have to split PATHVAR
+    #     local -a PATHARRAY FRONT BACK
+    #     from_list PATHARRAY "${!PATHVAR}"
+    #
+    #     for entry in "${PATHARRAY[@]}"; do
+    #         [[ ! $entry =~ $MARKER ]] || break
+    #         FRONT+=("$entry")
+    #         PATHARRAY=("${PATHARRAY[@]:1}")
+    #     done
+    #
+    #     BACK=("${PATHARRAY[@]}")
+    #
+    #     to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
+    # fi
+    #
+    # _debug_var ADDITIONS FRONT BACK
+    # _verbose "[<] ${FUNCNAME[0]} $PATHVAR ([${!PATHVAR//:/], [}])"
+    # hash -r
 }
 
 cleanpath()
@@ -857,38 +998,29 @@ cleanpath()
         return 1
     fi
 
-    local -n PATHVAR=${1:-PATH} || return
-    declared "${!PATHVAR}" || return
+    local PATHVAR=${1:-PATH}
+    declared "$PATHVAR" || return
 
     local -a ENTRIES
-    from_list ENTRIES "$PATHVAR" || return
+    from_list ENTRIES "${!PATHVAR}" || return
 
     local CLEAN
     pathmungex CLEAN "${ENTRIES[@]}" || return
-    PATHVAR="$CLEAN"
+    eval "$PATHVAR=\"$CLEAN\""
 } && complete -v cleanpath
 
 flash_message()
 {
     # briefly print a message to the screen
     local HELP message sleep=1
+    eval "$(fixargs "$@")"
     while (($# > 0)); do
-        local arg="$1"
-        shift
+        local arg="$1" && shift
         case $arg in
-            -s | --sleep)
-                sleep="$1"
-                shift
-                ;;
-            -h | --help)
-                HELP=1
-                ;;
-            -*)
-                echo >&2 "[X] ${FUNCNAME[0]}: Unrecognized option: $arg"
-                ;;
-            *)
-                message+="$arg "
-                ;;
+            -s | --sleep) sleep="${1?}" && shift ;;
+            -h | --help) HELP=1 ;;
+            -*) echo >&2 "[X] ${FUNCNAME[0]}: Unrecognized option: $arg" ;;
+            *) message+="$arg " ;;
         esac
     done
 
@@ -941,9 +1073,9 @@ pkg-config-vars()
         for name in "${names[@]}"; do
             # shellcheck disable=2053  # the globbing is the point
             [[ $name == $glob ]] || continue
-            unset vars lines
-            local -a vars lines
+            local -a vars
             get_array vars -- pkg-config "$name" --print-variables
+            local -a lines=()
             local var value
             for var in "${vars[@]}"; do
                 value=$(pkg-config "$name" --variable "$var")
@@ -988,13 +1120,28 @@ faketty()
 mxtime()
 {
     # get timestamps for maxar
-    (($# > 0)) && local args=(--date "$*")
+    local -a args
+    (($# > 0)) && args=(--date "$*")
     date -Iseconds "${args[@]}" | sed 's/+0000/Z/'
 }
 
-# wrapper for pstree default arguments
 pstree()
 {
+    # wrapper for pstree default arguments
     (($# == 0)) && set -- -H $$ $$
     command pstree -Uas "$@"
+}
+
+loud()
+{
+    eval "$(fixargs "$@")"
+    while (($# > 0)); do
+        local arg="$1" && shift
+        case $arg in
+            -s | --sleep) sleep="$1" && shift ;;
+            -h | --help) HELP=1 ;;
+            -*) echo >&2 "[X] ${FUNCNAME[0]}: Unrecognized option: $arg" ;;
+            *) message+="$arg " ;;
+        esac
+    done
 }

@@ -1,4 +1,5 @@
 # setup powerline
+# shellcheck disable=2034
 
 # If not running interactively or powerline already defined, do nothing
 [[ $- != *i* ]] && return
@@ -36,7 +37,14 @@ fi
 
 # start powerline
 if [[ -v HAS_POWERLINE ]]; then
-    powerline-daemon -q || true
+    # if `ss` is unavailable, or no matching powerline daemon socket exists
+    if ! haveexe ss || [[ -z $(ss -Hax src @powerline-ipc-$UID) ]]; then
+        # start powerline daemon
+        powerline-daemon -q || true
+    else
+        _debug "skipping powerline-daemon start; appears online"
+    fi
+
     # export POWERLINE_BASH_CONTINUATION=1
     # export POWERLINE_BASH_SELECT=1
 

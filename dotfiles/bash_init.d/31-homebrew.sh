@@ -7,7 +7,7 @@ setpath HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew" || return 0
 setpath HOMEBREW_CELLAR "$HOMEBREW_PREFIX/Cellar"
 setpath HOMEBREW_REPOSITORY "$HOMEBREW_PREFIX/Homebrew"
 
-pathmungex PATH "$HOMEBREW_PREFIX/sbin" "$HOMEBREW_PREFIX/bin"
+pathmungex PATH "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin"
 
 pathmungex MANPATH "$HOMEBREW_PREFIX/share/man"
 pathmungex INFOPATH "$HOMEBREW_PREFIX/share/info"

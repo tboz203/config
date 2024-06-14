@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # bash init script
 # vim: tw=119
-# shellcheck disable=2015
 
-# : "${_BASH_INIT_DEBUG:=pause:verbose:nodebug:notrace:source}"
+# : "${_BASH_INIT_DEBUG:=pause:verbose:debug:notrace}"
 # set -vx
 
 shopt -s checkhash
@@ -40,14 +39,13 @@ alias haveexe='type -P > /dev/null'
 # check for any callable
 alias havecmd='type -t > /dev/null'
 
-# By default, every invocation should run this script
-[[ -v BASH_ENV ]] || export BASH_ENV="$HOME/.bashrc"
+# # By default, every invocation should run this script
+# [[ -v BASH_ENV ]] || export BASH_ENV="$HOME/.bashrc"
 
 # shellcheck disable=2120
 bash_init()
 {
     declare -g _BASH_INIT_STARTED=1
-    [[ $# -gt 0 ]] && unset _BASH_INIT_DONE
 
     _verbose top of bash init
 
@@ -55,7 +53,6 @@ bash_init()
     for item in ~/.bash_init.d/*; do
         if [[ $item =~ .*\.(sh|bash)$ ]]; then
             _verbose "# sourcing init script $item"
-            inlist verbose "${_BASH_INIT_DEBUG-}" && echo "PATH: ${PATH//:/$'\n      '}" || true
 
             . "$item"
             havecmd _debug_reset && _debug_reset || true

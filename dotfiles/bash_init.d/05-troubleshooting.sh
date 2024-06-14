@@ -1,18 +1,18 @@
 # bash environment troubleshooting
-# disabling warnings for `A && B || C`, declare & assign separately, and unreachable commands
-# shellcheck disable=2015,2155,2317
 
 # https://flokoe.github.io/bash-hackers-wiki/scripting/debuggingtips/#making-xtrace-more-useful
-export PS4='+($BASH_SOURCE:$LINENO): ${FUNCNAME:+$FUNCNAME(): }'
+export PS4='+[$EPOCHREALTIME] ($BASH_SOURCE:$LINENO): ${FUNCNAME:+$FUNCNAME(): }'
 
 _debug_var()
 {
     # print variable state
-    [[ $# -gt 0 ]] || return 1
+    (($# >= 1)) || return 2
     [[ -o xtrace ]] || inlist trace "${_BASH_INIT_DEBUG-}" || inlist debug "${_BASH_INIT_DEBUG-}" || return 0
-    echo >&2 "[.] ${FUNCNAME[0]} (${FUNCNAME[1]}) $*"
-    local declarations=$(declare -p -- "$@" 2>&1 || true)
-    echo >&2 "    ${declarations//$'\n'/&    }"
+    printf >&2 "%s\n" "[.] ${FUNCNAME[0]} (${FUNCNAME[1]}) $*"
+    local line
+    declare -p -- "$@" 2>&1 | while read -r line; do
+        printf '  %s\n' "$line"
+    done
 }
 
 _debug_trace()
@@ -20,8 +20,8 @@ _debug_trace()
     # start tracing bash execution
     _debug_reset
     if inlist trace "${_BASH_INIT_DEBUG-}"; then
-        [[ -o verbose ]] || _BASH_INIT_DEBUG_RESET_FLAGS+=v
-        [[ -o xtrace ]] || _BASH_INIT_DEBUG_RESET_FLAGS+=x
+        declare -g _BASH_INIT_DEBUG_RESET_FLAGS
+        read -r -d '' _BASH_INIT_DEBUG_RESET_FLAGS <<< "$(shopt -op verbose xtrace)"
         set -vx
     fi
 }
@@ -30,7 +30,7 @@ _debug_reset()
 {
     # stop tracing bash execution
     if [[ -v _BASH_INIT_DEBUG_RESET_FLAGS ]]; then
-        set "+$_BASH_INIT_DEBUG_RESET_FLAGS"
+        eval "$_BASH_INIT_DEBUG_RESET_FLAGS"
         unset _BASH_INIT_DEBUG_RESET_FLAGS
     fi
 }
@@ -39,10 +39,10 @@ _debug_reset()
 # source_verbose()
 # {
 #     # print names of sourced files when entering and exiting
-#     inlist source "${_BASH_INIT_DEBUG-}" && echo "# sourcing $*" || true
+#     inlist source "${_BASH_INIT_DEBUG-}" && printf "# sourcing %s\n" "$*" || true
 #     local retval=0
 #     builtin source "$@" || retval=$?
-#     inlist source "${_BASH_INIT_DEBUG-}" && echo "# leaving $* (return $retval)" || true
+#     inlist source "${_BASH_INIT_DEBUG-}" && printf "# leaving %s (return $retval)\n" "$*" || true
 #     return $retval
 # }
 #
@@ -53,13 +53,14 @@ replace_exec()
 {
 
     inlist pause "${_BASH_INIT_DEBUG-}" || return 0
+    # shellcheck disable=2317
     exec()
     {
-        echo >&2 "will run: $*"
+        printf >&2 "will run: %s\n" "$*"
         read -rp "continue? "
         local retval=0
         "$@" || retval=$?
-        echo >&2 "exited with $retval ($*)"
+        printf >&2 "exited with $retval (%s)" "$*"
         read -rp "continue? "
         exit "$retval"
     }
@@ -68,29 +69,44 @@ replace_exec()
 print_stack()
 {
     local i=0
-    echo "$LINENO $FUNCNAME $BASH_SOURCE"
+    # printf "%s %s %s\n" "$LINENO" "${FUNCNAME[0]}" "${BASH_SOURCE[0]}"
     while caller $i; do ((i++)); done
 }
 
 stack()
 {
-    print_stack | while read -r lineno funcname filename; do
-        echo "$funcname ($filename:$lineno)"
+    local line func file
+    print_stack | while read -r line func file; do
+        printf "%s\n" "$func ($file:$line)"
     done
+}
+
+called-at()
+{
+    [[ $# -le 1 && ${1-} != -* ]] || return 2
+    local idx=${1:-0}
+    ((idx >= 0 && idx < ${#BASH_SOURCE[@]})) || return 1
+    echo "${FUNCNAME[$idx + 1]} (${BASH_SOURCE[$idx + 1]}:${BASH_LINENO[$idx]})"
 }
 
 stackline()
 {
-    inlist verbose "${_BASH_INIT_DEBUG-}" || inlist debug "${_BASH_INIT_DEBUG-}" || return 0
-    for ((i = ${#BASH_SOURCE[@]} - 1; 1; i--)); do
-        echo -n "${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i - 1]})"
-        if ((i > 1)); then
-            echo -n " > "
-        else
-            break
-        fi
+    local -a stack
+    for ((i = 1; i < ${#BASH_SOURCE[@]}; i++)); do
+        stack+=("${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i - 1]})")
     done
-    echo
+
+    [[ -v stack ]] || return 0
+
+    while
+        printf "%s" "${stack[-1]}"
+        unset "stack[-1]"
+        [[ -v stack ]]
+    do
+        printf " > "
+    done
+
+    printf "\n"
 }
 
 inlist stacktrace "${_BASH_INIT_DEBUG-}" && trap 'print_stack' EXIT || true

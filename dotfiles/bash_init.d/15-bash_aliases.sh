@@ -106,7 +106,8 @@ alias bashrc='nv ~/.bashrc ~/.bash_init.d/*'
 alias aliases='nv ~/.bash_init.d/*alias*'
 alias functions='nv ~/.bash_init.d/*function*'
 alias nvconfig='nv ~/.config/nvim/lua/config/lazy.lua'
-alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show ~/.config/nvim"'
+# alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show ~/.config/nvim"'
+alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua}'
 alias nvimrc=nvrc
 alias listening='lsof -i -s TCP:Listen'
 alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
@@ -116,7 +117,7 @@ alias docker-halt='docker container ls -a --format "{{.Names}}" | xargs -r docke
 alias docker-scrub='docker-halt && docker-prune'
 alias docker-purge='docker-halt && docker-prune -a'
 
-alias loud='BASH_ENV=~/.bash_loud '
+# alias loud='BASH_ENV=~/.bash_loud '
 # alias verbose='BASH_ENV=~/.bash_verbose '
 
 alias xclip='xclip -selection clipboard'
