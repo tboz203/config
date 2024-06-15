@@ -32,20 +32,6 @@ maybe()
     "$@"
 }
 
-contains()
-{
-    # whether or not an element appears in a list
-    # usage: contains TARGET [ELEMENTS...]
-    (($# >= 1)) || return 2
-
-    local target=$1 && shift
-    local item
-    for item in "$@"; do
-        [[ "$item" == "$target" ]] && return 0
-    done
-    return 1
-}
-
 clone()
 {
     # clone a variable
@@ -63,29 +49,52 @@ clone()
 
 }
 
-keyof()
+# array_remove()
+# {
+#     # remove each instance of an element from an array
+#     # usage: array_remove ELEMENT ARRAY_NAME
+#     (($# == 2)) || return 2
+#     local target=$1
+#     local arrayref=$2
+# }
+
+contains()
 {
-    # print the key of an element in an array
-    # if the element is not found, prints nothing and returns 1
-    # usage: contains ELEMENT ARRAY_NAME
+    # whether or not an element appears in a list
+    # usage: contains TARGET [ELEMENTS...]
     (($# >= 1)) || return 2
 
-    local target=$1
-    local arrayref=$2
-
-    local array
-    clone "$arrayref" array
-
-    local key value
-    for key in "${!array[@]}"; do
-        value=${array[$key]}
-        if [[ $target == "$value" ]]; then
-            printf '%s\n' "$key"
-            return 0
-        fi
+    local target=$1 && shift
+    local item
+    for item in "$@"; do
+        [[ "$item" == "$target" ]] && return 0
     done
     return 1
 }
+
+# array_index()
+# {
+#     # print the key of an element in an array
+#     # if the element is not found, prints nothing and returns 1
+#     # usage: contains ELEMENT ARRAY_NAME
+#     (($# >= 1)) || return 2
+#
+#     local target=$1
+#     local arrayref=$2
+#
+#     local array
+#     clone "$arrayref" array
+#
+#     local key value
+#     for key in "${!array[@]}"; do
+#         value=${array[$key]}
+#         if [[ $target == "$value" ]]; then
+#             printf '%s\n' "$key"
+#             return 0
+#         fi
+#     done
+#     return 1
+# }
 
 declared()
 {
@@ -272,7 +281,7 @@ trim()
     # find the common leading whitespace between all non-blank lines
     for curr_line in "${lines[@]}"; do
         # skip blank lines
-        [[ ! $curr_line =~ ^[[:space:]]*$ ]] || continue
+        [[ $curr_line != *([[:space:]]) ]] || continue
 
         # strip largest trailing substring that starts with non-whitespace
         curr="${curr_line%%[^[:space:]]*}"
@@ -389,7 +398,7 @@ showarray()
         local attrib
         attrib=$(attributes "$name")
 
-        if [[ ! $attrib =~ [aA] ]]; then
+        if [[ $attrib != *[aA]* ]]; then
             echo >&2 "[X] not an array: $name"
             continue
         fi
@@ -718,8 +727,8 @@ pathmungex()
 {
     # like pathmunge, but better
 
-    _verbose "[>] ${FUNCNAME[0]} at $(called-at 1)"
-    _verbose "[>] ${FUNCNAME[0]} $*"
+    # _verbose "[>] ${FUNCNAME[0]} at $(called-at 1)"
+    # _verbose "[>] ${FUNCNAME[0]} $*"
 
     # EXPORT: whether to export PATHVAR
     # REPLACE: whether to replace matching entries
@@ -797,40 +806,54 @@ pathmungex()
     local PATHVAR="${POSITIONAL[0]}"
     local -a ENTRIES=("${POSITIONAL[@]:1}")
 
-    _debug_var EXPORT HELP CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" ENTRIES
+    # _debug_var EXPORT HELP CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" ENTRIES
 
     if [[ -v EXPORT ]]; then
         declare -gx "$PATHVAR"
     fi
 
-    local -a PATHARRAY ADDITIONS
-    from_list PATHARRAY "${!PATHVAR-}"
+    # In PATHVAR, `` represents an empty list, and `:` represents a list with a
+    # single null element. In PATHLIST and ADDITIONS, `:` represents an empty
+    # list, and `::` represents a list with a single null element.
 
-    local key item
-    for key in "${!PATHARRAY[@]}"; do
-        item=${PATHARRAY[$key]}
-        # strip a trailing slash, unless the item is `/`
-        [[ $item == / ]] || item=${item%/}
-        PATHARRAY[key]=$item
-    done
+    local PATHLIST
+    case ${!PATHVAR-} in
+        "") PATHLIST=: ;;
+        :) PATHLIST=:: ;;
+        *) PATHLIST=:${!PATHVAR}: ;;
+    esac
+    local ADDITIONS=:
 
-    for item in "${ENTRIES[@]}"; do
+    if [[ -v REPLACE ]]; then
+        # replace runs of three or more colons (representing two or more adjacent
+        # null entries) with a pair of colons (representing a single null entry).
+        # This allows us to correctly remove null entries
+        PATHLIST=${PATHLIST//::+(:)/::}
+    fi
+
+    local entry
+    for entry in "${ENTRIES[@]}"; do
         # entries with embedded colons are not allowed
-        if [[ $item =~ : ]]; then
-            echo >&2 "[X] ${FUNCNAME[0]}: invalid entry: \"$item\""
+        if [[ $entry == *:* ]]; then
+            echo >&2 "[X] ${FUNCNAME[0]}: invalid entry: \"$entry\""
             return 1
         fi
 
-        # strip a trailing slash, unless the item is `/`
-        [[ $item == / ]] || item=${item%/}
+        # if the list is not empty, check for our entry
+        if [[ $PATHLIST != : ]]; then
+            # either the entry is `/`, or we should strip a trailing slash
+            local match=$entry
+            [[ $match == / ]] || match=${match%/}
+            # either the entry is null, or we should match list values with trailing slashes
+            local suffix=
+            [[ -z $match ]] || suffix="?(/)"
 
-        # check whether item is in
-        key=$(keyof "$item" PATHARRAY)
-        if [[ -n $key ]]; then
             if [[ -v REPLACE ]]; then
-                unset "PATHARRAY[key]"
+                # replace `:$entry:` with `:`
+                PATHLIST=${PATHLIST//:"$match"$suffix:/:}
             else
-                continue
+                # skip this entry if it already exists in the list
+                [[ ${PATHLIST} != *:"$match"$suffix:* ]] || continue
             fi
         fi
 
@@ -838,28 +861,29 @@ pathmungex()
         if [[ $CHECK == nocheck ]]; then
             # explicitly not checking file existance
             true
-        elif [[ -z $item || -e $item ]]; then
+        elif [[ -z $entry || -e $entry ]]; then
             # null entry or file exists
-            true
+            # strip a trailing slash (unless entry is `/`)
+            [[ $entry == / ]] || entry=${entry%/}
         elif [[ $CHECK == fail ]]; then
-            echo >&2 "[!] ${FUNCNAME[0]}: entry does not exist: $item"
+            echo >&2 "[!] ${FUNCNAME[0]}: entry does not exist: $entry"
             return 1
         else
             continue
         fi
 
-        if ! contains "$item" "${ADDITIONS[@]}"; then
-            ADDITIONS+=("$item")
-        fi
+        # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
+        [[ $ADDITIONS != *:"$entry":* ]] || continue
+        ADDITIONS+="$entry:"
     done
 
-    if [[ $WHERE = after ]]; then
-        PATHARRAY=("${PATHARRAY[@]}" "${ADDITIONS[@]}")
-    elif [[ $WHERE = before ]]; then
-        PATHARRAY=("${ADDITIONS[@]}" "${PATHARRAY[@]}")
-    else
+    # nothing to add?
+    [[ $ADDITIONS == : ]] || return 0
+
+    if [[ $WHERE == insert ]]; then
         # have to split PATHVAR
-        local -a FRONT BACK
+        local -a PATHARRAY FRONT BACK
+        from_list PATHARRAY "${!PATHVAR}"
 
         for entry in "${PATHARRAY[@]}"; do
             [[ ! $entry =~ $MARKER ]] || break
@@ -869,100 +893,31 @@ pathmungex()
 
         BACK=("${PATHARRAY[@]}")
 
-        PATHARRAY=("${FRONT[@]}" "${ADDITIONS[@]}" "${BACK[@]}")
+        to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
+    else
+        if [[ $WHERE == before ]]; then
+            PATHLIST=${ADDITIONS%:}:${PATHLIST}
+        elif [[ $WHERE == after ]]; then
+            PATHLIST=${PATHLIST%:}:${ADDITIONS}
+        else
+            echo >&2 "[X] ${FUNCNAME[0]}: invalid WHERE ($WHERE)"
+            return 1
+        fi
+
+        case $PATHLIST in
+            # PATHLIST is empty
+            :) eval "$PATHVAR=" ;;
+            # PATHLIST is a single null entry
+            ::) eval "$PATHVAR=:" ;;
+            # PATHLIST has a leading & a trailing separator
+            *)
+                PATHLIST=${PATHLIST%:}
+                PATHLIST=${PATHLIST#:}
+                eval "$PATHVAR=\"$PATHLIST\""
+                ;;
+        esac
     fi
 
-    to_list "$PATHVAR" "${PATHARRAY[@]}"
-
-    _debug_var ADDITIONS FRONT BACK PATHARRAY
-    _verbose "[<] ${FUNCNAME[0]} $PATHVAR ([${!PATHVAR//:/], [}])"
-    hash -r
-
-    # local ADDITIONS
-    # local MATCHVAR=:${!PATHVAR-}:
-    #
-    # # In PATHVAR, `` represents an empty list, and `:` represents a list with a
-    # # single null element. In MATCHVAR, `:` represents an empty list, and `::`
-    # # represents a list with a single null element.
-    #
-    # # Detect & correct an empty MATCHVAR
-    # [[ $MATCHVAR != :: ]] || MATCHVAR=:
-    #
-    # # replace runs of three or more colons (representing two or more adjacent
-    # # null entries) with a pair of colons (representing a single null entry).
-    # # This allows us to correctly remove null entries
-    # MATCHVAR=${MATCHVAR//::+(:)/::}
-    #
-    # local entry
-    # for entry in "${ENTRIES[@]}"; do
-    #     # entries with embedded colons are not allowed
-    #     if [[ $entry =~ : ]]; then
-    #         echo >&2 "[X] ${FUNCNAME[0]}: invalid entry: \"$entry\""
-    #         return 1
-    #     fi
-    #
-    #     # if the list is not empty, check for our entry
-    #     if [[ MATCHVAR != : ]]; then
-    #         # either the entry is `/`, or we should strip a trailing slash
-    #         local match=$entry
-    #         [[ $match == / ]] || match=${match%/}
-    #         # either the entry is null, or we should match list values with trailing slashes
-    #         local suffix=
-    #         [[ -z $match ]] || suffix="?(/)"
-    #
-    #         if [[ -v REPLACE ]]; then
-    #             # replace `:$entry:` with `:`
-    #             MATCHVAR=${MATCHVAR//:"$match"$suffix:/:}
-    #         else
-    #             # skip this entry if it already exists in the list
-    #             [[ ${MATCHVAR} != *:"$match"$suffix:* ]] || continue
-    #         fi
-    #     fi
-    #
-    #     # do any entry checking
-    #     if [[ $CHECK == nocheck ]]; then
-    #         # explicitly not checking file existance
-    #         true
-    #     elif [[ -z $entry || -e $entry ]]; then
-    #         # null entry or file exists
-    #         # strip a trailing slash (unless entry is `/`)
-    #         [[ $entry == / ]] || entry=${entry%/}
-    #     elif [[ $CHECK == fail ]]; then
-    #         echo >&2 "[!] ${FUNCNAME[0]}: entry does not exist: $entry"
-    #         return 1
-    #     else
-    #         continue
-    #     fi
-    #
-    #     # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
-    #     if [[ -v ADDITIONS ]]; then
-    #         [[ :$ADDITIONS: != *:"$entry":* ]] || continue
-    #         ADDITIONS+=":$entry"
-    #     elif [[ -z $entry ]]; then
-    #         ADDITIONS=:
-    #     else
-    #         ADDITIONS="$entry"
-    #     fi
-    # done
-    #
-    # # nothing to add?
-    # [[ -v ADDITIONS ]] || return 0
-    #
-    # if [[ -v REPLACE ]]; then
-    #     case $MATCHVAR in
-    #         # MATCHVAR is empty
-    #         :) eval "$PATHVAR=" ;;
-    #         # MATCHVAR is a single null entry
-    #         ::) eval "$PATHVAR=:" ;;
-    #         # MATCHVAR has a leading & a trailing separator
-    #         *)
-    #             MATCHVAR=${MATCHVAR%:}
-    #             MATCHVAR=${MATCHVAR#:}
-    #             eval "$PATHVAR=\"$MATCHVAR\""
-    #             ;;
-    #     esac
-    # fi
-    #
     # if [[ -z ${!PATHVAR-} ]]; then
     #     eval "$PATHVAR=\"$ADDITIONS\""
     # elif [[ $WHERE = after ]]; then
@@ -984,10 +939,10 @@ pathmungex()
     #
     #     to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
     # fi
-    #
+
     # _debug_var ADDITIONS FRONT BACK
     # _verbose "[<] ${FUNCNAME[0]} $PATHVAR ([${!PATHVAR//:/], [}])"
-    # hash -r
+    hash -r
 }
 
 cleanpath()

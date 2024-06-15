@@ -7,8 +7,8 @@ import re
 import statistics
 import sys
 from collections.abc import Iterable, Iterator
-from dataclasses import asdict, dataclass
-from datetime import datetime
+from dataclasses import asdict, dataclass, is_dataclass
+from datetime import datetime, timedelta
 from enum import Enum
 from operator import attrgetter
 from typing import Callable, Optional, cast
@@ -80,13 +80,13 @@ class DeltaAggregate:
         deltas = [line.delta for line in self.lines if line.delta != NaN] or [NaN]
 
         object.__setattr__(self, "delta_sum", sum(deltas))
-        object.__setattr__(self, "delta_mean", statistics.mean(deltas))
+        object.__setattr__(self, "delta_mean", NaN if NaN in deltas else statistics.geometric_mean(deltas))
         object.__setattr__(self, "delta_median", statistics.median(deltas))
         object.__setattr__(self, "delta_stdev", NaN if len(deltas) < 2 else statistics.stdev(deltas, self.delta_mean))
 
     @property
     def top_line(self) -> ParsedLine:
-        return self.lines[0].line
+        return self.lines[-1].line
 
     def __str__(self) -> str:
         fmt = "<8.6f"
@@ -166,8 +166,11 @@ def calculate_deltas(lines: Iterable[ParsedLine]) -> Iterator[DeltaLine]:
     except StopIteration:
         return
 
+    # yield DeltaLine(NaN, prev)
+
     for curr in lines:
         delta = curr.timestamp - prev.timestamp
+        # yield DeltaLine(delta.total_seconds(), curr)
         yield DeltaLine(delta.total_seconds(), prev)
         prev = curr
 
@@ -186,9 +189,19 @@ def output_aggregates(aggregates: Iterable[DeltaAggregate], format: OutputFormat
     if format is LINES:
         print("\n".join(str(agg) for agg in aggregates))
     elif format is JSON:
-        json.dump(aggregates, sys.stdout, indent=2, default=asdict)
+        json.dump(aggregates, sys.stdout, indent=2, default=json_default)
     else:
         raise ValueError("Invalid OutputFormat", format)
+
+
+def json_default(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, timedelta):
+        return obj.total_seconds()
+    if is_dataclass(obj) and not isinstance(obj, type):
+        return asdict(obj)
+    raise TypeError("lol what is this", obj)
 
 
 def main():
