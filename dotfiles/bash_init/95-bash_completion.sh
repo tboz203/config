@@ -2,10 +2,10 @@
 # shellcheck disable=2034
 
 # bash completion is not exportable
-[[ ! -v EXPORT_ONLY ]] || return
+[[ ! -v EXPORT_ONLY ]] || return 0
 
 # If not running interactively, do nothing
-[[ $- == *i* ]] || return
+[[ $- == *i* ]] || return 0
 
 if [[ ! -v BASH_COMPLETION_VERSINFO ]]; then
     BASH_COMPLETION_USER_FILE=${BASH_SOURCE[0]}

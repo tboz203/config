@@ -4,11 +4,6 @@
 # If not running interactively, don't do anything
 [[ $- == *i* ]] || return
 
-# number one: complain
-if [[ ${BASH_VERSINFO[0]} -lt 5 ]]; then
-    echo >&2 "Hi! go update your bash please..."
-fi
-
 PS1='\[\e[1;33m\]\u@\h \w \$ \[\e[0m\]'
 
 export LESS="-SRi"

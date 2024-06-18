@@ -4,7 +4,7 @@
 # version of bash-completion (and hence has an older version of the function
 # definition), and that the package it's cleaning up after isn't installed.
 
-[[ -f /etc/bash_completion.d/redefine_filedir ]] || return
+[[ -f /etc/bash_completion.d/redefine_filedir ]] || return 0
 
 _filedir()
 {
@@ -60,7 +60,7 @@ _filedir()
 
     if ((${#toks[@]} != 0)); then
         # 2>/dev/null for direct invocation, e.g. in the _filedir unit test
-        compopt -o filenames 2>/dev/null
+        compopt -o filenames 2> /dev/null
         COMPREPLY+=("${toks[@]}")
     fi
 } # _filedir()

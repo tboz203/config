@@ -2,8 +2,6 @@
 
 # _debug_trace
 
-# [[ -v _BASH_INIT_TMUX ]] && return
-
 cleanpath
 
 pathmungex --replace PATH \

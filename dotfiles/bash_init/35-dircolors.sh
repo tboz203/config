@@ -1,9 +1,9 @@
 # ~/.profile/dircolors.sh
 
 # If not running interactively, don't do anything
-[[ $- == *i* ]] || return
+[[ $- == *i* ]] || return 0
 
-haveexe dircolors || return
+haveexe dircolors || return 0
 
 if [[ -r ~/.dircolors ]]; then
     eval "$(dircolors -b ~/.dircolors)"

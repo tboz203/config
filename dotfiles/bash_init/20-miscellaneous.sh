@@ -14,10 +14,11 @@ setpath REQUESTS_CA_BUNDLE /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.c
 
 pathmungex BASH_COMPLETION_USER_DIR ~/.local/share/bash-completion
 
-setpath BOOST_ROOT "$HOME/.local/boost_1_82_0"
+setpath BOOST_ROOT "$HOME/.local/boost_1_82_0" || true
 
-setpath SDKMAN_DIR "$HOME/.sdkman"
-sourcepath "$SDKMAN_DIR/bin/sdkman-init.sh"
+if setpath SDKMAN_DIR "$HOME/.sdkman"; then
+    sourcepath "${SDKMAN_DIR?}/bin/sdkman-init.sh"
+fi
 
 # [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
 
@@ -31,7 +32,7 @@ export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
 
 pathmungex -a PATH "$HOME/perl5/bin"
 pathmungex -e PERL5LIB "$HOME/perl5/lib/perl5"
-setpath PERL_LOCAL_LIB_ROOT "$HOME/perl5"
+setpath PERL_LOCAL_LIB_ROOT "$HOME/perl5" || true
 
 pathmungex -e PYTHONPATH "$HOME/.pymodules"
 

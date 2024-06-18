@@ -2,7 +2,7 @@
 # shellcheck disable=2034
 
 # If not running interactively or powerline already defined, do nothing
-[[ $- != *i* ]] && return
+[[ $- == *i* ]] || return
 
 # set powerline availability flag (for all programs)
 if haveexe powerline && [[ ($TERM == *256color || $COLORTERM == truecolor) && $HAS_POWERLINE_FONTS ]]; then
@@ -33,7 +33,7 @@ if [[ -v HAS_POWERLINE && ! -v POWERLINE_ROOT ]]; then
 fi
 
 # we've exported what we can
-[[ -v EXPORT_ONLY ]] && return
+[[ -z ${EXPORT_ONLY-} ]] || return 0
 
 # start powerline
 if [[ -v HAS_POWERLINE ]]; then
@@ -41,8 +41,8 @@ if [[ -v HAS_POWERLINE ]]; then
     if ! haveexe ss || [[ -z $(ss -Hax src @powerline-ipc-$UID) ]]; then
         # start powerline daemon
         powerline-daemon -q || true
-    else
-        _debug "skipping powerline-daemon start; appears online"
+    # else
+    #     _debug _log "skipping powerline-daemon start: appears online"
     fi
 
     # export POWERLINE_BASH_CONTINUATION=1

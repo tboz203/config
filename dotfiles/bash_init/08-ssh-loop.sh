@@ -2,7 +2,7 @@
 # make an ssh to localhost loop
 
 # If not running interactively, do nothing
-[[ $- == *i* ]] || return
+[[ $- == *i* ]] || return 0
 
 # _debug_trace
 
