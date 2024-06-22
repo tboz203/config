@@ -1,6 +1,6 @@
 # ensure PATH is populated
 
-# _debug_trace
+[[ ${_SHELL_LOGIN-} ]] || return 0
 
 cleanpath
 

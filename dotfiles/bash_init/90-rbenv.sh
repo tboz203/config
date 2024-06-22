@@ -1,6 +1,6 @@
 #!/bin/bash
 
-setpath RBENV_ROOT ~/.rbenv || return 0
+setpath -er RBENV_ROOT ~/.rbenv || return 0
 
 pathmungex --before --replace PATH "$RBENV_ROOT/shims"
 pathmungex PATH "$RBENV_ROOT/bin"

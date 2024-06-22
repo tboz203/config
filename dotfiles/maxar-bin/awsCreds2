@@ -1,6 +1,5 @@
 #!/bin/bash
 # vim: tabstop=4 shiftwidth=0 expandtab
-# shellcheck disable=2128
 
 awsCreds2()
 {

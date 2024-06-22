@@ -3,6 +3,7 @@
 import argparse
 import fileinput
 import json
+import math
 import re
 import statistics
 import sys
@@ -15,19 +16,22 @@ from typing import Callable, Optional, cast
 
 NaN = float("nan")
 
-# I'm realizing that my pretty format perhaps does not make for a great
-# regular expression
 PATTERN = re.compile(
     r"""
-    # start of line, one or more plus signs
-    ^\++
+    # start of line, one or more plus signs, and optional whitespace
+    ^\++\s*
     # A bracketed floating point number representing seconds since the unix epoch
     \[(?P<timestamp>\d+\.\d+)\]\s
-    # A filename and a line number, separated by a colon, wrapped in parentheses
-    \((?P<filename>(?:[^\\]|\\[^:])+)?:(?P<lineno>\d+)\):\s
-    # an optional group consisting of a function name followed by a pair of
-    # parentheses and a colon
-    (?:(?P<function>[^|&;()<>\s]+)\(\):\s)?
+    # the start of a parenthesized group
+    \(
+    # a filename (without colons) followed by a colon
+    (?P<filename>[^:]+):
+    # a linenumber
+    (?P<lineno>\d+)
+    # an optional group consisting of a colon, a function name, and a pair of parentheses
+    (?::(?P<function>[^|&;()<>\s]+))?
+    # the end of the parenthesized group, followed by a colon and whitespace
+    \):\s+
     # everything else until the end of the line is the command
     (?P<command>.*)$
     """,
@@ -107,6 +111,12 @@ LINES = OutputFormat.LINES
 JSON = OutputFormat.JSON
 
 
+def stripansi(text: str) -> str:
+    text = re.sub(r"\x01[^\0x02]*\x02", "", text)
+    text = re.sub(r"\x1b\[[^a-zA-Z]*[a-zA-Z]", "", text)
+    return text
+
+
 def parse_absolute_lines(lines: Iterable[str]) -> Iterator[ParsedLine]:
     """Parse AbsoluteLines from an iterable of text lines."""
 
@@ -114,6 +124,8 @@ def parse_absolute_lines(lines: Iterable[str]) -> Iterator[ParsedLine]:
 
     if (line := next(lineiter, None)) is None:
         return
+
+    line = stripansi(line.rstrip())
 
     if not (capture := PATTERN.search(line)):
         raise ValueError("First line does not match", line)
@@ -132,13 +144,15 @@ def parse_absolute_lines(lines: Iterable[str]) -> Iterator[ParsedLine]:
 
         line = next(lineiter, None)
 
-        if line is not None and not (nextcapture := PATTERN.search(line)):
-            # got a new line, but it belongs to the current capture's `command`
-            cmd_extra.append(line.rstrip())
-            continue
+        if line is not None:
+            line = stripansi(line.rstrip())
+            if not (nextcapture := PATTERN.search(line)):
+                # got a new line, but it belongs to the current capture's `command`
+                cmd_extra.append(line)
+                continue
 
         # either input has been exhausted, or we have the next logical line;
-        # time to emit the current capture
+        # either way, time to emit the current capture
 
         timestamp_str = capture.group("timestamp")
         timestamp = datetime.fromtimestamp(float(timestamp_str))
@@ -189,12 +203,15 @@ def output_aggregates(aggregates: Iterable[DeltaAggregate], format: OutputFormat
     if format is LINES:
         print("\n".join(str(agg) for agg in aggregates))
     elif format is JSON:
-        json.dump(aggregates, sys.stdout, indent=2, default=json_default)
+        json.dump(aggregates, sys.stdout, indent=2, allow_nan=False, default=json_default)
+        # json.dump(aggregates, sys.stdout, indent=2, default=json_default)
     else:
         raise ValueError("Invalid OutputFormat", format)
 
 
 def json_default(obj):
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
     if isinstance(obj, datetime):
         return obj.isoformat()
     if isinstance(obj, timedelta):

@@ -1,4 +1,5 @@
 #!/bin/bash
 
-source ~/.bashrc
-set -x
+PS4='+'$'\t''\e[02m${EPOCHREALTIME:+[$EPOCHREALTIME] }(${BASH_SOURCE:-main}:$LINENO${FUNCNAME:+:$FUNCNAME}): \e[0m'
+
+set -vx

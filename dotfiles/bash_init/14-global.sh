@@ -1,18 +1,14 @@
 # source global bashrc
 
-needs-restarting()
-{
-    # mask this slow script unless we're interactive
-    [[ $- == *i* ]] || return 0
-    command "${FUNCNAME[0]}" "$@"
-}
+[[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
-_state=${-//[^evux]/}
-set +eux
+[[ -f /etc/bashrc ]] || throw "bashrc missing"
 
-if [[ -f /etc/bashrc ]]; then
-    source /etc/bashrc
-fi
+# don't let bash completion run just yet; that's handled later
+_reset_progcomp=$(shopt -p progcomp)
+shopt -u progcomp
 
-set +eux ${_state+-$_state}
-unset _state
+source /etc/bashrc
+
+eval "$_reset_progcomp"
+unset _reset_progcomp

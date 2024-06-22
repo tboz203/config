@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
-# shellcheck disable=2155
 
-# If not running interactively, don't do anything
-[[ $- == *i* ]] || return
-
-haveexe thefuck || return
+[[ ${_SHELL_INTERACTIVE-} ]] || return
+havebin thefuck || return
 
 function ugh()
 {

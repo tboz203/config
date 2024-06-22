@@ -1,6 +1,6 @@
 #!/bin/bash
 
-setpath NODENV_ROOT ~/.nodenv || return 0
+setpath -er NODENV_ROOT ~/.nodenv || return 0
 
 pathmungex --before --replace PATH "$NODENV_ROOT/shims"
 pathmungex PATH "$NODENV_ROOT/bin"

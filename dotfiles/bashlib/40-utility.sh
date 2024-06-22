@@ -10,7 +10,8 @@ inlist()
 
 each()
 {
-    # print each argument separately
+    # print each argument on a separate line
+    # usage printeach [ELEMENT...]
     printeach "%s\n" "$@"
 }
 
@@ -18,34 +19,10 @@ printeach()
 {
     # like printf, but does nothing without format arguments
     # usage: printeach FORMAT [ARG...]
-    (($# >= 1)) || return 2
+    (($# >= 1)) || throw "Not enough arguments"
     (($# >= 2)) || return 0
     local format=$1 && shift
     printf "$format" "$@"
-}
-
-maybe()
-{
-    # run a command if it exists
-    (($# >= 1)) || return 2
-    havecmd "$1" || return 0
-    "$@"
-}
-
-clone()
-{
-    # clone a variable
-    # usage: clone SRC DST
-    (($# == 2)) || return 2
-    local src=$1
-    local dst=$2
-    [[ $src != "$dst" ]] || return 2
-
-    local declaration
-    read -r declaration <<< "$(declare -p "$src")"
-    # strip off leading `declare \S+`
-    declaration=${declaration#declare +([^[:space:]]) }
-    eval "${declaration/$src/$dst}"
 }
 
 # array_remove()
@@ -58,17 +35,18 @@ clone()
 # }
 
 contains()
-(
+{
     # whether or not an element appears in a list
     # usage: contains TARGET [ELEMENTS...]
-    (($# >= 1)) || return 2
+    (($# >= 1)) || throw "Not enough arguments"
 
-    target=$1 && shift
+    local target=$1 && shift
+    local item
     for item in "$@"; do
         [[ "$item" != "$target" ]] || return 0
     done
     return 1
-)
+}
 
 # array_index()
 # {
@@ -87,17 +65,29 @@ contains()
 #     for key in "${!array[@]}"; do
 #         value=${array[$key]}
 #         if [[ $target == "$value" ]]; then
-#             printf '%s\n' "$key"
+#             println "$key"
 #             return 0
 #         fi
 #     done
 #     return 1
 # }
 
+valid_name()
+{
+    # test whether a word is an acceptable variable name
+    # usage: valid_name NAME...
+    (($# >= 1)) || throw "Not enough arguments"
+    while (($# >= 1)); do
+        [[ $1 == [a-zA-Z_]*([a-zA-Z0-9_]) ]] || return 1
+        shift
+    done
+}
+
 declared()
 {
     # like [[ -v NAME ]], but for declarations
-    (($# >= 1)) || return 2
+    # usage: declared NAME...
+    (($# >= 1)) || throw "Not enough arguments"
     declare -p -- "$@" &> /dev/null
 } && complete -v declared
 
@@ -105,114 +95,126 @@ attributes()
 {
     # print attributes of variables as understood by `declare`,
     # with the addition of 'u' to indicate "undefined"
-    (($# >= 1)) || return 2
+    # usage: attributes NAME...
+    (($# >= 1)) || throw "Not enough arguments"
     declare -p -- "$@" |& while IFS=$IFS:= read -r _ attrs _; do
         if [[ "$attrs" == declare ]]; then
             # got "bash: declare: <name>: not found"
-            echo u
+            println u
         else
-            printf "%s\n" "${attrs#-}"
+            println "${attrs#-}"
         fi
     done
 } && complete -v attributes
 
 quoted()
-(
-    set +vx
+{
+    # print each argument on a separate line, quoted if necessary
+    # usage: quoted [ARG...]
+    local -a results
+    local value clean
     for value in "$@"; do
         printf -v clean "%q" "$value"
         if [[ $value == "$clean" ]]; then
-            # printf says no modifications needed; send the original
-            printf "%s\n" "$value"
-            continue
-        fi
-
-        if [[ $clean == \$* ]]; then
+            # printf says no modifications needed
+            results+=("$value")
+        elif [[ $clean == \$* ]]; then
             # printf used $'...' notation; send the cleaned value
-            printf "%s\n" "$clean"
-            continue
+            results+=("$clean")
+        else
+            # otherwise, printf gave us the "escape\ every\ \$character\ form",
+            # which we hate. we'll force it to use the other form, and then clean
+            # up the result
+            printf -v clean "%q" $'\n'"$value"
+            results+=("'${clean#\$\'\\n}")
         fi
-
-        # otherwise, printf gave us the "escape\ every\ \$character\ form",
-        # which we hate. we'll force it to use the other form, and then clean
-        # up the result
-        printf -v clean "%q" $'\n'"$value"
-        printf "%s\n" "'${clean#\$\'\\n}"
     done
-)
+    each "${results[@]}"
+}
+
+_get_array()
+{
+    # execute a command & read lines into an array
+    # usage: get_array [READARRAY_ARGS...] ARRAY_NAME -- COMMAND [COMMAND_ARGS...]
+    local -a readargs commandargs
+    while (($# > 0)); do
+        local arg=$1 && shift
+        case $arg in
+            --) commandargs=("$@") && break ;;
+            *) readargs+=("$arg") ;;
+        esac
+    done
+
+    ((${#commandargs[@]} >= 1)) || throw "No command given"
+
+    # technically you could say something like `get_array -d : -- println $PATH`
+    # and pass this check, but if you've gotten that far, i'll assume you know
+    # what you're doing
+    ((${#readargs[@]} >= 1)) || throw "No array name given"
+
+    # execute the command
+    local fulltext
+    fulltext=$("${commandargs[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
+
+    # map the array
+    readarray -t "${readargs[@]}" <<< "$fulltext"
+}
 
 get_array()
 {
     # execute a command & read lines into an array
-    # usage: get_array [READARRAY_ARGS...] ARRAY -- COMMAND...
-    local -a mapargs
-    while (($# > 0)); do
-        local arg=$1 && shift
-        case $arg in
-            --) break ;;
-            *) mapargs+=("$arg") ;;
-        esac
-    done
+    # usage: get_array ARRAY_NAME COMMAND [COMMAND_ARGS...]
+    (($# >= 2)) || throw "Not enough arguments"
 
-    if (($# == 0)); then
-        echo >&2 "[X] ${FUNCNAME[0]}: no command given"
-        return 2
-    elif ((${#mapargs[@]} == 0)); then
-        # technically you could call like `get_array -d : -- echo $PATH` and
-        # pass this check, but if you've gotten that far, i'll assume you know
-        # what you're doing
-        echo >&2 "[X] ${FUNCNAME[0]}: no array given"
-        return 2
-    fi
+    local arrayref=$1 && shift
+    local -a command=("$@")
+
+    valid_name "$arrayref" || throw "Not a valid name: \"$arrayref\""
 
     # execute the command
     local fulltext
-    fulltext=$("$@") || {
-        local err=$?
-        printf >&2 "%s\n" "$fulltext"
-        return $err
-    }
+    fulltext=$("${command[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
 
-    # map the array
-    readarray -t "${mapargs[@]}" <<< "$fulltext"
+    # read lines into our array
+    readarray -t "$arrayref" <<< "$fulltext"
 }
 
 from_list()
 {
     if [[ $# -ne 2 || $1 == -* ]]; then
-        echo "Convert a colon-separated list to a Bash array variable"
-        echo "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
+        println "Convert a colon-separated list to a Bash array variable"
+        println "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
         return 2
     fi
 
     local arrayref=$1
     local list=$2
 
-    [[ -n $arrayref ]] || return 2
+    valid_name "$arrayref" || throw "Not a valid array name: \"$arrayref\""
 
-    declared "${arrayref?}" || declare -ga "$arrayref" || return 1
+    declared "$arrayref" || declare -ga "$arrayref" || return 1
 
-    if [[ -z $list ]]; then
-        eval "${arrayref?}=()"
-    elif [[ $list == : ]]; then
-        eval "${arrayref?}=('')"
-    else
-        # read into arrayref, splitting on `:`
-        # (seems to use terminator semantics, so add an extra final separator)
-        IFS=: read -r -d '' -a "${arrayref?}" < <(printf "%s" "${list}:") || true
-    fi
+    case $list in
+        "") eval "$arrayref=()" ;;
+        :) eval "$arrayref=('')" ;;
+        *)
+            # read into arrayref, splitting on `:`
+            # (seems to use terminator semantics, so add an extra final separator)
+            IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
+            ;;
+    esac
 }
 
 to_list()
 {
     if [[ $# -lt 1 || $1 == -* ]]; then
-        echo "Create a colon-separated list from zero or more elements"
-        echo "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
+        println "Create a colon-separated list from zero or more elements"
+        println "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
         return 2
     fi
 
     local listref=$1 && shift
-    [[ -n $listref ]] || return 2
+    valid_name "$listref" || throw "Not a valid name: \"$listref\""
     declared "$listref" || declare -g "$listref"
 
     IFS=: eval "$listref"='"$*"'
@@ -223,92 +225,82 @@ join()
     # join strings
     # usage: join SEPARATOR [ELEMENTS...]
 
-    # no SEPARATOR?
-    (($# >= 1)) || return 2
+    (($# >= 1)) || throw "Not enough arguments"
     local sep=$1 && shift
-    # no ELEMENTS?
     (($# >= 1)) || return 0
 
-    printf "%s" "$1"
-    printeach "${sep}%s" "${@:1}"
-    echo
+    print "$1" && shift
+    printeach "${sep}%s" "$@"
+    println
 }
 
 repeat()
 {
     # does something a bit like `TEXT * COUNT`
     # usage: repeat TEXT COUNT
-    (($# == 2)) || return 2
+    (($# == 2)) || throw "Wrong number of arguments"
     local text=$1 count=$2
+    [[ $count == +([0-9]) ]] || throw "Not a number: $count"
+    # apparently this is the fastest way to do this, for numbers both big and small...
     eval printf -- "'${text}%.0s'" "{1..$count}"
-    echo
+    println
 }
 
-setpath()
+prefix_lines()
 {
-    if (($# != 2)); then
-        echo "Set a variable to a path if that path exists"
-        echo "Usage: ${FUNCNAME[0]} VAR PATH"
-        return 2
-    fi
-    [[ -e $2 ]] && export "$1=$2"
+    # read from stdin and add a prefix to each line
+    (($# == 1)) || throw "Wrong number of arguments"
+    local prefix=$1 line
+    while read -r line; do
+        println "${prefix}${line}"
+    done
 }
-
-sourcepath()
-{
-    if [[ $# -ne 1 || $1 == -* ]]; then
-        echo "Source a script if it exists"
-        echo "Usage: ${FUNCNAME[0]} PATH"
-        return 2
-    elif [[ -e $1 ]]; then
-        source "$1"
-    fi
-} && complete -f sourcepath
 
 indent()
-(
-    # indent each line by $1 (or 4)
-    set +vx
+{
+    # read from stdin and indent each line by `$1` spaces, (defaulting to 4)
+    (($# <= 1)) || throw "Too many arguments"
     local width=${1:-4}
-    local line
-    while read -r line; do
-        printf "%${width}s%s\n" "" "$line"
-    done
-)
+    [[ $width == +([0-9]) ]] || throw "Not a number: \"$width\""
+    prefix_lines "$(repeat " " "$width")"
+}
 
 dedent()
-(
-    # trim common leading whitespace from non-blank lines
+{
+    # read from stdin and trim common leading whitespace (from non-blank lines)
 
-    set +vx
-    (($# == 0)) || return 2
+    (($# == 0)) || throw "No arguments permitted"
+    local -a lines
     readarray -t lines
     # short-circuit for empty stdin
     ((${#lines[@]} > 0)) || return 0
 
     # find the common leading whitespace between all non-blank lines
+    local prefix prefix_line
+    local curr curr_line
     for curr_line in "${lines[@]}"; do
         # skip blank lines
         [[ $curr_line != *([[:space:]]) ]] || continue
 
         # strip largest trailing substring that starts with non-whitespace
-        curr="${curr_line%%[^[:space:]]*}"
+        curr=${curr_line%%[^[:space:]]*}
 
         # if prefix hasn't been set yet, set it & continue to next line
-        if [[ -z ${prefix-} ]]; then
+        if [[ ! ${prefix-} ]]; then
             prefix=$curr
             prefix_line=$curr_line
             continue
         fi
 
         # find longest common prefix
+        local common=
         for ((i = 1; i <= ${#prefix}; i++)); do
             [[ "${curr::$i}" == "${prefix::$i}" ]] || break
             common=${curr::$i}
         done
 
         # no match?
-        if [[ -z ${common-} ]]; then
+        if [[ ! ${common-} ]]; then
             printf >&2 "[!] ${FUNCNAME[0]}: No common prefix\n"
             printf >&2 "... (%s)\n" "$prefix_line" "$curr_line"
 
@@ -324,13 +316,12 @@ dedent()
     done
 
     # trim and print each line
-    printf "%s\n" "${lines[@]#"$prefix"}"
-)
+    println "${lines[@]#"$prefix"}"
+}
 
-fixargs()
-(
-    set +vx
-    arguments=()
+_fixargs()
+{
+    local -a arguments
     while (($#)); do
         case $1 in
             --)
@@ -343,7 +334,7 @@ fixargs()
                 ;;
             -[^-]?*)
                 # split `-xyz` flags into `-x -y -z`, and re-consider
-                split=()
+                local split=()
                 for ((i = 1; i < ${#1}; i++)); do
                     split+=("-${1:$i:1}")
                 done
@@ -351,33 +342,84 @@ fixargs()
                 ;;
             *)
                 # others unmodified
-                arguments+=("$(quoted "$1")") && shift
+                arguments+=("$1") && shift
                 ;;
         esac
     done
+
+    ((${#arguments[0]} >= 1)) || return 0
+
+    get_array arguments quoted "${arguments[@]}"
     echo set -- "${arguments[@]}"
-)
+}
+
+# shellcheck disable=2142  # "Aliases can't use positional parameters" that's fine
+alias fixargs='eval "$(_fixargs "$@")"'
 
 file_context()
 {
     # read lines from $filename at $lineno with $context lines of context
     # lines are read into sparse array $lines such that array indicies match file line numbers
-    # usage: filename=FILENAME lineno=LINENO [context=CONTEXT] file_context
-    # mapfile -s $((lineno - context - 1)) -O $((lineno - context)) -n $((context * 2 + 1)) -t lines < "$filename"
+    # usage: file_context ARRAY_NAME FILENAME LINENO [CONTEXT]
 
-    # no function arguments allowed, only environment variables
-    [[ $# -eq 0 && -n ${filename-} && -n ${lineno-} ]] || return 1
+    (($# >= 3)) || throw "Not enough arguments"
+    (($# <= 4)) || throw "Too many arguments"
+    local arrayref=$1
+    local filename=$2
+    local lineno=$3
+    local context=${4:-2}
 
+    valid_name arrayref || throw "Not a valid array name: \"$arrayref\""
+
+    ((lineno >= 0)) || throw "Invalid line number: $lineno"
     ((lineno >= 1)) || lineno=1
-    [[ -n ${context-} ]] || context=2
 
-    # max(lineno - context, 1)
+    # first line number: max(lineno - context, 1)
     local start=$((lineno > context ? lineno - context : 1))
-    # context before + line itself + context after (adjusted when at start of file)
-    local count=$((context * 2 + 1 - (lineno > context ? 0 : context + 1 - lineno)))
+    # max number of lines to read: the line itself, plus leading context, plus trailing context
+    local count=$((1 + (lineno - start) + context))
 
-    declared lines || declare -ga lines
-    lines=()
+    declared "${arrayref:?}" || declare -ga "${arrayref:?}"
+    eval "${arrayref:?}=()"
 
-    mapfile -t -O $start -n $count -s $((start - 1)) lines < "$filename"
+    mapfile -t -O $start -n $count -s $((start - 1)) "${arrayref:?}" < "$filename"
+}
+
+withflags()
+{
+    # run a command with specific shell opts
+    # usage: withflags [SHELLOPTS] -- COMMAND [ARGS]
+    # ex: withflags -vx -- pathmunge PATH /usr/local/bin /usr/local/sbin
+
+    throw "not implemented"
+
+    local oldstate=$SHELLOPTS
+    set "$@"
+    local newstate=$SHELLOPTS retval=0
+    "$@" || retval=$?
+
+    set +vx
+    # determine what exactly needs to be reset
+    local -a oldopts newopts reset
+    from_list oldopts "$oldstate"
+    from_list newopts "$newstate"
+
+    # iterating pair-wise through sorted arrays
+    while [[ $oldopts || $newopts ]]; do
+
+        if [[ "$oldopts" == "$newopts" ]]; then
+            # option does not need to be set or unset
+            oldopts=("${oldopts[@]:1}")
+            newopts=("${newopts[@]:1}")
+            continue
+        fi
+
+        if [[ "$oldopts" == "$oldopts" ]]; then
+            true
+        fi
+
+    done
+
+    [[ ! ${reset-} ]] || set "${reset[@]}"
+    return $retval
 }

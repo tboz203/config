@@ -1,48 +1,52 @@
 # setup powerline
 # shellcheck disable=2034
 
-# If not running interactively or powerline already defined, do nothing
-[[ $- == *i* ]] || return
-
-# set powerline availability flag (for all programs)
-if haveexe powerline && [[ ($TERM == *256color || $COLORTERM == truecolor) && $HAS_POWERLINE_FONTS ]]; then
-    export HAS_POWERLINE=1
-fi
+[[ ${_SHELL_INTERACTIVE-} ]] || return 0
+havebin powerline || return 0
+[[ ($TERM == *256color || $COLORTERM == truecolor) && $HAS_POWERLINE_FONTS ]] || return 0
 
 # if this isn't working and you don't know why, make sure that
 # `HAS_POWERLINE_FONTS` survives the ssh connection
 
-if [[ -v HAS_POWERLINE && ! -v POWERLINE_ROOT ]]; then
-    dirs=(
-        "$HOME"/.local/lib/python*
+find_powerline_root()
+{
+    if [[ -d ${POWERLINE_ROOT-} && $POWERLINE_ROOT == */powerline ]]; then
+        _warn "POWERLINE_ROOT already set"
+        return 0
+    fi
+
+    local -a python_installations=(
+        ~/.local/lib/python*
         /usr/local/lib/python*
         /usr/lib/python*
     )
-    for dir in "${dirs[@]}"; do
-        candidate="$dir/site-packages/powerline"
-        if [[ -d $dir && -d $candidate ]]; then
-            export POWERLINE_ROOT="$candidate"
-            break
+
+    local dir
+    for dir in "${python_installations[@]}"; do
+        powerline_candidate="$dir/site-packages/powerline"
+        if [[ -d $powerline_candidate ]]; then
+            export POWERLINE_ROOT=$powerline_candidate
+            return 0
         fi
     done
-    if [[ ! -v POWERLINE_ROOT ]]; then
-        unset HAS_POWERLINE
-        echo >&2 "[!] Powerline root not found"
-    fi
-    unset dirs dir
+
+    _warn "Powerline root not found"
+    return 1
+}
+
+if [[ ! ${POWERLINE_ROOT-} ]]; then
+    find_powerline_root
 fi
 
-# we've exported what we can
-[[ -z ${EXPORT_ONLY-} ]] || return 0
+export HAS_POWERLINE=1
 
-# start powerline
-if [[ -v HAS_POWERLINE ]]; then
+[[ ${_SHELL_INTERACTIVE-} ]] || return 0
+
+if [[ ${HAS_POWERLINE-} ]]; then
     # if `ss` is unavailable, or no matching powerline daemon socket exists
-    if ! haveexe ss || [[ -z $(ss -Hax src @powerline-ipc-$UID) ]]; then
+    if ! havebin ss || [[ -z $(ss -Hax src @powerline-ipc-$UID) ]]; then
         # start powerline daemon
         powerline-daemon -q || true
-    # else
-    #     _debug _log "skipping powerline-daemon start: appears online"
     fi
 
     # export POWERLINE_BASH_CONTINUATION=1

@@ -6,16 +6,10 @@
 shopt -s expand_aliases
 
 alias rmf='rm -rf'
-alias curl='curl -w "\n"'
 alias cd='cd -P'
 alias make='make -j $(nproc)'
 
 alias xargs='xargs -r '
-
-# check for an executable in the path
-alias haveexe='type -P > /dev/null'
-# check for any callable
-alias havecmd='type -t > /dev/null'
 
 # some aliases for date in a sortable format
 alias day='date +%Y-%m-%d'
@@ -26,9 +20,7 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # shellcheck disable=SC2154
 # alias xenv='compgen -v | grep -v "^_" | sort | while read -r item; do declare -p $item ; done'
 
-# If not running interactively, stop here
-# ========================================
-[[ $- == *i* ]] || return
+[[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
 # color aliases
 alias grep='grep --color=auto'
@@ -64,7 +56,7 @@ alias nv=nvim
 alias nvimdiff='nvim -d'
 alias nvdiff=nvimdiff
 
-alias cat=bat
+# alias cat=bat
 
 # common misspellings
 alias sl=ls
@@ -101,13 +93,16 @@ alias ipy='ipython'
 
 alias vimrc='vim ~/.vimrc'
 # alias gvimrc='gvim ~/.gvimrc'
-alias bashrc='nv ~/.bashrc ~/.bash_init.d/*'
-alias aliases='nv ~/.bash_init.d/*alias*'
-alias functions='nv ~/.bash_init.d/*function*'
+alias bashrc='nv ~/.bashrc ~/.bash_init/*'
+alias aliases='nv ~/.bash_init/*aliases*'
+alias bashlib='nv ~/.bashlib.sh ~/.bashlib/*'
 alias nvconfig='nv ~/.config/nvim/lua/config/lazy.lua'
 # alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua} +"Neotree show ~/.config/nvim"'
-alias nvrc='nv ~/.config/nvim/lua/{plugins/{core,python}.lua,config/{options,keymaps}.lua}'
+alias nvrc='nv ~/.config/nvim/lua/{plugins,config}/*.lua'
 alias nvimrc=nvrc
+
+alias open='gio open'
+
 alias listening='lsof -i -s TCP:Listen'
 alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
 
@@ -116,8 +111,7 @@ alias docker-halt='docker container ls -a --format "{{.Names}}" | xargs -r docke
 alias docker-scrub='docker-halt && docker-prune'
 alias docker-purge='docker-halt && docker-prune -a'
 
-# alias loud='BASH_ENV=~/.bash_loud '
-# alias verbose='BASH_ENV=~/.bash_verbose '
+alias loud='BASH_ENV=~/.bash_loud '
 
 alias xclip='xclip -selection clipboard'
 
@@ -137,7 +131,7 @@ fi
 
 alias help2man='help2man -N -L $LC_ALL'
 
-# make aliases of the form ...=../..
+# make aliases of the form `...=../..`, `....=../../..`, etc
 # these are most useful with `shopt -s autocd`
 pattern="..=.."
 for _ in {1..20}; do

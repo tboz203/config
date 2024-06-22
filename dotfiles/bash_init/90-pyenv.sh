@@ -1,6 +1,6 @@
 #!/bin/bash
 
-setpath PYENV_ROOT ~/.pyenv || return 0
+setpath -er PYENV_ROOT ~/.pyenv || return 0
 
 pathmungex --before --replace PATH "$PYENV_ROOT/shims"
 pathmungex PATH "$PYENV_ROOT/bin"

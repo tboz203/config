@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
 # shellcheck disable=2034
 
-# If not running interactively, don't do anything
-[[ $- == *i* ]] || return
+[[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
-PS1='\[\e[1;33m\]\u@\h \w \$ \[\e[0m\]'
-
-export LESS="-SRi"
-(less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
-export LESSCHARSET=utf-8
-
-setpath PYTHONSTARTUP ~/.pythonrc.py
+PS1='\[\e[1;33m\]\u \w \$ \[\e[0m\]'
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -42,7 +35,7 @@ shopt -s autocd
 # use a specific key for rsync over ssh
 [[ -r ~/.ssh/rsync_key ]] && export RSYNC_RSH="ssh -i $HOME/.ssh/rsync_key"
 
-if haveexe dircolors; then
+if havebin dircolors; then
     if [[ -r ~/.dircolors ]]; then
         eval "$(dircolors -b ~/.dircolors)"
     else
@@ -54,13 +47,13 @@ fi
 # bash completion ones are in ~/.local/share/bash-completion/completions and
 # are lazily loaded at first use
 
-# haveexe kubectl && eval "$(kubectl completion bash)"
-# haveexe helm && eval "$(helm completion bash)"
-# haveexe kind && eval "$(kind completion bash)"
-# haveexe poetry && eval "$(poetry completions bash)"
-# haveexe pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
-# haveexe oc && eval "$(oc completion bash)"
-# haveexe yq && eval "$(yq shell-completion bash)"
+# havebin kubectl && eval "$(kubectl completion bash)"
+# havebin helm && eval "$(helm completion bash)"
+# havebin kind && eval "$(kind completion bash)"
+# havebin poetry && eval "$(poetry completions bash)"
+# havebin pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
+# havebin oc && eval "$(oc completion bash)"
+# havebin yq && eval "$(yq shell-completion bash)"
 
 # When set to "1" suggest all commands, including plumbing commands
 # which are hidden by default (e.g. "cat-file" on "git ca<TAB>").

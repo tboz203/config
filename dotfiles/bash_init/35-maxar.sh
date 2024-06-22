@@ -1,10 +1,9 @@
 # Wideband Team Tools
-# shellcheck disable=2015,2128
 
 alias eureka='eureka -s '
 alias rake='bundle exec rake '
 
-if setpath WB_TOOLS ~/workspace/maxar/wb-team; then
+if setpath -e WB_TOOLS ~/workspace/maxar/wb-team; then
     # source $WB_TOOLS/source_all.sh
     source "$WB_TOOLS/bash_lib/aws_tools/awsCreds.sh"
     # alias initaws='awsCreds mcs-com us-east-1'
@@ -154,7 +153,7 @@ awsCreds2()
             return 1
         fi
 
-        local FILENAME=$ROOT/${PROFILE?}_${REGION?}_profile
+        local FILENAME=$ROOT/${PROFILE:?}_${REGION:?}_profile
     fi
 
     # if we weren't told to force reauthentication with explicit parameters, try to read our file
@@ -180,8 +179,8 @@ awsCreds2()
                     fi
                 else
                     # if we were *not* given explicit parameters, use the values from our file
-                    local PROFILE=${AWS_OKTA_PROFILE?}
-                    local REGION=${AWS_REGION?}
+                    local PROFILE=${AWS_OKTA_PROFILE:?}
+                    local REGION=${AWS_REGION:?}
                 fi
 
                 if [[ -v FORCE ]]; then
@@ -190,13 +189,13 @@ awsCreds2()
                 elif [[ ! (-v AWS_SESSION_TOKEN && -v AWS_CREDENTIAL_EXPIRATION) ]]; then
                     # otherwise, if our file does not set required credential variables, continue to reauthentication
                     echo "[.] Cached credentials appear invalid: $FILENAME"
-                elif [[ ${AWS_CREDENTIAL_EXPIRATION?} < $(date --iso-8601=seconds) ]]; then
+                elif [[ ${AWS_CREDENTIAL_EXPIRATION:?} < $(date --iso-8601=seconds) ]]; then
                     # otherwise, if our file's credentials appear to be expired, continue to reauthentication
                     echo "[.] Cached credentials appear expired: $FILENAME"
                 else
                     # otherwise, return success
                     echo "[.] Cached credentials appear valid (use --force to force reauthentication)"
-                    echo "[.] Assumed AWS profile: ${AWS_OKTA_PROFILE?} (${AWS_REGION?}): ${AWS_PROFILE?}"
+                    echo "[.] Assumed AWS profile: ${AWS_OKTA_PROFILE:?} (${AWS_REGION:?}): ${AWS_PROFILE:?}"
                     return 0
                 fi
 
@@ -234,21 +233,21 @@ awsCreds2()
     echo "[.] Caching credentials to $FILENAME"
 
     # write file
-    command cat <<- EOF > "$FILENAME"
-		export AWS_OKTA_PROFILE="$PROFILE"
-		export AWS_DEFAULT_PROFILE="$AWS_PROFILE"
-		export AWS_PROFILE="$AWS_PROFILE"
-		export AWS_REGION="$REGION"
-		export AWS_ACCESS_KEY_ID="$(jq -r '.credentials.aws_access_key_id' <<< "$JSON_RESPONSE")"
-		export AWS_SECRET_ACCESS_KEY="$(jq -r '.credentials.aws_secret_access_key' <<< "$JSON_RESPONSE")"
-		export AWS_SESSION_TOKEN="$(jq -r '.credentials.aws_session_token' <<< "$JSON_RESPONSE")"
-		export AWS_SECURITY_TOKEN="$(jq -r '.credentials.aws_security_token' <<< "$JSON_RESPONSE")"
-		export AWS_CREDENTIAL_EXPIRATION="$(jq -r '.credentials.expiration' <<< "$JSON_RESPONSE")"
-		EOF
+    trim > "$FILENAME" <<< "
+        export AWS_OKTA_PROFILE="$PROFILE"
+        export AWS_DEFAULT_PROFILE="$AWS_PROFILE"
+        export AWS_PROFILE="$AWS_PROFILE"
+        export AWS_REGION="$REGION"
+        export AWS_ACCESS_KEY_ID="$(jq -r '.credentials.aws_access_key_id' <<< "$JSON_RESPONSE")"
+        export AWS_SECRET_ACCESS_KEY="$(jq -r '.credentials.aws_secret_access_key' <<< "$JSON_RESPONSE")"
+        export AWS_SESSION_TOKEN="$(jq -r '.credentials.aws_session_token' <<< "$JSON_RESPONSE")"
+        export AWS_SECURITY_TOKEN="$(jq -r '.credentials.aws_security_token' <<< "$JSON_RESPONSE")"
+        export AWS_CREDENTIAL_EXPIRATION="$(jq -r '.credentials.expiration' <<< "$JSON_RESPONSE")"
+        "
 
     chmod 600 "$FILENAME"
 
     source "$FILENAME"
-    echo "[.] Assumed AWS profile: ${AWS_OKTA_PROFILE?} (${AWS_REGION?}): ${AWS_PROFILE?}"
+    echo "[.] Assumed AWS profile: ${AWS_OKTA_PROFILE:?} (${AWS_REGION:?}): ${AWS_PROFILE:?}"
     return 0
 }

@@ -2,19 +2,21 @@
 
 # eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-setpath HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew" || return 0
+[[ ${_SHELL_LOGIN-} ]] || return 0
 
-setpath HOMEBREW_CELLAR "$HOMEBREW_PREFIX/Cellar"
-setpath HOMEBREW_REPOSITORY "$HOMEBREW_PREFIX/Homebrew"
+# see ~/.homebrew/brew.env for other configuration
+
+setpath -er HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew" || return 0
+
+setpath -e HOMEBREW_CELLAR "$HOMEBREW_PREFIX/Cellar"
+setpath -e HOMEBREW_REPOSITORY "$HOMEBREW_PREFIX/Homebrew"
 
 pathmungex PATH "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin"
 
-pathmungex MANPATH "$HOMEBREW_PREFIX/share/man"
-pathmungex INFOPATH "$HOMEBREW_PREFIX/share/info"
+pathmungex -Ee MANPATH "$HOMEBREW_PREFIX/share/man"
+pathmungex -Ee INFOPATH "$HOMEBREW_PREFIX/share/info"
 
-# old & breaks things
+# homebrew's version of bash completion is old and breaks things, but we do
+# want to try to load homebrew's installed completion scripts
 # pathmungex --before BASH_COMPLETION_PATHS "$HOMEBREW_PREFIX/etc/bash_completion"
-pathmungex --before BASH_COMPLETION_USER_DIR "$HOMEBREW_PREFIX/etc/bash_completion.d"
-
-# handling periodic updates as a cron job
-export HOMEBREW_NO_AUTO_UPDATE=1
+pathmungex BASH_COMPLETION_USER_DIR "$HOMEBREW_PREFIX/etc/bash_completion.d"

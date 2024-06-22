@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # script for cron to update brew & brew packages
 
-PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" || return
+
+export HOMEBREW_DISPLAY_INSTALL_TIMES=1
 
 brew update && brew upgrade

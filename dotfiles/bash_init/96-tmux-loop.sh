@@ -1,7 +1,6 @@
 # connect to tmux
 
-# If not running interactively, do nothing
-[[ $- == *i* ]] || return
+[[ ${_SHELL_INTERACTIVE-} ]] || return
 
 # fix TERM for tmux
 # if [[ $TERM != *256color && $COLORTERM == @(gnome-terminal|xfce4-terminal|truecolor) ]]; then
@@ -10,12 +9,8 @@
 #     export TERM=rxvt-256color
 # fi
 
-# if we have tmux and we're not nested, change process to new session
-if haveexe tmux && [[ ! -v TMUX && -v TURBO_MODE ]]; then
+if havebin tmux && [[ -v TURBO_MODE && ! -v TMUX ]]; then
     export _BASH_INIT_TMUX=1
-    replace_exec
-    exec tmux new-session -A -s main || {
-        echo >&2 "[!] exec tmux failed"
-        return 1
-    }
+    _if_verbose replace_exec
+    exec tmux new-session -A -s main
 fi
