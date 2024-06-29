@@ -1,33 +1,39 @@
 # setup powerline
 # shellcheck disable=2034
 
-[[ ${_SHELL_INTERACTIVE-} ]] || return 0
-havebin powerline || return 0
-[[ ($TERM == *256color || $COLORTERM == truecolor) && $HAS_POWERLINE_FONTS ]] || return 0
+# [[
+#     ${_SHELL_INTERACTIVE-} &&
+#     ${HAVE_POWERLINE_FONTS-} &&
+#     ($TERM == *256color || $COLORTERM == truecolor) ]] &&
+#     havebin powerline || return 0
 
 # if this isn't working and you don't know why, make sure that
-# `HAS_POWERLINE_FONTS` survives the ssh connection
+# `HAVE_POWERLINE_FONTS` survives the ssh connection
 
-find_powerline_root()
-{
+find_powerline_root() {
     if [[ -d ${POWERLINE_ROOT-} && $POWERLINE_ROOT == */powerline ]]; then
         _warn "POWERLINE_ROOT already set"
         return 0
     fi
 
-    local -a python_installations=(
-        ~/.local/lib/python*
-        /usr/local/lib/python*
-        /usr/lib/python*
+    local -a candidate_roots=(
+        ~/.local/pipx/venvs/powerline-status
+        ~/.local
+        /usr/local
+        /usr
     )
 
-    local dir
-    for dir in "${python_installations[@]}"; do
-        powerline_candidate="$dir/site-packages/powerline"
-        if [[ -d $powerline_candidate ]]; then
-            export POWERLINE_ROOT=$powerline_candidate
-            return 0
-        fi
+    local python_root_glob="/lib/python[0-9].+([0-9])"
+
+    local candidate_root python_root
+    for candidate_root in "${candidate_roots[@]}"; do
+        for python_root in "$candidate_root"/lib/python3.+([0-9]); do
+            powerline_candidate="$python_root/site-packages/powerline"
+            if [[ -d $powerline_candidate ]]; then
+                export POWERLINE_ROOT=$powerline_candidate
+                return 0
+            fi
+        done
     done
 
     _warn "Powerline root not found"
@@ -38,11 +44,9 @@ if [[ ! ${POWERLINE_ROOT-} ]]; then
     find_powerline_root
 fi
 
-export HAS_POWERLINE=1
-
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
-if [[ ${HAS_POWERLINE-} ]]; then
+if [[ -d ${POWERLINE_ROOT-} ]]; then
     # if `ss` is unavailable, or no matching powerline daemon socket exists
     if ! havebin ss || [[ -z $(ss -Hax src @powerline-ipc-$UID) ]]; then
         # start powerline daemon

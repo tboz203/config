@@ -1,10 +1,9 @@
 # bashlib core
-# shellcheck disable=2016,2059,2120
+# shellcheck disable=2016,2034,2059,2120
 
-spinner()
-{
-    local chars='|/-\\'
-    # local chars='▁▂▃▄▅▆▇█▉▊▋▌▍▎▏ '
+spinner() {
+    # local chars='|/-\\'
+    local chars='▁▂▃▄▅▆▇█▉▊▋▌▍▎▏ '
     if (($# == 0)); then
         declare -g _spinner_idx
         [[ ${_spinner_idx-} ]] || _spinner_idx=0
@@ -17,59 +16,57 @@ spinner()
     printf "\e[1K\e[G%s" "${chars:$idx:1}"
 }
 
-setpath()
-{
+setpath() {
     local -a POSITIONAL
-    local HELP EXPORT RETURN
+    local EXPORT RETURN HELP USAGE
     fixargs
     while (($# > 0)); do
         local arg=$1 && shift
         case $arg in
-            -h | --help) HELP=0 && break ;;
+            -h | --help) HELP=1 && break ;;
             -e | --export) EXPORT=1 ;;
             -r | --return) RETURN=1 ;;
             -*)
-                _log "Unknown option: \"$arg\""
-                HELP=2
+                _err "Unknown option: \"$arg\""
+                USAGE=1
                 ;;
             *) POSITIONAL+=("$arg") ;;
         esac
     done
 
-    if [[ ${HELP-} != 0 ]]; then
-        if ((${#POSITIONAL[@]} < 2)); then
+    set -- "${POSITIONAL[@]}"
+
+    if [[ ! ${HELP-} && $# != 2 ]]; then
+        USAGE=1
+        if (($# < 2)); then
             _err "Not enough arguments"
-            HELP=2
-        elif ((${#POSITIONAL[@]} > 2)); then
-            _err "Too many arguments"
-            HELP=2
         else
-            local name=${POSITIONAL[0]}
-            local path=${POSITIONAL[1]}
+            _err "Too many arguments"
         fi
     fi
 
     if [[ ${HELP-} ]]; then
-        if [[ $HELP == 0 ]]; then
-            trim <<< "
-                Set a variable to a path if that path exists
-                Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH
+        trim <<< "
+            Set a variable to a path if that path exists
+            Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH
 
-                Parameters:
-                VAR     A variable name
-                PATH    A file or directory path
+            Parameters:
+            VAR     A variable name
+            PATH    A file or directory path
 
-                Options:
-                -e | --export   Export the given variable
-                -r | --return   Return success or failure
-                -h | --help     Print this message and halt
-                "
-        else
-            println
-            println "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
-        fi
-        return $HELP
+            Options:
+            -e | --export   Export the given variable
+            -r | --return   Return success or failure
+            -h | --help     Print this message and halt
+            "
+        return 0
+    elif [[ ${USAGE-} ]]; then
+        echo >&2 "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
+        return 1
     fi
+
+    local name=$1 && shift
+    local path=$1 && shift
 
     if [[ -e $path ]]; then
         eval "$name=$path"
@@ -77,22 +74,19 @@ setpath()
     elif [[ ${RETURN-} ]]; then
         return 1
     fi
-    return 0
 }
 
-sourcepath()
-{
+sourcepath() {
     if [[ $# -ne 1 || $1 == -* ]]; then
-        println "Source a script if it exists"
-        println "Usage: ${FUNCNAME[0]} PATH"
+        echo "Source a script if it exists"
+        echo "Usage: ${FUNCNAME[0]} PATH"
         return 2
     elif [[ -e $1 ]]; then
         source "$1"
     fi
 } && complete -f sourcepath
 
-showpath()
-{
+showpath() {
     # pretty print PATH-like lists or list variables
     # usage: showpath [PATH_OR_VAR...]
     local value
@@ -102,44 +96,44 @@ showpath()
             value=${!value}
         fi
 
-        local -a array
-        from_list array "$value"
-
+        local -a patharray
+        from_list patharray "$value"
+        quoted "${patharray[@]}"
     done
 } && complete -v showpath
 
-showarray()
-{
+showarray() {
     # pretty print array variables
     # usage: showarray ARRAYVAR...
 
-    local name
-    for name in "$@"; do
-        local attrib
-        attrib=$(attributes "$name")
+    local arrayref_name
+    for arrayref_name in "$@"; do
+        local arrayref_attributes
+        arrayref_attributes=$(attributes "$arrayref_name")
 
-        if [[ $attrib != *[aA]* ]]; then
-            _warn "Not an array: $name"
+        if [[ $arrayref_attributes != *[aA]* ]]; then
+            _warn "Not an array: $arrayref_name"
             continue
         fi
 
-        local -a keys values
+        local -a arrayref_keys arrayref_values
         eval "$(
-            printf 'keys=( "${!%s[@]}" )\n' "$name"
-            printf 'values=( "${%s[@]}" )\n' "$name"
+            printf 'arrayref_keys=( "${!%s[@]}" )\n' "$arrayref_name"
+            printf 'arrayref_values=( "${%s[@]}" )\n' "$arrayref_name"
         )"
 
-        println "$name=("
-        local idx
-        for ((idx = 0; idx < ${#keys[@]}; idx++)); do
-            println "  [${keys[idx]}]=$(quoted "${values[idx]}")"
-        done
+        get_array arrayref_values quoted "${arrayref_values[@]}"
+
+        local -a arrayref_kv_pairs
+        arrayzip arrayref_kv_pairs arrayref_keys arrayref_values
+
+        println "$arrayref_name=("
+        printf "  [%s]=%s\n" "${arrayref_kv_pairs[@]}"
         println ")"
     done
 } && complete -A arrayvar showarray
 
-searchpath()
-{
+searchpath() {
     # find the first file in a path that matches a glob
     local -a GLOBS
     local ALL HELP
@@ -159,7 +153,7 @@ searchpath()
                 fi
                 ;;
             -*)
-                _err "Unrecognized argument: \"$arg\""
+                _err "Unrecognized option: \"$arg\""
                 HELP=2
                 ;;
             *) GLOBS+=("$arg") ;;
@@ -218,8 +212,7 @@ searchpath()
     return $retval
 }
 
-searchparents()
-{
+searchparents() {
     local HELP ALL
     local -a GLOBS
     fixargs
@@ -229,7 +222,7 @@ searchparents()
             -h | --help) HELP=0 ;;
             -a | --all) ALL=1 ;;
             -*)
-                _err "Unrecognized argument: \"$arg\""
+                _err "Unrecognized option: \"$arg\""
                 HELP=2
                 ;;
             *)
@@ -261,15 +254,13 @@ searchparents()
     return $retval
 }
 
-with_files()
-{
+with_files() {
     # run a command & pass `files` as parameters
     # usage: with_files COMMAND [COMMAND_ARGS...] [-- FILES_ARGS...]
     # split our params into command and files_args
     local -a command files
     while (($# > 0)); do
-        local arg="$1"
-        shift
+        local arg="$1" && shift
         case $arg in
             --) break ;;
             *) command+=("$arg") ;;
@@ -278,17 +269,15 @@ with_files()
 
     # remaining args, if any, go to `fd`
     get_array files fd -t f . "$@" || return
+
     # check for empty set
-    ((${#files[*]} == 0)) && {
-        _err "no files"
-        return 1
-    }
+    ((${#files[*]} != 0)) || throw "no files"
+
     # handoff
     "${command[@]}" "${files[@]}"
 } && complete -c with_files
 
-pathmungex()
-{
+pathmungex() {
     # like pathmunge, but better
 
     _if_verbose _log "$* # called at $(called-at 1)"
@@ -320,7 +309,7 @@ pathmungex()
                 fi
                 ;;
             -*)
-                _err "Unrecognized argument: \"$arg\""
+                _err "Unrecognized option: \"$arg\""
                 HELP=2
                 ;;
             *) POSITIONAL+=("$arg") ;;
@@ -393,7 +382,7 @@ pathmungex()
     #     PATHLIST=${PATHLIST//::+(:)/::}
     # fi
 
-    _if_debug inspect_var EXPORT HELP CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" PATHLIST ENTRIES ADDITIONS
+    _if_debug inspect_var EXPORT HELP CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" PATHLIST ENTRIES
 
     local entry
     for entry in "${ENTRIES[@]}"; do
@@ -487,8 +476,7 @@ pathmungex()
     hash -r
 }
 
-cleanpath()
-{
+cleanpath() {
     if [[ $# -gt 1 || ${1-} == -* ]]; then
         echo "Remove repeated values from PATH, or another PATH-like variable"
         echo "Usage: ${FUNCNAME[0]} [PATHVAR]"
@@ -506,8 +494,7 @@ cleanpath()
     eval "$PATHVAR=\"$CLEAN\""
 } && complete -v cleanpath
 
-flash_message()
-{
+flash_message() {
     # briefly print a message to the screen
     local HELP message sleep=1
     fixargs
@@ -517,7 +504,7 @@ flash_message()
             -s | --sleep) sleep="${1:?$arg: argument required}" && shift ;;
             -h | --help) HELP=0 ;;
             -*)
-                _err "Unrecognized argument: \"$arg\""
+                _err "Unrecognized option: \"$arg\""
                 HELP=2
                 ;;
             *) message+="$arg " ;;
@@ -540,8 +527,7 @@ flash_message()
     tput ed
 }
 
-pkg-config-vars()
-{
+pkg-config-vars() {
     # display all pkg-config variables for a name
     local -a names
     get_array names pkg-config-names
@@ -564,13 +550,11 @@ pkg-config-vars()
     done
 }
 
-pkg-config-names()
-{
+pkg-config-names() {
     pkg-config --list-all | cut -f1 -d" " | sort
 }
 
-_complete-pkg-config-names()
-{
+_complete-pkg-config-names() {
     # mapfile -t COMPREPLY < <(compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}")
     get_array COMPREPLY compgen -W "$(pkg-config-names)" -- "${COMP_WORDS[COMP_CWORD]}"
 }
@@ -591,8 +575,7 @@ complete -F _complete-pkg-config-names pkg-config-vars
 #     done
 # }
 
-filetype()
-{
+filetype() {
     throw "not implemented"
     (($# >= 1)) || throw "Not enough arguments"
     local cmd

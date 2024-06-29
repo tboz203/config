@@ -1,7 +1,7 @@
 # bash environment troubleshooting
 
 # inspired by https://flokoe.github.io/bash-hackers-wiki/scripting/debuggingtips/#making-xtrace-more-useful
-export PS4='+'$'\t''\e[02m${EPOCHREALTIME:+[$EPOCHREALTIME] }(${BASH_SOURCE:-main}:$LINENO${FUNCNAME:+:$FUNCNAME}): \e[0m'
+export PS4='+\011\e[02m${EPOCHREALTIME:+[$EPOCHREALTIME] }(${BASH_SOURCE:-main}:$LINENO${FUNCNAME:+:$FUNCNAME}): \e[0m'
 
 alias _if_verbose='#'
 alias _if_debug='#'
@@ -12,16 +12,12 @@ case ${_BASHLIB_LOGLEVEL-} in
     *) ;;
 esac
 
-inspect_var()
-{
+inspect_var() {
     (($# >= 1)) || throw "Not enough arguments"
     declare -p -- "$@" 2>&1 | indent >&2
 }
 
-# inlist replace_exec "${_BASHLIB_FLAGS-}" || return 0
-
-replace_exec()
-{
+replace_exec() {
     # replace the `exec` builtin with a function that:
     # 1) displays the command to be executed, and pauses
     # 2) executes that command in a child process (i.e. NOT by the exec builtin)
@@ -30,8 +26,7 @@ replace_exec()
     # recommended usage: _if_verbose replace_exec
 
     # shellcheck disable=2317
-    exec()
-    {
+    exec() {
         _if_verbose stackline
         _log "will run: $*" && pause
         local retval=0
@@ -56,8 +51,7 @@ replace_exec()
 #     done
 # }
 
-called-at()
-{
+called-at() {
     # like `caller` but with nicer formatting
     (($# <= 1)) || throw "Too many arguments"
     local idx=${1:-0}
@@ -68,82 +62,47 @@ called-at()
     println "${funcname:+$funcname }(${filename:-main}:$lineno)"
 }
 
-stackline()
-{
-    local -a stackframes=()
+stackline() {
+    local -a stackframes
     for ((i = ${#BASH_SOURCE[@]} - 1; i > 1; i--)); do
         stackframes+=("${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i - 1]})")
     done
 
-    ((${#stackframes[@]} >= 1)) || return 0
-
-    print "${stackframes[0]}"
-
-    local frame
-    for frame in "${stackframes[@]:1}"; do
-        print " > $frame"
-    done
-
-    println
+    join " > " "${stackframes[@]}"
 }
 
-showframe()
-{
-    (($# >= 3)) || throw "Not enough arguments"
-    (($# <= 4)) || throw "Too many arguments"
-    local filename=$1
-    local funcname=$2
-    local lineno=$3
-    local context=${4-2}
-
-    [[ $lineno == +([0-9]) ]] || throw "Not a number: $lineno"
-
-    local -a lines
-    file_context lines "$filename" "$lineno" "$context"
-
-    println "    $filename:$lineno (in $funcname):"
-
-    if ((${#lines[@]} == 0)); then
-        println "   >> (not found)"
-    else
-        local ctx_lineno prefix
-        for ctx_lineno in "${!lines[@]}"; do
-            ((ctx_lineno == lineno)) && prefix="   >>" || prefix="     "
-            println "$prefix $ctx_lineno ${lines[$ctx_lineno]}"
-        done
-    fi
-}
-
-stacktrace()
-{
+stacktrace() {
     # print the current call stack
     local context=2 top=0 bottom=0
 
-    local opt OPTARG OPTIND HELP=
+    local opt OPTARG OPTIND HELP USAGE
     while getopts :hc:t:b: opt; do
         case $opt in
-            h) HELP=0 ;;
+            h) HELP=1 ;;
             c) context=$OPTARG ;;
             t) top=$OPTARG ;;
             b) bottom=$OPTARG ;;
             :)
                 _err "required argument not found: $OPTARG"
-                HELP=2
+                USAGE=1
                 ;;
             ?)
                 _err "invalid option: $OPTARG"
-                HELP=2
+                USAGE=1
                 ;;
             *)
                 _err "unexpected input"
                 declare -p opt OPTARG
-                HELP=2
+                USAGE=1
                 ;;
         esac
     done
     shift $((OPTIND - 1))
 
-    if [[ ${HELP-} ]]; then
+    if [[ ${USAGE-} ]]; then
+        echo "Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]"
+        return 1
+    elif [[ ${HELP-} ]]; then
         dedent <<< "
             Print a bash function stacktrace
             Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]
@@ -155,17 +114,24 @@ stacktrace()
         return $HELP
     fi
 
+    ((bottom = ${#BASH_SOURCE[@]} - 1 - bottom))
+    ((bottom > top)) || return 0
+
     echo "  Call stack (starting with oldest frame):"
     # iterating through 3 related arrays in reverse
     local idx
-    for ((idx = ${#BASH_SOURCE[@]} - 1 - bottom; idx > top; idx--)); do
+    for ((idx = bottom; idx > top; idx--)); do
         showframe "${BASH_SOURCE[$idx]}" "${FUNCNAME[$idx]}" "${BASH_LINENO[$idx - 1]}"
     done
 }
 
-_traceback()
-{
-    (($# == 5)) || throw "Wrong number of arguments"
+_traceback() {
+    local last_status=$?
+    if (($# != 5)); then
+        _err "Wrong number of arguments"
+        return $last_status
+    fi
+
     local filename=$1
     local funcname=$2
     local lineno=$3
@@ -178,8 +144,28 @@ _traceback()
 
     showframe "$filename" "$funcname" "$lineno"
 
-    println ">> $command ($retval)"
+    echo ">> $command ($retval)"
     pause
+    return $last_status
 } && alias traceback='_traceback "${BASH_SOURCE-}" "${FUNCNAME-}" "$LINENO" "$BASH_COMMAND" "$?"'
 
-# inlist stacktrace "${_BASHLIB_FLAGS-}" && trap 'traceback' EXIT || true
+[[ :${_BASHLIB_FLAGS-}: != *:stacktrace:* ]] || trap 'traceback' ERR EXIT
+
+mtime() {
+    # time a statement with microsecond precision (accuracy not guaranteed 😬)
+    local start=$EPOCHREALTIME stop retval=0
+    "$@" || retval=$?
+    stop=$EPOCHREALTIME
+    bc <<< "$stop - $start"
+    return $retval
+}
+
+nested() {
+    (($# >= 2)) || throw "Not enough arguments"
+    local depth=${1:?0} && shift
+    if ((depth > 0)); then
+        nested $((depth - 1)) "$@"
+    else
+        "$@"
+    fi
+}

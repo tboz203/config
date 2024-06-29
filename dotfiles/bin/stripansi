@@ -1,4 +1,20 @@
 #!/usr/bin/env bash
 
-# strip ANSI color sequences
+declare -a POSITIONAL
+while (($#)); do
+    arg=$1 && shift
+    case $arg in
+        -*) HELP=1 ;;
+        *) POSITIONAL+=("$arg") ;;
+    esac
+done
+
+set -- "${POSITIONAL[@]}"
+
+if [[ ${HELP-} ]]; then
+    echo >&2 "$BASH_SOURCE: strip ANSI escape color sequences from named files, or stdin"
+    echo >&2 "Usage: $BASH_SOURCE [FILE...]"
+    return 1
+fi
+
 exec sed -r 's/\x1b\[[0-9]+(;[0-9]+)*m//g' "$@"

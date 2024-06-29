@@ -2,8 +2,7 @@
 
 ((BASH_VERSINFO[0] >= 5)) || return 0
 
-from_list()
-{
+from_list() {
     if [[ $# -ne 2 || $1 == -* ]]; then
         println "Convert a colon-separated list to a Bash array variable"
         println "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
@@ -26,8 +25,7 @@ from_list()
     esac
 }
 
-to_list()
-{
+to_list() {
     if [[ $# -lt 1 || $1 == -* ]]; then
         echo "Create a colon-separated list from zero or more elements"
         echo "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
@@ -35,15 +33,14 @@ to_list()
     fi
 
     local -n listref=$1 && shift
-    declared "${!listref}" || declare -g "${!listref}"
+    declared "${!listref}" || declare -g "${!listref}" || return 1
 
     local IFS=:
     listref="$*"
 }
 
-_fixargs()
-{
-    local -a arguments=()
+_fixargs() {
+    local -a arguments
     while (($#)); do
         case $1 in
             --)
@@ -71,71 +68,67 @@ _fixargs()
     echo set -- "${arguments[@]@Q}"
 }
 
-setpath()
-{
+setpath() {
     local -a POSITIONAL
-    local HELP EXPORT RETURN
+    local EXPORT RETURN HELP USAGE
     fixargs
     while (($# > 0)); do
         local arg=$1 && shift
         case $arg in
-            -h | --help) HELP=0 && break ;;
+            -h | --help) HELP=1 && break ;;
             -e | --export) EXPORT=1 ;;
             -r | --return) RETURN=1 ;;
             -*)
                 _log "Unknown option: \"$arg\""
-                HELP=2
+                USAGE=1
                 ;;
             *) POSITIONAL+=("$arg") ;;
         esac
     done
 
-    if [[ ${HELP-} != 0 ]]; then
-        if ((${#POSITIONAL[@]} < 2)); then
+    set -- "${POSITIONAL[@]}"
+
+    if [[ ! ${HELP-} && $# != 2 ]]; then
+        USAGE=1
+        if (($# < 2)); then
             _err "Not enough arguments"
-            HELP=2
-        elif ((${#POSITIONAL[@]} > 2)); then
+        else
             _err "Too many arguments"
-            HELP=2
-        else
-            local -n var=${POSITIONAL[0]} || HELP=2
-            local path=${POSITIONAL[1]}
         fi
     fi
 
-    if [[ -v HELP ]]; then
-        if [[ $HELP == 0 ]]; then
-            trim <<< "
-                Set a variable to a path if that path exists
-                Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH
+    if [[ ${HELP-} ]]; then
+        trim <<< "
+            Set a variable to a path if that path exists
+            Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH
 
-                Parameters:
-                VAR     A variable name
-                PATH    A file or directory path
+            Parameters:
+            VAR     A variable name
+            PATH    A file or directory path
 
-                Options:
-                -e | --export   Export the given variable
-                -r | --return   Return success or failure
-                -h | --help     Print this message and halt
-                "
-        else
-            echo
-            echo "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
-        fi
-        return $HELP
+            Options:
+            -e | --export   Export the given variable
+            -r | --return   Return success or failure
+            -h | --help     Print this message and halt
+            "
+        return 0
+    elif [[ ${USAGE-} ]]; then
+        echo >&2 "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
+        return 1
     fi
+
+    local -n var=$1 && shift
+    local path=$1 && shift
 
     if [[ -e $path ]]; then
         var=$path
-        [[ ! -v EXPORT ]] || export "${!var}"
-    elif [[ -v RETURN ]]; then
+        [[ ! ${EXPORT-} ]] || export "${!var}"
+    elif [[ ${RETURN-} ]]; then
         return 1
     fi
-    return 0
 }
 
-showarray()
-{
+showarray() {
     # pretty print array variables
     # usage: showarray ARRAYVAR...
 
@@ -152,17 +145,16 @@ showarray()
             continue
         fi
 
-        printf -- "%s=(\n" "${!arrayref}"
-        local key
-        for key in "${!arrayref[@]}"; do
-            printf "  [%s]=%s\n" "$key" "${arrayref[key]@Q}"
-        done
-        echo ")"
+        local -a kv_pairs
+        arrayzip kv_pairs "${!arrayref[@]}" "${arrayref[@]@Q}"
+
+        println "${!arrayref}=("
+        printf "  [%s]=%s\n" "${kv_pairs[@]}"
+        println ")"
     done
 }
 
-pathmungex()
-{
+pathmungex() {
     # like pathmunge, but better
 
     # local state=${-//[^xT]}
@@ -171,7 +163,7 @@ pathmungex()
 
     _if_verbose _log "$* # called at $(called-at 1)"
 
-    local EXPORT='' REPLACE='' HELP=''
+    local EXPORT EXISTS REPLACE HELP USAGE
     local CHECK=silent
     local WHERE=insert
     local MARKER="^/usr/"
@@ -182,23 +174,24 @@ pathmungex()
         local arg=$1 && shift
         case $arg in
             -e | --export) EXPORT=1 ;;
+            -E | --exists) EXISTS=1 ;;
             -b | --before) WHERE=before ;;
             -a | --after) WHERE=after ;;
             -f | --fail | --fatal) CHECK=fail ;;
             -n | --no-check | --nocheck) CHECK=nocheck ;;
             -r | --replace) REPLACE=1 ;;
-            -h | --help) HELP=0 ;;
+            -h | --help) HELP=1 ;;
             -m | --marker)
-                if [[ -v 1 && ! ($1 == -*) ]]; then
+                if [[ -v 1 && $1 != -* ]]; then
                     MARKER="$1" && shift
                 else
                     _err "Argument required: \"$arg\""
-                    HELP=2
+                    USAGE=1
                 fi
                 ;;
             -*)
                 _err "Unrecognized argument: \"$arg\""
-                HELP=2
+                USAGE=1
                 ;;
             *) POSITIONAL+=("$arg") ;;
         esac
@@ -206,10 +199,10 @@ pathmungex()
 
     if [[ -z $HELP && ${#POSITIONAL[@]} -lt 2 ]]; then
         _err "Not enough arguments"
-        HELP=2
+        USAGE=1
     fi
 
-    if [[ $HELP ]]; then
+    if [[ ${HELP-} ]]; then
         dedent <<< "
             Add entries to a PATH-like list variable, for each entry that exists on disk
             and is not already in the list. By default, entries are inserted in order into
@@ -223,6 +216,7 @@ pathmungex()
 
             Options:
             -e | --export       Export PATHVAR
+            -E | --exists       Only update PATHVAR if it already exists
             -a | --after        Append entries to the end of PATHVAR
             -b | --before       Prepend entries to the front of PATHVAR
             -f | --fail         Fail with an error and leave PATHVAR unmodified if any
@@ -234,13 +228,17 @@ pathmungex()
             Optional Parameters:
             -m | --marker MARKER    A pattern to use to find the entry in PATHVAR where
                                     ENTRIES should be inserted"
-        return $HELP
+        return 0
     fi
 
-    local -n PATHVAR=${POSITIONAL[0]}
+    local -n PATHVAR=${POSITIONAL[0]} || return 1
     local -a ENTRIES=("${POSITIONAL[@]:1}")
 
-    if [[ $EXPORT ]]; then
+    if [[ ${EXISTS-} && ! -v ${!PATHVAR} ]]; then
+        return 0
+    fi
+
+    if [[ ${EXPORT-} ]]; then
         declare -gx "${!PATHVAR}"
     fi
 
@@ -255,13 +253,6 @@ pathmungex()
         *) PATHLIST=:$PATHVAR: ;;
     esac
     local ADDITIONS=:
-
-    # if [[ $REPLACE ]]; then
-    #     # replace runs of three or more colons (representing two or more adjacent
-    #     # null entries) with a pair of colons (representing a single null entry).
-    #     # This allows us to correctly remove null entries
-    #     PATHLIST=${PATHLIST//::+(:)/::}
-    # fi
 
     _if_debug inspect_var EXPORT HELP CHECK WHERE MARKER POSITIONAL PATHVAR "${!PATHVAR}" ENTRIES
 
@@ -279,7 +270,7 @@ pathmungex()
             local suffix=
             [[ -z $match ]] || suffix="?(/)"
 
-            if [[ $REPLACE ]]; then
+            if [[ ${REPLACE-} ]]; then
                 # replace `:$entry:` with `:`
                 PATHLIST=${PATHLIST//:"$match"$suffix:/:}
             else
@@ -354,13 +345,12 @@ pathmungex()
         esac
     fi
 
-    _if_debug inspect_var FRONT BACK
+    _if_debug inspect_var PATHLIST ADDITIONS FRONT BACK
     _if_verbose _log "set ${!PATHVAR} to ([${PATHVAR//:/], [}])"
     hash -r
 }
 
-cleanpath()
-{
+cleanpath() {
     if [[ $# -gt 1 || ${1-} == -* ]]; then
         echo "Remove repeated values from PATH, or another PATH-like variable"
         echo "Usage: ${FUNCNAME[0]} [PATHVAR]"

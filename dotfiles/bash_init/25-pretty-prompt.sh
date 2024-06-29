@@ -2,8 +2,7 @@
 # make a pretty PS1
 # shellcheck disable=2016,2034
 
-build_color()
-{
+build_color() {
     # build an (escaped) ANSI escape code color sequence
 
     local -a parts
@@ -46,8 +45,7 @@ build_color()
     print "m\002"
 }
 
-__last_status_ps1()
-{
+__last_status_ps1() {
     # print the return status of the last command in color
     local last_status=$?
 
@@ -74,14 +72,12 @@ __last_status_ps1()
     return "$last_status"
 }
 
-simple_prompt()
-{
+simple_prompt() {
     unset PROMPT_COMMAND
     PS1='\[\e[1;33m\]\u \w \$ \[\e[0m\]'
 }
 
-__prompt_ll_on_cd()
-{
+__prompt_ll_on_cd() {
     # list files on directory change
     local last_retval=$?
     [[ -z ${__last_cwd-} || $__last_cwd == "$PWD" ]] || ls -lhF
@@ -89,13 +85,11 @@ __prompt_ll_on_cd()
     return $last_retval
 }
 
-pretty_prompt()
-{
+pretty_prompt() {
     # build & set a nice bash prompt
 
     # first, politely disable powerline prompt
-    _powerline_status_wrapper()
-    {
+    _powerline_status_wrapper() {
         true
     }
 

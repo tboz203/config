@@ -10,8 +10,7 @@ pathmungex --before --replace PATH "$PYENV_VIRTUALENV_ROOT/shims"
 pathmungex PATH "$PYENV_VIRTUALENV_ROOT/bin"
 export PYENV_VIRTUALENV_INIT=1
 
-_pyenv_virtualenv_hook()
-{
+_pyenv_virtualenv_hook() {
     local ret=$?
     if [ -n "${VIRTUAL_ENV-}" ]; then
         eval "$(command pyenv sh-activate --quiet || command pyenv sh-deactivate --quiet || true)" || true

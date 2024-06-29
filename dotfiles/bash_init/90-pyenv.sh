@@ -8,8 +8,7 @@ pathmungex PATH "$PYENV_ROOT/bin"
 
 export PYENV_SHELL=bash
 
-pyenv()
-{
+pyenv() {
     local command
     command="${1:-}"
     if [ "$#" -gt 0 ]; then

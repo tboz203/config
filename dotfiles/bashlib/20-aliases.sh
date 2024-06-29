@@ -21,4 +21,4 @@ alias havecmd='type > /dev/null -t'
 # shellcheck disable=2154  # "message is referenced but not assigned" wrong
 alias throw='{ local __message ; read -r __message ; _err "$__message" ; return 1 ; } <<<'
 
-alias pause='read -rp "[press enter to continue] " || return $?'
+alias pause='{ read -rp "[press enter to continue] " || return $? ; }'

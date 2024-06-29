@@ -3,7 +3,6 @@
 set -euo pipefail
 
 PATTERNS=()
-OPTIONS=()
 while [[ $# -gt 0 ]]; do
     arg="$1"
     shift
@@ -13,18 +12,26 @@ while [[ $# -gt 0 ]]; do
         -*=*) set -- "${arg%%=*}" "${arg#*=}" "$@" ;;
         --host) HOST="$1" && shift ;;
         -a | --all) ALL=1 ;;
+        -c | --compose) COMPOSE=1 ;;
         -j | --json) JSON=1 ;;
         -h | --help) HELP=1 ;;
+        -*)
+            echo >&2 "[!] Unrecognized option: \"$arg\""
+            USAGE=1
+            ;;
         *) PATTERNS+=("$arg") ;;
     esac
 done
 
-OPTIONS=("$@")
+DOCKER_ARGS=("$@")
+
+SCRIPT=${BASH_SOURCE##*/}
+USAGE_TEXT="$SCRIPT [a|--all] [-j|--json] [-h|--help] [--host HOST] [PATTERN ...] [-- DOCKER_ARGS ...]"
 
 if [[ -v HELP ]]; then
     cat << EOF
-$0: print abbreviated docker containers
-Usage: $0 [-h|--host HOST] [PATTERN ...] [-- OPTIONS ...]
+$SCRIPT: print abbreviated docker containers
+Usage: $USAGE_TEXT
 
 Options:
 
@@ -36,28 +43,39 @@ Options:
 PATTERN         only list containers whose names contain one or more pattern as
                 a substring
 
-additionally, you may include options and arguments intended for docker itself
+Additionally, you may include options and arguments intended for docker itself
 by separating them from the options and arguments listed above with '--'.
 
 EOF
     exit 0
 fi
 
-TABLE_FORMAT="table {{.Image}}\t{{.Names}}\t{{.Status}}"
+if [[ -v USAGE ]]; then
+    echo >&2 "Usage: $USAGE_TEXT"
+    exit 1
+fi
+
+if [[ -v COMPOSE ]]; then
+    COMMAND=(docker-compose ps)
+    TABLE_FORMAT="table {{.Service}}\t{{.Image}}\t{{.Status}}"
+else
+    COMMAND=(docker container ls)
+    TABLE_FORMAT="table {{.Names}}\t{{.Image}}\t{{.Status}}"
+fi
+
 JSON_FORMAT="{{. | json}}"
 JQ_FILTER='.Labels |= ( split(",") | .[] |= ( split("=") | {(.[0]): .[1]}) | add )'
 
 [[ -v HOST ]] && export DOCKER_HOST=$HOST
 
-[[ -v ALL ]] && OPTIONS+=(--all)
+[[ -v ALL ]] && DOCKER_ARGS+=(--all)
 
 for pattern in "${PATTERNS[@]}"; do
-    OPTIONS+=(--filter "name=$pattern")
+    DOCKER_ARGS+=(--filter "name=$pattern")
 done
 
 if [[ -v JSON ]]; then
-    docker container ls "${OPTIONS[@]}" --no-trunc --format "$JSON_FORMAT" |
-        jq "$JQ_FILTER"
+    "${COMMAND[@]}" "${DOCKER_ARGS[@]}" --no-trunc --format "$JSON_FORMAT" | jq "$JQ_FILTER"
 else
-    docker container ls "${OPTIONS[@]}" --format "$TABLE_FORMAT"
+    "${COMMAND[@]}" "${DOCKER_ARGS[@]}" --format "$TABLE_FORMAT"
 fi

@@ -6,9 +6,9 @@ trap 'echo "err ($?) on line ($LINENO): $BASH_COMMAND"' ERR
 
 RECIPIENT=thomas.bozeman@maxar.com
 USER=th026106
-INPUTS=(/home /usr/local /etc)
+INPUTS=("/home/$USER" /usr/local /etc)
 TITLE="backup-$(date +%Y-%m-%d)"
-TARBALL="$(pwd)/${TITLE}.tar.zst.gpg"
+TARBALL="$PWD/${TITLE}.tar.zst.gpg"
 
 if [[ $# -gt 0 ]]; then
     echo >&2 "$0: create local backups; takes no arguments"
@@ -46,7 +46,7 @@ crontab -l > "$USER.crontab" || true
 tar -c \
     --ignore-failed-read --absolute-names \
     --exclude-caches --exclude-backups --exclude=.cache --exclude=cache \
-    --exclude=node_modules --exclude-tag=pyvenv.cfg \
+    --exclude=node_modules --exclude-tag=pyvenv.cfg --exclude=tmp \
     -- * "${INPUTS[@]}" |
     zstd --long -7 |
     gpg --compress-algo none --output "$TARBALL" --encrypt --recipient "$RECIPIENT"

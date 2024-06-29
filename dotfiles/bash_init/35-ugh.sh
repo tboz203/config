@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-[[ ${_SHELL_INTERACTIVE-} ]] || return
-havebin thefuck || return
+[[ ${_SHELL_INTERACTIVE-} ]] && havebin thefuck || return
 
-function ugh()
-{
+function ugh() {
     TF_PYTHONIOENCODING=$PYTHONIOENCODING
     export TF_SHELL=bash
     export TF_ALIAS=ugh

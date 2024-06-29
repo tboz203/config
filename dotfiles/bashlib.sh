@@ -1,7 +1,6 @@
 # bashlib.sh
 
-_bashlib()
-{
+_bashlib() {
     # step one: where are we?
     if [[ $- == *i* ]]; then declare -g _SHELL_INTERACTIVE=1; fi
     if shopt -qp login_shell; then declare -g _SHELL_LOGIN=1; fi
@@ -21,6 +20,8 @@ _bashlib()
     shopt -s globstar
     shopt -s nullglob
 
+    shopt -u nocasematch
+
     if ((BASH_VERSINFO[0] >= 5)); then
         shopt -s globskipdots
     fi
@@ -38,6 +39,6 @@ _bashlib()
             echo >&2 "[!] $FUNCNAME: Will not source file: $item"
         fi
     done
-}
+} && export -f _bashlib
 
 _bashlib

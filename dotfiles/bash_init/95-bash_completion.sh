@@ -3,6 +3,12 @@
 
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
+shopt -s progcomp
+
+if ((BASH_VERSINFO[0] >= 5)); then
+    shopt -s progcomp_alias
+fi
+
 if [[ ! -v BASH_COMPLETION_VERSINFO ]]; then
     # if bash completion hasn't been loaded yet, do that, and then return;
     # we expect that script to execute this script in turn, at which point the
@@ -12,9 +18,4 @@ if [[ ! -v BASH_COMPLETION_VERSINFO ]]; then
     return
 fi
 
-((BASH_VERSINFO[0] < 5)) || shopt -s progcomp_alias
-
-complete -F _command watch
-complete -F _command viewpane
-
-complete -C '/usr/local/bin/aws_completer' aws
+complete -C aws_completer aws

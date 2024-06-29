@@ -382,17 +382,33 @@ if version > "500"
     " end tabs }}}
 
     " powerline {{{
-    if $HAS_POWERLINE
-        python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
-        python3 << trim endpython
+    python3 << trim endpython
+        def try_add_powerline():
             try:
-                from powerline.vim import setup as powerline_setup
-                powerline_setup()
-                del powerline_setup
+                from powerline.vim import setup
+                setup()
+                return
             except ImportError:
                 pass
-        endpython
-    endif
+
+            import os, sys
+            root = os.environ.get('POWERLINE_ROOT')
+            if not root or not os.path.exists(root):
+                return
+
+            site_packages = os.path.dirname(root)
+            sys.path.append(site_packages)
+
+            try:
+                from powerline.vim import setup
+                setup()
+                return
+            except ImportError:
+                pass
+
+        try_add_powerline()
+        del try_add_powerline
+    endpython
     " }}}
 
 " endif
