@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -eu
-
 : "${WB_TOOLS:=$HOME/workspace/maxar/wb-team}"
 source "$WB_TOOLS/source_all.sh"
 

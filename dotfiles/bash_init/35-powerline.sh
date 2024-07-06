@@ -53,11 +53,30 @@ if [[ -d ${POWERLINE_ROOT-} ]]; then
         powerline-daemon -q || true
     fi
 
-    # export POWERLINE_BASH_CONTINUATION=1
-    # export POWERLINE_BASH_SELECT=1
+    export POWERLINE_BASH_CONTINUATION=1
+    export POWERLINE_BASH_SELECT=1
 
     # gross hack to skip slow, redundant checks
     POWERLINE_COMMAND=powerline
-    POWERLINE_CONFIG_COMMAND=true
-    . "${POWERLINE_ROOT?}/bindings/bash/powerline.sh"
+    POWERLINE_CONFIG_COMMAND=powerline-config
+    powerline-config() {
+        # shellcheck disable=2317
+        return 0
+    }
+
+    withflags +veux . "${POWERLINE_ROOT:?}/bindings/bash/powerline.sh"
+    unset -f powerline-config
+    # 1. I want to have `$SHLVL` in my prompt
+    # 2. as of (5.2.26.1), bash seems to have a bug such that when the last
+    #    command in a subshell is an external process, the SHLVL passed to it
+    #    is too small by one
+    # 3. powerline executes its process by itself in a subshell
+    # 4. so i'm patching the function wrapping it to add a final `return`
+    if definition=$(declare -f _powerline_prompt 2>/dev/null); then
+        if [[ ! $definition =~ $'\n'[[:space:]]+return[^$'\n']*$'\n'} ]]; then
+            definition="${definition/%'}'/'return ; }'}"
+            eval "$definition"
+        fi
+    fi
+    unset definition
 fi

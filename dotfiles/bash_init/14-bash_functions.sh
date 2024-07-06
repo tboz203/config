@@ -99,10 +99,31 @@ pstree() {
     command pstree -Uas "$@"
 }
 
-unalias which &> /dev/null || true
+unalias which &>/dev/null || true
 which() {
     {
         alias -p
         declare -f
     } | command which --tty-only --read-alias --read-alias --read-functions --show-dot --show-tilde "$@"
+}
+
+snip() {
+    if [[ $# -gt 1 || ${1-} == -* ]]; then
+        _err "Snip lines from the middle"
+        _err "Usage: ${FUNCNAME[0]} [COUNT]"
+        return 2
+    fi
+    local count=${1:-10}
+    local -a lines
+    readarray -t -n "$count" lines || return 1
+    each "${lines[@]}"
+    echo "..."
+    tail -n "$count"
+}
+
+make() {
+    bear intercept --force-wrapper -- make -j "$(nproc)" "$@"
+    local retval=$?
+    bear citnames --append
+    return $retval
 }

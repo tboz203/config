@@ -8,7 +8,7 @@
 _reset_progcomp=$(shopt -p progcomp)
 shopt -u progcomp
 
-source /etc/bashrc
+withflags +eu source /etc/bashrc
 
 eval "$_reset_progcomp"
 unset _reset_progcomp

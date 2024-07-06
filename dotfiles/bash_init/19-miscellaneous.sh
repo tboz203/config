@@ -1,5 +1,7 @@
 # miscellaneous bash profile cruft
 
+# [[ ${SHELL-} != /bin/bash ]] || SHELL=/usr/local/bin/bash
+
 [[ ${_SHELL_LOGIN-} ]] || return 0
 
 export MAILTO=thomas.bozeman@cgifederal.com
@@ -16,8 +18,6 @@ export DOCKER_BUILDKIT=1
 export LESS="-SRi"
 (less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
 export LESSCHARSET=utf-8
-
-[[ ${SHELL-} != /bin/bash ]] || SHELL=/usr/local/bin/bash
 
 setpath -e PYTHONSTARTUP ~/.pythonrc.py
 setpath -e REQUESTS_CA_BUNDLE /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
@@ -45,13 +45,4 @@ pathmungex BASH_COMPLETION_USER_DIR ~/.local/share/bash-completion
 
 pathmungex -e PYTHONPATH ~/.pymodules
 
-pathmungex -eb PKG_CONFIG_PATH \
-    ~/.local/lib/pkgconfig \
-    ~/.local/lib64/pkgconfig \
-    ~/.local/share/pkgconfig \
-    /usr/local/lib/pkgconfig \
-    /usr/local/lib64/pkgconfig \
-    /usr/local/share/pkgconfig \
-    /usr/lib/pkgconfig \
-    /usr/lib64/pkgconfig \
-    /usr/share/pkgconfig
+pathmungex -er PKG_CONFIG_PATH {~/.local,/usr/local,/usr}/{lib,lib64,share}/pkgconfig

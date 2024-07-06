@@ -1,6 +1,6 @@
 # homebrew configuration
 
-[[ ${_SHELL_LOGIN-} ]] || return 0
+# [[ ${_SHELL_LOGIN-} ]] || return 0
 
 # eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
@@ -13,8 +13,9 @@ export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
 
 pathmungex PATH "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin" "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin"
 
-pathmungex -Ee MANPATH "$HOMEBREW_PREFIX/share/man" ""
-pathmungex -e INFOPATH "$HOMEBREW_PREFIX/share/info"
+pathmungex -Eeb MANPATH "$HOMEBREW_PREFIX/share/man" ""
+pathmungex -Eeb INFOPATH "$HOMEBREW_PREFIX/share/info"
+# pathmungex -Eeb PKG_CONFIG_PATH "$HOMEBREW_PREFIX"/{lib,lib64,share}/pkgconfig
 
 # homebrew's version of bash completion is old and breaks things, but we do
 # want to try to load homebrew's installed completion scripts

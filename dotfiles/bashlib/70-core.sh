@@ -20,35 +20,28 @@ setpath() {
     local -a POSITIONAL
     local EXPORT RETURN HELP USAGE
     fixargs
-    while (($# > 0)); do
+    while (($#)); do
         local arg=$1 && shift
         case $arg in
-            -h | --help) HELP=1 && break ;;
-            -e | --export) EXPORT=1 ;;
-            -r | --return) RETURN=1 ;;
-            -*)
-                _err "Unknown option: \"$arg\""
-                USAGE=1
-                ;;
-            *) POSITIONAL+=("$arg") ;;
+        -h | --help) HELP=1 && break ;;
+        -e | --export) EXPORT=1 ;;
+        -r | --return) RETURN=1 ;;
+        -*)
+            _err "Unknown option: \"$arg\""
+            USAGE=1
+            ;;
+        *) POSITIONAL+=("$arg") ;;
         esac
     done
 
     set -- "${POSITIONAL[@]}"
 
-    if [[ ! ${HELP-} && $# != 2 ]]; then
-        USAGE=1
-        if (($# < 2)); then
-            _err "Not enough arguments"
-        else
-            _err "Too many arguments"
-        fi
-    fi
+    USAGE_TEXT="${FUNCNAME[0]} [-e|--export] [-r|--return] VAR PATH"
 
     if [[ ${HELP-} ]]; then
-        trim <<< "
+        trim <<<"
             Set a variable to a path if that path exists
-            Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH
+            Usage: $USAGE_TEXT
 
             Parameters:
             VAR     A variable name
@@ -60,9 +53,16 @@ setpath() {
             -h | --help     Print this message and halt
             "
         return 0
-    elif [[ ${USAGE-} ]]; then
-        echo >&2 "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
-        return 1
+    fi
+
+    if (($# != 2)); then
+        _err "Wrong number of arguments"
+        USAGE=1
+    fi
+
+    if [[ ${USAGE-} ]]; then
+        _err "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
+        return 2
     fi
 
     local name=$1 && shift
@@ -77,7 +77,7 @@ setpath() {
 }
 
 sourcepath() {
-    if [[ $# -ne 1 || $1 == -* ]]; then
+    if [[ $# -ne 1 || ${1-} == -* ]]; then
         echo "Source a script if it exists"
         echo "Usage: ${FUNCNAME[0]} PATH"
         return 2
@@ -109,7 +109,10 @@ showarray() {
     local arrayref_name
     for arrayref_name in "$@"; do
         local arrayref_attributes
-        arrayref_attributes=$(attributes "$arrayref_name")
+        if ! arrayref_attributes=$(attributes "$arrayref_name"); then
+            _warn "Could not determine attributes of $arrayref_name"
+            continue
+        fi
 
         if [[ $arrayref_attributes != *[aA]* ]]; then
             _warn "Not an array: $arrayref_name"
@@ -124,11 +127,11 @@ showarray() {
 
         get_array arrayref_values quoted "${arrayref_values[@]}"
 
-        local -a arrayref_kv_pairs
-        arrayzip arrayref_kv_pairs arrayref_keys arrayref_values
-
         println "$arrayref_name=("
-        printf "  [%s]=%s\n" "${arrayref_kv_pairs[@]}"
+        local idx
+        for ((idx = 0; idx < ${#arrayref_keys[@]}; idx++)); do
+            printf "  [%s]=%s\n" "${arrayref_keys[idx]}" "${arrayref_values[idx]}"
+        done
         println ")"
     done
 } && complete -A arrayvar showarray
@@ -136,37 +139,32 @@ showarray() {
 searchpath() {
     # find the first file in a path that matches a glob
     local -a GLOBS
-    local ALL HELP
+    local ALL HELP USAGE
     local LIST=PATH
     fixargs
-    while (($# > 0)); do
+    while (($#)); do
         local arg=$1 && shift
         case $arg in
-            -a | --all) ALL=1 ;;
-            -h | --help) HELP=0 ;;
-            -l | --list)
-                if [[ ${1-} && $1 != -* ]]; then
-                    LIST=$1 && shift
-                else
-                    _err "Argument required: \"$arg\""
-                    HELP=2
-                fi
-                ;;
-            -*)
-                _err "Unrecognized option: \"$arg\""
-                HELP=2
-                ;;
-            *) GLOBS+=("$arg") ;;
+        -a | --all) ALL=1 ;;
+        -h | --help) HELP=1 ;;
+        -l | --list)
+            if [[ ${1-} && $1 != -* ]]; then
+                LIST=$1 && shift
+            else
+                _err "Argument required: \"$arg\""
+                USAGE=1
+            fi
+            ;;
+        -*)
+            _err "Unrecognized option: \"$arg\""
+            USAGE=1
+            ;;
+        *) GLOBS+=("$arg") ;;
         esac
     done
 
-    if [[ -z $HELP && ${#GLOBS[@]} -lt 1 ]]; then
-        _err "Not enough arguments"
-        HELP=2
-    fi
-
-    if [[ $HELP ]]; then
-        dedent <<< "
+    if [[ ${HELP-} ]]; then
+        dedent <<<"
             Search PATH for a file matching a pattern
             Usage: ${FUNCNAME[0]} [--all] [--list LIST] GLOB [GLOB...]
 
@@ -188,7 +186,17 @@ searchpath() {
 
             Returns 2 for invalid arguments, 1 if no matches are found, and 0 otherwise.
             "
-        return $HELP
+        return 0
+    fi
+
+    if [[ ${#GLOBS[@]} -lt 1 ]]; then
+        _err "Not enough arguments"
+        USAGE=1
+    fi
+
+    if [[ ${USAGE-} ]]; then
+        _err "Usage: $USAGE_TEXT"
+        return 2
     fi
 
     if [[ -v $LIST ]]; then
@@ -205,7 +213,7 @@ searchpath() {
         for glob in "${GLOBS[@]}"; do
             if compgen -G "$dir/$glob"; then
                 retval=0
-                [[ $ALL ]] || break 2
+                [[ ${ALL-} ]] || break 2
             fi
         done
     done
@@ -216,24 +224,24 @@ searchparents() {
     local HELP ALL
     local -a GLOBS
     fixargs
-    while (($# > 0)); do
+    while (($#)); do
         local arg=$1 && shift
         case $arg in
-            -h | --help) HELP=0 ;;
-            -a | --all) ALL=1 ;;
-            -*)
-                _err "Unrecognized option: \"$arg\""
-                HELP=2
-                ;;
-            *)
-                GLOBS+=("$arg")
-                ;;
+        -h | --help) HELP=0 ;;
+        -a | --all) ALL=1 ;;
+        -*)
+            _err "Unrecognized option: \"$arg\""
+            HELP=2
+            ;;
+        *)
+            GLOBS+=("$arg")
+            ;;
         esac
     done
 
-    if [[ $HELP ]]; then
-        echo "Search from PWD to root directory for files matching patterns"
-        echo "usage: ${FUNCNAME[0]} [-a|--all] GLOB [GLOB...]"
+    if [[ ${HELP-} ]]; then
+        _err "Search from PWD to root directory for files matching patterns"
+        _err "Usage: ${FUNCNAME[0]} [-a|--all] GLOB..."
         return $HELP
     fi
 
@@ -244,7 +252,7 @@ searchparents() {
         for glob in "${GLOBS[@]}"; do
             if compgen -G "$dir/$glob"; then
                 retval=0
-                [[ $ALL ]] || break 2
+                [[ ${ALL-} ]] || break 2
             fi
         done
         local next=${dir%/*}
@@ -259,11 +267,11 @@ with_files() {
     # usage: with_files COMMAND [COMMAND_ARGS...] [-- FILES_ARGS...]
     # split our params into command and files_args
     local -a command files
-    while (($# > 0)); do
+    while (($#)); do
         local arg="$1" && shift
         case $arg in
-            --) break ;;
-            *) command+=("$arg") ;;
+        --) break ;;
+        *) command+=("$arg") ;;
         esac
     done
 
@@ -282,52 +290,52 @@ pathmungex() {
 
     _if_verbose _log "$* # called at $(called-at 1)"
 
-    local EXPORT EXISTS REPLACE HELP
+    local EXPORT EXISTS REPLACE DELETE HELP USAGE
     local CHECK=silent
     local WHERE=insert
     local MARKER="^/usr/"
     local -a POSITIONAL
 
     fixargs
-    while (($# > 0)); do
+    while (($#)); do
         local arg=$1 && shift
         case $arg in
-            -e | --export) EXPORT=1 ;;
-            -E | --exists) EXISTS=1 ;;
-            -b | --before) WHERE=before ;;
-            -a | --after) WHERE=after ;;
-            -f | --fail | --fatal) CHECK=fail ;;
-            -n | --no-check | --nocheck) CHECK=nocheck ;;
-            -r | --replace) REPLACE=1 ;;
-            -h | --help) HELP=0 ;;
-            -m | --marker)
-                if [[ ${1-} && ! ($1 == -*) ]]; then
-                    MARKER="$1" && shift
-                else
-                    _err "Argument required: \"$arg\""
-                    HELP=2
-                fi
-                ;;
-            -*)
-                _err "Unrecognized option: \"$arg\""
-                HELP=2
-                ;;
-            *) POSITIONAL+=("$arg") ;;
+        -e | --export) EXPORT=1 ;;
+        -E | --exists) EXISTS=1 ;;
+        -b | --before) WHERE=before ;;
+        -a | --after) WHERE=after ;;
+        -f | --fail | --fatal) CHECK=fail ;;
+        -n | --no-check | --nocheck) CHECK=nocheck ;;
+        -r | --replace) REPLACE=1 ;;
+        -d | --delete) DELETE=1 ;;
+        -h | --help) HELP=1 ;;
+        -m | --marker)
+            if [[ -v 1 && $1 != -* ]]; then
+                MARKER=$1 && shift
+            else
+                _err "Argument required: \"$arg\""
+                USAGE=1
+            fi
+            ;;
+        -*)
+            _err "Unrecognized option: \"$arg\""
+            USAGE=1
+            ;;
+        *) POSITIONAL+=("$arg") ;;
         esac
     done
 
-    if [[ -z $HELP && ${#POSITIONAL[@]} -lt 2 ]]; then
-        _err "Not enough arguments"
-        HELP=2
-    fi
+    set -- "${POSITIONAL[@]}"
 
-    if [[ $HELP ]]; then
-        dedent <<< "
+    local USAGE_TEXT="${FUNCNAME[0]} [OPTIONS] PATHVAR ENTRIES..."
+
+    if [[ ${HELP-} ]]; then
+        dedent <<<"
             Add entries to a PATH-like list variable, for each entry that exists on disk
             and is not already in the list. By default, entries are inserted in order into
             PATHVAR before the first entry that begins with '/usr/'.
 
-            Usage: ${FUNCNAME[0]} [OPTIONS] PATHVAR ENTRIES...
+            Usage: $USAGE_TEXT
 
             Parameters:
             PATHVAR     The name of a PATH-like list variable
@@ -347,7 +355,17 @@ pathmungex() {
             Optional Parameters:
             -m | --marker MARKER    A pattern to use to find the entry in PATHVAR where
                                     ENTRIES should be inserted"
-        return $HELP
+        return 0
+    fi
+
+    if (($# < 2)); then
+        _err "Not enough arguments"
+        USAGE=1
+    fi
+
+    if [[ ${USAGE-} ]]; then
+        _err "Usage: $USAGE_TEXT"
+        return 2
     fi
 
     local PATHVAR="${POSITIONAL[0]}"
@@ -356,6 +374,7 @@ pathmungex() {
     valid_name "${PATHVAR-}" || throw "Not a valid name: \"${PATHVAR-}\""
 
     if [[ ${EXISTS-} && ! -v $PATHVAR ]]; then
+        _if_verbose _log "PATHVAR $PATHVAR does not exist; returning"
         return 0
     fi
 
@@ -365,24 +384,13 @@ pathmungex() {
 
     # In PATHVAR, `` represents an empty list, and `:` represents a list with a
     # single null element. In PATHLIST and ADDITIONS, `:` represents an empty
-    # list, and `::` represents a list with a single null element.
+    # list, and `::` represents a list with a single null element. otherwise,
+    # PATHLIST == :PATHVAR:
 
-    local PATHLIST
-    case ${!PATHVAR-} in
-        "") PATHLIST=: ;;
-        :) PATHLIST=:: ;;
-        *) PATHLIST=:${!PATHVAR}: ;;
-    esac
-    local ADDITIONS=:
+    local PATHLIST ADDITIONS=:
+    wraplist PATHLIST "${!PATHVAR-}"
 
-    # if [[ ${REPLACE-} ]]; then
-    #     # replace runs of three or more colons (representing two or more adjacent
-    #     # null entries) with a pair of colons (representing a single null entry).
-    #     # This allows us to correctly remove null entries
-    #     PATHLIST=${PATHLIST//::+(:)/::}
-    # fi
-
-    _if_debug inspect_var EXPORT HELP CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" PATHLIST ENTRIES
+    _if_debug inspect_var EXPORT CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" PATHLIST ENTRIES
 
     local entry
     for entry in "${ENTRIES[@]}"; do
@@ -398,13 +406,18 @@ pathmungex() {
             local suffix=
             [[ -z $match ]] || suffix="?(/)"
 
-            if [[ ${REPLACE-} ]]; then
+            if [[ ${REPLACE-} || ${DELETE-} ]]; then
                 # replace `:$entry:` with `:`
                 PATHLIST=${PATHLIST//:"$match"$suffix:/:}
             else
                 # skip this entry if it already exists in the list
                 [[ ${PATHLIST} != *:"$match"$suffix:* ]] || continue
             fi
+        fi
+
+        if [[ ${DELETE-} ]]; then
+            # no need to check entry or track additions
+            continue
         fi
 
         # do any entry checking
@@ -426,48 +439,36 @@ pathmungex() {
         ADDITIONS+="$entry:"
     done
 
-    # nothing to add?
-    [[ $ADDITIONS != : ]] || return 0
-
-    if [[ $WHERE == insert ]]; then
-        # have to split PATHLIST
-        local -a PATHARRAY FRONT BACK
-        PATHLIST=${PATHLIST%:}
-        PATHLIST=${PATHLIST#:}
-        from_list PATHARRAY "$PATHLIST"
-
-        for entry in "${PATHARRAY[@]}"; do
-            [[ ! $entry =~ $MARKER ]] || break
-            FRONT+=("$entry")
-            PATHARRAY=("${PATHARRAY[@]:1}")
-        done
-
-        BACK=("${PATHARRAY[@]}")
-
-        ADDITIONS=${ADDITIONS%:}
-        ADDITIONS=${ADDITIONS#:}
-
-        to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
+    if [[ ${DELETE-} ]]; then
+        unwraplist "$PATHVAR" "$PATHLIST"
+    elif [[ $ADDITIONS == : ]]; then
+        _if_verbose _log "Nothing to add"
     else
-        if [[ $WHERE == before ]]; then
-            PATHLIST=${ADDITIONS%:}${PATHLIST}
-        elif [[ $WHERE == after ]]; then
-            PATHLIST=${PATHLIST%:}${ADDITIONS}
-        else
-            throw "invalid WHERE ($WHERE)"
-        fi
+        case $WHERE in
+        before) unwraplist "$PATHVAR" "${ADDITIONS%:}${PATHLIST}" ;;
+        after) unwraplist "$PATHVAR" "${PATHLIST%:}${ADDITIONS}" ;;
+        insert)
+            # have to split PATHLIST to insert our additions
 
-        case $PATHLIST in
-            # PATHLIST is empty
-            :) eval "$PATHVAR=" ;;
-            # PATHLIST is a single null entry
-            ::) eval "$PATHVAR=:" ;;
-            # PATHLIST has a leading & a trailing separator
-            *)
-                PATHLIST=${PATHLIST%:}
-                PATHLIST=${PATHLIST#:}
-                eval "$PATHVAR=\"$PATHLIST\""
-                ;;
+            local -a PATHARRAY FRONT BACK
+            ADDITIONS=${ADDITIONS%:} && ADDITIONS=${ADDITIONS#:}
+            PATHLIST=${PATHLIST%:} && PATHLIST=${PATHLIST#:}
+            from_list PATHARRAY "$PATHLIST"
+
+            # find the index in PATHARRAY of the first element that matches our marker
+            local idx
+            for ((idx = 0; idx < ${#PATHARRAY[@]}; idx++)); do
+                [[ ${PATHARRAY[idx]} =~ $MARKER ]] && break || true
+            done
+
+            # split PATHARRAY before that index
+            FRONT=("${PATHARRAY[@]::idx}")
+            BACK=("${PATHARRAY[@]:idx}")
+
+            # recombine our arrays, with our additions list between them
+            to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
+            ;;
+        *) throw "invalid WHERE ($WHERE)" ;;
         esac
     fi
 
@@ -498,21 +499,21 @@ flash_message() {
     # briefly print a message to the screen
     local HELP message sleep=1
     fixargs
-    while (($# > 0)); do
+    while (($#)); do
         local arg="$1" && shift
         case $arg in
-            -s | --sleep) sleep="${1:?$arg: argument required}" && shift ;;
-            -h | --help) HELP=0 ;;
-            -*)
-                _err "Unrecognized option: \"$arg\""
-                HELP=2
-                ;;
-            *) message+="$arg " ;;
+        -s | --sleep) sleep="${1:?$arg: argument required}" && shift ;;
+        -h | --help) HELP=0 ;;
+        -*)
+            _err "Unrecognized option: \"$arg\""
+            HELP=2
+            ;;
+        *) message+="$arg " ;;
         esac
     done
 
-    if [[ $HELP ]]; then
-        dedent <<< "
+    if [[ ${HELP-} ]]; then
+        dedent <<<"
             Briefly print a message to the screen.
 
             Usage: ${FUNCNAME[0]} [-s|--sleep SLEEP] MESSAGE...
@@ -564,7 +565,7 @@ complete -F _complete-pkg-config-names pkg-config-vars
 # loud()
 # {
 #     fixargs
-#     while (($# > 0)); do
+#     while (($#)); do
 #         local arg="$1" && shift
 #         case $arg in
 #             -s | --sleep) sleep="$1" && shift ;;
@@ -581,12 +582,12 @@ filetype() {
     local cmd
     for cmd in "$@"; do
         case $(type -t "$cmd") in
-            alias) ;;
-            keyword) ;;
-            function) ;;
-            builtin) ;;
-            file) ;;
-            *) ;;
+        alias) ;;
+        keyword) ;;
+        function) ;;
+        builtin) ;;
+        file) ;;
+        *) ;;
         esac
     done
 } && complete -c filetype

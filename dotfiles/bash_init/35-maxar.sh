@@ -12,7 +12,6 @@ else
 fi
 
 awsCreds2() {
-
     local -a POSITIONAL
     local HELP USAGE FORCE ROOT FILENAME
     while (($# > 0)); do
@@ -123,14 +122,14 @@ awsCreds2() {
                 if [[ -v FORCE ]]; then
                     # if we were told to force reauthentication, continue
                     true
-                elif [[ ! (-v AWS_SESSION_TOKEN && -v AWS_CREDENTIAL_EXPIRATION) ]]; then
+                elif [[ ! -v AWS_SESSION_TOKEN ]]; then
                     # otherwise, if our file does not set required credential variables, continue to reauthentication
                     _log "Cached credentials appear invalid: $FILENAME"
-                elif [[ ${AWS_CREDENTIAL_EXPIRATION:?} < $(date --iso-8601=seconds) ]]; then
+                elif [[ -v AWS_CREDENTIAL_EXPIRATION && $AWS_CREDENTIAL_EXPIRATION < $(date --iso-8601=seconds) ]]; then
                     # otherwise, if our file's credentials appear to be expired, continue to reauthentication
                     _log "Cached credentials appear expired: $FILENAME"
-                else
-                    # otherwise, return success
+                elif aws s3 ls &> /dev/null; then
+                    # otherwise, if we can successfully list s3 buckets, return success
                     _log "Cached credentials appear valid (use --force to force reauthentication)"
                     _log "Assumed AWS profile: ${AWS_OKTA_PROFILE:?} (${AWS_REGION:?}): ${AWS_PROFILE:?}"
                     return 0
@@ -166,18 +165,30 @@ awsCreds2() {
 
     _log "Caching credentials to $FILENAME"
 
-    # write file
-    dedent > "$FILENAME" <<< "
-        export AWS_OKTA_PROFILE="$PROFILE"
-        export AWS_DEFAULT_PROFILE="$AWS_PROFILE"
-        export AWS_PROFILE="$AWS_PROFILE"
-        export AWS_REGION="$REGION"
-        export AWS_ACCESS_KEY_ID="$(jq -r '.credentials.aws_access_key_id' <<< "$JSON_RESPONSE")"
-        export AWS_SECRET_ACCESS_KEY="$(jq -r '.credentials.aws_secret_access_key' <<< "$JSON_RESPONSE")"
-        export AWS_SESSION_TOKEN="$(jq -r '.credentials.aws_session_token' <<< "$JSON_RESPONSE")"
-        export AWS_SECURITY_TOKEN="$(jq -r '.credentials.aws_security_token' <<< "$JSON_RESPONSE")"
-        export AWS_CREDENTIAL_EXPIRATION="$(jq -r '.credentials.expiration' <<< "$JSON_RESPONSE")"
-        "
+    jq -r --arg okta_profile "$PROFILE" --arg region "$REGION" '
+        {
+            "aws_profile": .profile.name,
+            "aws_okta_profile": $okta_profile,
+            "aws_region": $region,
+            "aws_credential_expiration": .credentials.expiration
+        } + ( .credentials | del(.expiration) )
+        | to_entries[]
+        | .key |= ascii_upcase
+        | .value |= @sh
+        | "export \(.key)=\(.value)"
+        ' <<< "$JSON_RESPONSE" > "$FILENAME"
+
+    # # write file
+    # dedent > "$FILENAME" <<< "
+    #     export AWS_OKTA_PROFILE="$PROFILE"
+    #     export AWS_PROFILE="$AWS_PROFILE"
+    #     export AWS_REGION="$REGION"
+    #     export AWS_ACCESS_KEY_ID="$(jq -r '.credentials.aws_access_key_id' <<< "$JSON_RESPONSE")"
+    #     export AWS_SECRET_ACCESS_KEY="$(jq -r '.credentials.aws_secret_access_key' <<< "$JSON_RESPONSE")"
+    #     export AWS_SESSION_TOKEN="$(jq -r '.credentials.aws_session_token' <<< "$JSON_RESPONSE")"
+    #     export AWS_SECURITY_TOKEN="$(jq -r '.credentials.aws_security_token' <<< "$JSON_RESPONSE")"
+    #     export AWS_CREDENTIAL_EXPIRATION="$(jq -r '.credentials.expiration' <<< "$JSON_RESPONSE")"
+    #     "
 
     chmod 600 "$FILENAME"
 

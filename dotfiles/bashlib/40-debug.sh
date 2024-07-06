@@ -3,8 +3,8 @@
 # inspired by https://flokoe.github.io/bash-hackers-wiki/scripting/debuggingtips/#making-xtrace-more-useful
 export PS4='+\011\e[02m${EPOCHREALTIME:+[$EPOCHREALTIME] }(${BASH_SOURCE:-main}:$LINENO${FUNCNAME:+:$FUNCNAME}): \e[0m'
 
-alias _if_verbose='#'
-alias _if_debug='#'
+alias _if_verbose=': #'
+alias _if_debug=': #'
 case ${_BASHLIB_LOGLEVEL-} in
     trace) ;&
     debug) alias _if_debug=' ' ;&
@@ -36,20 +36,18 @@ replace_exec() {
     }
 }
 
-# print_stack()
-# {
-#     local i=0
-#     # println "$LINENO ${FUNCNAME[0]} ${BASH_SOURCE[0]}"
-#     while caller $i; do ((i++)); done
-# }
-#
-# stack()
-# {
-#     local line func file
-#     print_stack | while read -r line func file; do
-#         println "$func ($file:$line)"
-#     done
-# }
+print_stack() {
+    local i=0
+    # println "$LINENO ${FUNCNAME[0]} ${BASH_SOURCE[0]}"
+    while caller $i; do ((i++)); done
+}
+
+stack() {
+    local line func file
+    print_stack | while read -r line func file; do
+        println "$func ($file:$line)"
+    done
+}
 
 called-at() {
     # like `caller` but with nicer formatting
@@ -99,19 +97,23 @@ stacktrace() {
     done
     shift $((OPTIND - 1))
 
-    if [[ ${USAGE-} ]]; then
-        echo "Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]"
-        return 1
-    elif [[ ${HELP-} ]]; then
+    local USAGE_TEXT="${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]"
+
+    if [[ ${HELP-} ]]; then
         dedent <<< "
             Print a bash function stacktrace
-            Usage: ${FUNCNAME[0]} [-h] [-c CONTEXT] [-b BOTTOM] [-t TOP]
+            Usage: $USAGE_TEXT
 
             Options:
             -c CONTEXT      print CONTEXT number of lines of context (currently $context)
             -b BOTTOM       trim BOTTOM frames from the bottom of the stack (currently $bottom)
             -t TOP          trim TOP frames from the top of the stack (currently $top)"
-        return $HELP
+        return 0
+    fi
+
+    if [[ ${USAGE-} ]]; then
+        echo "Usage: $USAGE_TEXT"
+        return 2
     fi
 
     ((bottom = ${#BASH_SOURCE[@]} - 1 - bottom))
@@ -138,13 +140,21 @@ _traceback() {
     local command=$4
     local retval=$5
 
-    stacktrace -t 2
+    # stacktrace -t 2
+    stacktrace
+    inspect_var filename funcname lineno command retval
+    inspect_var BASH_SOURCE FUNCNAME BASH_LINENO
 
-    repeat '=' 20
-
-    showframe "$filename" "$funcname" "$lineno"
+    if [[ $lineno == 1 ]]; then
+        # called from `trap`
+        trap - ERR EXIT
+    else
+        repeat '=' 20
+        showframe "$filename" "$funcname" "$lineno"
+    fi
 
     echo ">> $command ($retval)"
+
     pause
     return $last_status
 } && alias traceback='_traceback "${BASH_SOURCE-}" "${FUNCNAME-}" "$LINENO" "$BASH_COMMAND" "$?"'

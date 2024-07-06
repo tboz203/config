@@ -1,38 +1,49 @@
 {
-	"cursor_space": 50,
-	"segments": {
-		"left": [
-			{
-				"function": "powerline.segments.shell.mode"
-			},
-			{
-				"function": "powerline.segments.common.env.user",
-				"priority": 30
-			},
-			{
-				"function": "powerline.segments.common.env.virtualenv",
-				"priority": 50
-			},
-			{
-				"function": "powerline.segments.shell.cwd",
-				"priority": 10
-			},
-			{
-				"function": "powerline.segments.common.vcs.stash",
-				"priority": 50
-			},
-			{
-				"function": "powerline.segments.common.vcs.branch",
-				"priority": 40
-			},
-			{
-				"function": "powerline.segments.shell.jobnum",
-				"priority": 20
-			},
-			{
-				"function": "powerline.segments.shell.last_pipe_status",
-				"priority": 10
-			}
-		]
-	}
+  "cursor_space": 50,
+  "segments": {
+    "left": [
+      {
+        "function": "powerline.segments.shell.mode",
+        "priority": 10
+      },
+      {
+        "function": "powerline.segments.common.env.environment",
+        "priority": 30,
+        "args": {
+          "variable": "SHLVL"
+        }
+      },
+      {
+        "function": "powerline.segments.common.env.user",
+        "priority": 10,
+        "args": {
+          "hide_user": "th026106"
+        }
+      },
+      {
+        "function": "powerline.segments.common.env.virtualenv",
+        "priority": 40
+      },
+      {
+        "function": "powerline.segments.shell.cwd",
+        "priority": 10
+      },
+      {
+        "function": "powerline.segments.common.vcs.stash",
+        "priority": 50
+      },
+      {
+        "function": "powerline.segments.common.vcs.branch",
+        "priority": 40
+      },
+      {
+        "function": "powerline.segments.shell.jobnum",
+        "priority": 20
+      },
+      {
+        "function": "powerline.segments.shell.last_pipe_status",
+        "priority": 10
+      }
+    ]
+  }
 }

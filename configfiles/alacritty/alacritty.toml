@@ -1,0 +1,46 @@
+[window]
+startup_mode = "Maximized"
+
+[env]
+TURBO_MODE = "1"
+
+[font]
+size = 8.0
+
+[font.normal]
+# NOTE: fonts live in ~/.local/share/fonts,
+# font config lives in ~/.config/fontconfig/fonts.conf
+
+# XXX 😀😃😄😁🙃😗🤪🤑🤐😏😒🙄🤯🤠😕🙁 XXX
+
+family = "JetBrains Mono with Fallback"
+style = "Retina"
+
+[colors]
+draw_bold_text_with_bright_colors = true
+
+[colors.bright]
+black = "#444444"
+blue = "#7aa6da"
+cyan = "#70c0b1"
+green = "#49fa4a"
+magenta = "#c397d8"
+red = "#e56e73"
+white = "#eaeaea"
+yellow = "#ffff67"
+
+[colors.normal]
+black = "#1d1f21"
+blue = "#6192be"
+cyan = "#4abeb7"
+green = "#72bd68"
+magenta = "#a254ab"
+red = "#cc5555"
+white = "#c5c8c6"
+yellow = "#e8e268"
+
+[colors.primary]
+background = "#1d1f21"
+bright_foreground = "#eaeaea"
+dim_foreground = "#828482"
+foreground = "#c5c8c6"

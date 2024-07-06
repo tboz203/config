@@ -7,6 +7,54 @@ inlist() {
     [[ :$2: == *:"$1":* ]]
 }
 
+wraplist() {
+    # Convert an unwrapped list (like $PATH) to a wrapped list (like :$PATH:)
+    if [[ $# != 2 || ${1-} == -* ]]; then
+        _err "Convert an unwrapped list to a wrapped list"
+        _err "Usage: ${FUNCNAME[0]} NAME LIST"
+        return 2
+    fi
+
+    local name=$1 && shift
+    local list=$1 && shift
+
+    valid_name "$name" || throw "Not a valid name: \"$name\""
+
+    case $list in
+    "") eval "$name=:" ;;
+    :) eval "$name=::" ;;
+    *) eval "$name=:$list:" ;;
+    esac
+}
+
+unwraplist() {
+    # Convert a wrapped list (like :$PATH:) to an unwrapped list (like $PATH)
+    if [[ $# != 2 || ${1-} == -* ]]; then
+        _err "Convert a wrapped list to an unwrapped list"
+        _err "Usage: ${FUNCNAME[0]} NAME LIST"
+        return 2
+    fi
+
+    local name=$1 && shift
+    local list=$1 && shift
+
+    valid_name "$name" || throw "Not a valid name: \"$name\""
+
+    case $list in
+    # empty list
+    :) eval "$name=" ;;
+    # list with a single null entry
+    ::) eval "$name=:" ;;
+    # any other wrapped list
+    :*:)
+        list=${list%:} && list=${list#:}
+        eval "$name='$list'"
+        ;;
+    # something else
+    *) throw "Invalid list: \"$list\"" ;;
+    esac
+}
+
 each() {
     # print each argument on a separate line
     # usage printeach [ELEMENT...]
@@ -72,7 +120,7 @@ valid_name() {
     # test whether a word is an acceptable variable name
     # usage: valid_name NAME...
     (($# >= 1)) || throw "Not enough arguments"
-    while (($# >= 1)); do
+    while (($#)); do
         [[ $1 == [a-zA-Z_]*([a-zA-Z0-9_]) ]] || return 1
         shift
     done
@@ -82,7 +130,7 @@ declared() {
     # like [[ -v NAME ]], but for declarations
     # usage: declared NAME...
     (($# >= 1)) || throw "Not enough arguments"
-    declare -p -- "$@" &> /dev/null
+    declare -p -- "$@" &>/dev/null
 } && complete -v declared
 
 attributes() {
@@ -128,11 +176,11 @@ _get_array() {
     # execute a command & read lines into an array
     # usage: get_array [READARRAY_ARGS...] ARRAY_NAME -- COMMAND [COMMAND_ARGS...]
     local -a readargs commandargs
-    while (($# > 0)); do
+    while (($#)); do
         local arg=$1 && shift
         case $arg in
-            --) commandargs=("$@") && break ;;
-            *) readargs+=("$arg") ;;
+        --) commandargs=("$@") && break ;;
+        *) readargs+=("$arg") ;;
         esac
     done
 
@@ -148,7 +196,7 @@ _get_array() {
     fulltext=$("${commandargs[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
 
     # map the array
-    readarray -t "${readargs[@]}" <<< "$fulltext"
+    readarray -t "${readargs[@]}" <<<"$fulltext"
 }
 
 get_array() {
@@ -166,13 +214,13 @@ get_array() {
     fulltext=$("${command[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
 
     # read lines into our array
-    readarray -t "$arrayref" <<< "$fulltext"
+    readarray -t "$arrayref" <<<"$fulltext"
 }
 
 from_list() {
-    if [[ $# -ne 2 || $1 == -* ]]; then
-        println "Convert a colon-separated list to a Bash array variable"
-        println "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
+    if [[ $# -ne 2 || ${1-} == -* ]]; then
+        _err "Convert a colon-separated list to a Bash array variable"
+        _err "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
         return 2
     fi
 
@@ -184,20 +232,20 @@ from_list() {
     declared "$arrayref" || declare -ga "$arrayref" || return 1
 
     case $list in
-        "") eval "$arrayref=()" ;;
-        :) eval "$arrayref=('')" ;;
-        *)
-            # read into arrayref, splitting on `:`
-            # (seems to use terminator semantics, so add an extra final separator)
-            IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
-            ;;
+    "") eval "$arrayref=()" ;;
+    :) eval "$arrayref=('')" ;;
+    *)
+        # read into arrayref, splitting on `:`
+        # (seems to use terminator semantics, so add an extra final separator)
+        IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
+        ;;
     esac
 }
 
 to_list() {
-    if [[ $# -lt 1 || $1 == -* ]]; then
-        println "Create a colon-separated list from zero or more elements"
-        println "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
+    if [[ $# -lt 1 || ${1-} == -* ]]; then
+        _err "Create a colon-separated list from zero or more elements"
+        _err "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
         return 2
     fi
 
@@ -307,26 +355,26 @@ _fixargs() {
     local -a arguments
     while (($#)); do
         case $1 in
-            --)
-                # halt argument parsing; take all remaining args verbatim
-                arguments+=("$@") && break
-                ;;
-            -*=*)
-                # split --var=value pairs, preserving whitespace, and re-consider
-                set -- "${1%%=*}" "${1#*=}" "${@:2}"
-                ;;
-            -[^-]?*)
-                # split `-xyz` flags into `-x -y -z`, and re-consider
-                local split=()
-                for ((i = 1; i < ${#1}; i++)); do
-                    split+=("-${1:$i:1}")
-                done
-                set -- "${split[@]}" "${@:2}"
-                ;;
-            *)
-                # others unmodified
-                arguments+=("$1") && shift
-                ;;
+        --)
+            # halt argument parsing; take all remaining args verbatim
+            arguments+=("$@") && break
+            ;;
+        -*=*)
+            # split --var=value pairs, preserving whitespace, and re-consider
+            set -- "${1%%=*}" "${1#*=}" "${@:2}"
+            ;;
+        -[^-]?*)
+            # split `-xyz` flags into `-x -y -z`, and re-consider
+            local split=()
+            for ((i = 1; i < ${#1}; i++)); do
+                split+=("-${1:$i:1}")
+            done
+            set -- "${split[@]}" "${@:2}"
+            ;;
+        *)
+            # others unmodified
+            arguments+=("$1") && shift
+            ;;
         esac
     done
 
@@ -364,7 +412,7 @@ file_context() {
     declared "${arrayref:?}" || declare -ga "${arrayref:?}"
     eval "${arrayref:?}=()"
 
-    mapfile -t -O $start -n $count -s $((start - 1)) "${arrayref:?}" < "$filename" &> /dev/null
+    mapfile -t -O $start -n $count -s $((start - 1)) "${arrayref:?}" <"$filename" &>/dev/null
 }
 
 showframe() {
@@ -406,20 +454,20 @@ setopts() {
     # set shell options from a $SHELLOPTS-like list
     local STORE HELP USAGE
     local -a POSITIONAL
-    while (($# > 0)); do
+    while (($#)); do
         local arg=$1 && shift
         case $arg in
-            -h | --help) HELP=1 ;;
-            -s | --store)
-                if [[ -v 1 && $1 != @(-*|*:*) ]]; then
-                    STORE=$1 && shift
-                else
-                    _err "Argument required: \"$arg\""
-                    USAGE=1
-                fi
-                ;;
-            -*) _err "Unrecognized option: \"$arg\"" && USAGE=1 ;;
-            *) POSITIONAL+=("$arg") ;;
+        -h | --help) HELP=1 ;;
+        -s | --store)
+            if [[ -v 1 && $1 != @(-*|*:*) ]]; then
+                STORE=$1 && shift
+            else
+                _err "Argument required: \"$arg\""
+                USAGE=1
+            fi
+            ;;
+        -*) _err "Unrecognized option: \"$arg\"" && USAGE=1 ;;
+        *) POSITIONAL+=("$arg") ;;
         esac
     done
 
@@ -427,8 +475,8 @@ setopts() {
 
     local USAGE_TEXT="${FUNCNAME[0]} [--help] [--store NAME] OPTS_LIST"
 
-    if [[ -v HELP ]]; then
-        dedent <<< "
+    if [[ ${HELP-} ]]; then
+        dedent <<<"
             ${FUNCNAME[0]}: set shell options from a \$SHELLOPTS-like list
             Usage: ${USAGE_TEXT}
 
@@ -452,14 +500,17 @@ setopts() {
         USAGE=1
     fi
 
-    if [[ -v STORE ]] && ! valid_name "$STORE"; then
+    if [[ ${STORE-} ]] && ! valid_name "$STORE"; then
         _err "Invalid name: \"$STORE\""
         USAGE=1
     fi
 
-    [[ -v USAGE ]] && throw "Usage: $USAGE_TEXT"
+    if [[ ${USAGE-} ]]; then
+        _err "Usage: $USAGE_TEXT"
+        return 2
+    fi
 
-    if [[ -v STORE ]]; then
+    if [[ ${STORE-} ]]; then
         eval "$STORE=$SHELLOPTS"
     fi
 
