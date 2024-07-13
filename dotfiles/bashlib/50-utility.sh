@@ -588,3 +588,8 @@ arrayzip() {
 
     eval "$destref"'=("${dest[@]}")'
 }
+
+patchfunc() {
+    # modify a function
+    throw "Not Implemented"
+}

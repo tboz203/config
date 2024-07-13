@@ -4,8 +4,8 @@ declare -a POSITIONAL
 while (($#)); do
     arg=$1 && shift
     case $arg in
-        -*) HELP=1 ;;
-        *) POSITIONAL+=("$arg") ;;
+    -*) HELP=1 ;;
+    *) POSITIONAL+=("$arg") ;;
     esac
 done
 
@@ -17,4 +17,19 @@ if [[ ${HELP-} ]]; then
     return 1
 fi
 
-exec sed -r 's/\x1b\[[0-9]+(;[0-9]+)*m//g' "$@"
+PATTERNS=(
+    # color and graphics directives
+    -e 's/\x1b\[[0-9]*(;[0-9]*)*m//g'
+
+    # cursor movement
+    -e 's/\x1b\[[0-9]*[A-G]//g'
+    -e 's/\x1b\[[0-9]+;[0-9]+H//g'
+
+    # erase
+    -e 's/\x1b\[[0-9]*[JK]//g'
+
+    # and carriage return...
+    -e 's/\x0d//g'
+)
+
+exec sed -r "${PATTERNS[@]}" "$@"

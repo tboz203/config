@@ -72,11 +72,20 @@ if [[ -d ${POWERLINE_ROOT-} ]]; then
     #    is too small by one
     # 3. powerline executes its process by itself in a subshell
     # 4. so i'm patching the function wrapping it to add a final `return`
-    if definition=$(declare -f _powerline_prompt 2>/dev/null); then
-        if [[ ! $definition =~ $'\n'[[:space:]]+return[^$'\n']*$'\n'} ]]; then
-            definition="${definition/%'}'/'return ; }'}"
-            eval "$definition"
+
+    declare -a func_lines
+    # if we succeed in reading the lines of the function `_powerline_prompt` ...
+    if get_array func_lines declare -f _powerline_prompt 2>/dev/null; then
+        # and the last statement does not match `/ *return( .*)?$/` ...
+        if [[ ! ${func_lines[-2]} =~ ^\ *return( .*)?$ ]]; then
+            # remove the final closing brace
+            unset 'func_lines[-1]'
+            # add a `return` statement
+            func_lines=("${func_lines[@]}" "return" "}")
+            # and re-evaluate the reconstructed function
+            eval "$(each "${func_lines[@]}")"
         fi
     fi
-    unset definition
+    unset func_lines
+
 fi

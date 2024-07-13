@@ -3,7 +3,6 @@
 import getpass
 import inspect
 import json
-import math
 import os
 import shlex
 import subprocess
@@ -13,6 +12,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import reduce
 from itertools import zip_longest
+from math import ceil, floor, log2, log10
 from pprint import pprint
 from shutil import get_terminal_size
 from textwrap import dedent
@@ -174,7 +174,7 @@ def columnize(alist, yfirst=True, width=None):
 
     def get_columns(alist, numcol):
         if yfirst:
-            height = math.ceil(len(alist) / numcol)
+            height = ceil(len(alist) / numcol)
             columns = [alist[(i * height) : ((i + 1) * height)] for i in range(numcol)]
         else:
             columns = [alist[i::numcol] for i in range(numcol)]
@@ -308,7 +308,7 @@ def just_timeit(stmt, **kwargs):
     min_r, avg_r, max_r = min(results), sum(results) / len(results), max(results)
 
     summary = f"""
-        iterations: {count} (~ 2**{round(math.log(count, 2))})
+        iterations: {count} (~ 2**{round(log2(count))})
         min: {min_r:.3f} ({format_seconds(min_r / count)})
         avg: {avg_r:.3f} ({format_seconds(avg_r / count)})
         max: {max_r:.3f} ({format_seconds(max_r / count)})
@@ -372,3 +372,7 @@ class LoggingContext:
             self.logger.removeHandler(self.handler)
         if self.handler and self.close:
             self.handler.close()
+
+
+def round_sig(x, sig=3):
+    return 0 if x == 0 else round(x, sig - int(floor(log10(abs(x)))) - 1)
