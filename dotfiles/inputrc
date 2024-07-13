@@ -19,3 +19,8 @@ set editing-mode vi
 # $if Bash
 #     Tab complete
 # $endif
+
+# ---
+
+"\C-p": "bad "
+"\C-n": "bad "

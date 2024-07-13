@@ -6,7 +6,7 @@
 	ui = true
 [core]
 	editor = vim
-	autocrlf = true
+	autocrlf = false
 	excludesfile = ~/.gitignore
 	pager = less
 [merge]

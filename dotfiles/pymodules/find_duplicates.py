@@ -19,6 +19,9 @@ logger = logging.getLogger(my_name)
 
 
 class Spinner:
+    """A 'spinner' tui element."""
+    # not clear why its a generator, but w/e
+
     spinner_chars = ['/', '-', '\\', '|']
 
     def __init__(self, count: int, increment: int = 1, width: int = 40):
@@ -47,14 +50,17 @@ def hash_file(name: str | Path) -> str:
 
 
 def main():
+    """Find (and optionally remove) duplicate files."""
+
+    # parse args
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", metavar="FILES", nargs="+", type=Path, help="Files to be checked for duplicates")
     parser.add_argument("--rm", action="store_true", help="Delete any file which is a duplicate of a previous file")
     parser.add_argument("-r", "--recurse", action="store_true", help="Search paths recursively")
     args = parser.parse_args()
 
+    # collect file paths
     file_list: list[Path] = []
-
     for path in args.paths:
         if path.is_file():
             file_list.append(path)
