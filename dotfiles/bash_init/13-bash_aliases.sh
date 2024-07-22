@@ -21,6 +21,9 @@ alias lla='ll -A'
 # alias lt='ls --sort=time'
 # alias llt='ll --sort=time'
 alias lt='tree -pugshD -l --metafirst --dirsfirst --noreport --sort=version --filelimit=50'
+if [[ $(tree --help 2>&1) == *'--gitignore'* ]]; then
+    BASH_ALIASES['lt']+=' --gitignore'
+fi
 alias lta='lt -a'
 alias l.='la -I "[^.]*"'
 alias ll.='lla -I "[^.]*"'
@@ -60,9 +63,6 @@ alias xclip='xclip -selection clipboard'
 alias http='http --ignore-stdin'
 alias ncdu='ncdu --exclude-caches --exclude=node_modules --exclude=cache --exclude=.cache --exclude=venv --exclude=tmp'
 alias help2man='help2man -N -L $LC_ALL'
-if [[ $(tree --help 2>&1) == *'--gitignore'* ]]; then
-    BASH_ALIASES['tree']+=' --gitignore'
-fi
 alias info='info --vi-keys'
 
 # editing rc files

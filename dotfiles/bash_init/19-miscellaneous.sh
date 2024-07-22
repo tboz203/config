@@ -14,6 +14,7 @@ export ANSIBLE_NOCOWS=1
 export PIPENV_VENV_IN_PROJECT=1
 export DOCKER_HIDE_LEGACY_COMMANDS=1
 export DOCKER_BUILDKIT=1
+export IPYTHONDIR=~/.config/ipython
 
 export LESS="-SRi"
 (less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
