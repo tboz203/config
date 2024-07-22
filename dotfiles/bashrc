@@ -30,6 +30,7 @@ export LANG=en_US.UTF-8
 export PIPENV_VENV_IN_PROJECT=1
 export DOCKER_HIDE_LEGACY_COMMANDS=1
 export DOCKER_BUILDKIT=1
+export IPYTHONDIR=~/.config/ipython
 export EDITOR=vim
 export PAGER=less
 

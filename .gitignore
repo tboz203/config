@@ -8,5 +8,7 @@ __pycache__
 /dotfiles/vim/plugged
 /dotfiles/vim/swap
 
+/configfiles/ipython/*/history.sqlite
+
 !.gitignore
 !CACHEDIR.TAG
