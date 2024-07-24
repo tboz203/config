@@ -2,3 +2,6 @@
 
 # go directly to bashrc
 [[ -f ~/.bashrc ]] && . ~/.bashrc
+
+# Added by `rbenv init` on Sun Jul 28 04:08:03 PM CDT 2024
+eval "$(~/.rbenv/bin/rbenv init - --no-rehash bash)"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-install dotfiles as symlinks
+Install dotfiles as symlinks
 """
 
 import argparse
@@ -10,21 +10,98 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).absolute().parent
-DESCRIPTION = __doc__
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def destroy_path(path):
-    if path.is_dir() and not path.is_symlink():
-        shutil.rmtree(path)
-    else:
-        path.unlink()
+class Installer:
+    """
+    A class to manage installing my config.
+    """
 
+    def __init__(self, config_root, homedir, configdir, sshdir, relative=True, preserve=False, dryrun=True):
+        """
+        Create a new Installer.
 
-def preserve_path(path):
-    new_suffix = ''.join(path.suffixes + ['.bak'])
-    path.replace(path.with_suffix(new_suffix))
+        `config_root` should be the root of a "config" directory (such as this git repository)
+        `homedir` should be your home directory
+        `configdir` should be your config directory (e.g. `~/.config`)
+        `sshdir` should be your ssh directory (e.g `~/.ssh`)
+
+        `relative` determines whether or not created symbolic links are relative or absolute
+        `preserve` determines whether existing files are removed or preserved (renamed)
+        `dryrun` determines whether actions are performed, or just displayed
+        """
+        self.config_root = Path(config_root).absolute()
+        self.homedir = Path(homedir).absolute()
+        self.configdir = Path(configdir).absolute()
+        self.sshdir = Path(sshdir).absolute()
+
+        self.relative = relative
+        self.preserve = preserve
+        self.dryrun = dryrun
+
+    def install(self):
+        """Install links from each managed directory."""
+        self.install_links(self.config_root.joinpath("dotfiles"), self.homedir, transform=self.tr_dotfile)
+        self.install_links(self.config_root.joinpath("configfiles"), self.configdir)
+        self.install_links(self.config_root.joinpath("sshfiles"), self.sshdir)
+
+    def install_links(self, source_dir, target_dir, transform=None):
+        """Install links from one directory to another."""
+
+        for path in source_dir.iterdir():
+            link = target_dir.joinpath(path.name)
+
+            if transform:
+                link = transform(link)
+
+            if link.exists() or link.is_symlink():
+                self.remove_path(link)
+
+            self.link_path(path, link)
+
+    def remove_path(self, path):
+        if self.preserve:
+            replacement = self.tr_backup(path)
+            if self.dryrun:
+                logger.info("would preserve %s as %s", path, replacement)
+                return
+
+            logger.info("preserving %s as %s", path, replacement)
+            path.replace(replacement)
+            return
+
+        if self.dryrun:
+            logger.info("would remove %s", path)
+            return
+
+        logger.info("removing %s", path)
+        if path.is_dir() and not path.is_symlink():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+
+    def link_path(self, source, target):
+        if self.relative:
+            source = relative_to(target.parent, source)
+
+        if self.dryrun:
+            logger.info("would link %s to %s", target, source)
+            return
+
+        logger.info("linking %s to %s", target, source)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(source)
+
+    def tr_dotfile(self, path):
+        """Transform `Path('filename.txt')` to `Path('.filename.txt')`."""
+        return path.with_name("." + path.name)
+
+    def tr_backup(self, path):
+        """Transform `Path('filename.txt')` to `Path('filename.txt.bak')`."""
+        new_suffix = "".join(path.suffixes + [".bak"])
+        return path.with_suffix(new_suffix)
 
 
 def relative_to(path, target):
@@ -32,93 +109,31 @@ def relative_to(path, target):
     return the relative path from `path` to `target`, backtracking to parent
     directories if necessary
     """
+
     ancestor = Path(os.path.commonpath([path, target]))
-    backtrack = '../' * len(path.relative_to(ancestor).parents)
+    backtrack = "../" * len(path.relative_to(ancestor).parents)
     return Path(backtrack + str(target.relative_to(ancestor)))
 
 
-def link_files(source_dir, target_dir, relative, preserve, dryrun, transformer=None):
-    """
-    link files from one directory to another
-    """
-    for path in source_dir.iterdir():
-        link = target_dir.joinpath(path.name)
-        if transformer:
-            link = transformer(link)
-        if link.exists() or link.is_symlink():
-            if preserve:
-                logger.info('preserving %s', link)
-                if not dryrun:
-                    preserve_path(link)
-            else:
-                logger.info('destroying %s', link)
-                if not dryrun:
-                    destroy_path(link)
-        if relative:
-            path = relative_to(target_dir, path)
-        logger.info('%s -> %s', link, path)
-        if not dryrun:
-            link.parent.mkdir(parents=True, exist_ok=True)
-            link.symlink_to(path)
-
-
-def wireup(config_root, homedir, configdir, sshdir, relative=True, preserve=False, dryrun=True):
-    """
-    install files
-
-    :param config_root: root of the `config` project
-    :type  config_root: Path-like
-    :param homedir: the home directory to install to
-    :type  homedir: Path-like
-    :param configdir: the config directory to install to
-    :type  configdir: Path-like
-    :param sshdir: the ssh directory to install to
-    :type  sshdir: Path-like
-    :param relative: create relative symlinks, defaults to True
-    :type  relative: bool
-    :param preserve: rename existing files to `*.bak`, defaults to False
-    :type  preserve: bool
-    :param dryrun: look but don't touch, defaults to False
-    :type  dryrun: bool
-
-    :return: None
-    """
-
-    config_root = Path(config_root).absolute()
-    homedir = Path(homedir).absolute()
-    configdir = Path(configdir).absolute()
-    sshdir = Path(sshdir).absolute()
-    settings = {"relative": relative, "preserve": preserve, "dryrun": dryrun}
-
-    # first dotfiles
-    dotfile_transformer = lambda p: p.with_name('.' + p.name)
-    link_files(config_root.joinpath('dotfiles'), homedir, **settings, transformer=dotfile_transformer)
-
-    # then configfiles
-    link_files(config_root.joinpath('configfiles'), configdir, **settings)
-
-    # then sshfiles
-    link_files(config_root.joinpath('sshfiles'), sshdir, **settings)
-
-
-
 def main():
-    parser = argparse.ArgumentParser(description=DESCRIPTION)
-    parser.add_argument('-r', '--relative', action='store_true', help='make relative symlinks')
-    parser.add_argument('-p', '--preserve', action='store_true', help='rename existing files to `*.bak`')
-    parser.add_argument('-d', '--dryrun', '--dry-run', action='store_true', help="look but don't touch")
+    parser = argparse.ArgumentParser(description=(__doc__ or "").strip())
+    parser.add_argument("-r", "--relative", action="store_true", help="make relative symlinks")
+    parser.add_argument("-p", "--preserve", action="store_true", help="rename existing files to `*.bak`")
+    parser.add_argument("-d", "--dryrun", "--dry-run", action="store_true", help="look but don't touch")
     args = parser.parse_args()
 
-    wireup(
+    installer = Installer(
         config_root=ROOT,
         homedir=Path.home(),
-        configdir=Path.home().joinpath('.config'),
-        sshdir=Path.home().joinpath('.ssh'),
+        configdir=Path.home().joinpath(".config"),
+        sshdir=Path.home().joinpath(".ssh"),
         relative=args.relative,
         preserve=args.preserve,
         dryrun=args.dryrun,
     )
 
+    installer.install()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

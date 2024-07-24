@@ -24,6 +24,7 @@ set smartcase
 set shiftround
 set cursorline
 set colorcolumn=
+set hlsearch
 
 set sidescroll=20
 set sidescrolloff=20

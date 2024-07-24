@@ -3,8 +3,8 @@
 
 # color aliases
 alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
+alias fgrep='grep -F'
+alias egrep='grep --color=auto'
 
 # make sure `diff` *has* color before trying to use it
 diff --help 2>&1 | grep -q -- '--color' && alias diff='diff --color=auto'
@@ -44,12 +44,11 @@ unset _dots _dirs
 alias files='fd . -t f'
 
 alias vim='vim -p'
-# alias vim='nvim'
-# alias nvim='nvim -p'
-# alias vim='vim -p'
-# alias view='view -p'
-# alias nv=nvim
-alias nv=vim
+alias nvim='nvim -p'
+alias vim='vim -p'
+alias view='view -p'
+
+alias nv=nvim
 alias nvimdiff='nvim -d'
 alias nvdiff=nvimdiff
 
@@ -144,3 +143,4 @@ alias eureka='eureka -s'
 # shellcheck disable=SC2154
 alias xenv='compgen -v | grep -v "^_" | sort | while read -r item; do declare -p $item ; done'
 
+alias open='explorer.exe'

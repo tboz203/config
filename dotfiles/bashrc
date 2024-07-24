@@ -44,12 +44,6 @@ export LESSCHARSET=utf-8
 # [[ -x $HOME/.local/bin/less ]] && export PAGER=$HOME/.local/bin/less
 [[ -e $HOME/.pythonrc.py ]] && export PYTHONSTARTUP=$HOME/.pythonrc.py
 
-# if we have our own installation of bash_completion, don't let
-# /etc/profile.d/bash_completion.sh source the system installation
-# LOCAL_BASH_COMPLETION=$HOME/.local/share/bash-completion/bash_completion
-LOCAL_BASH_COMPLETION=/usr/local/share/bash-completion/bash_completion
-[[ -r $LOCAL_BASH_COMPLETION ]] && shopt -u progcomp
-
 [[ -f /etc/bashrc ]] && . /etc/bashrc
 [[ -f $HOME/.bash_aliases ]] && . "$HOME/.bash_aliases"
 [[ -f $HOME/.bash_functions ]] && . "$HOME/.bash_functions"
@@ -85,15 +79,6 @@ pathmungex -e PYTHONPATH "$HOME/.pymodules"
 # number one: complain
 if [[ ${BASH_VERSINFO[0]} -lt 5 ]]; then
     echo >&2 "Hi! go update your bash please..."
-fi
-
-# if programmable completion wasn't activated by /etc/bashrc
-# (or if we disabled it in ~/.config/bash_completion),
-# re-enable it here
-if ! shopt -q progcomp && [[ -r $LOCAL_BASH_COMPLETION ]]; then
-    shopt -s progcomp
-    [[ ${BASH_VERSINFO[0]} -ge 5 ]] && shopt -s progcomp_alias
-    . "$LOCAL_BASH_COMPLETION"
 fi
 
 # don't save duplicate commands or commands starting with spaces in bash history
@@ -134,7 +119,6 @@ shopt -so pipefail
 # doihave pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
 # doihave oc && eval "$(oc completion bash)"
 # doihave yq && eval "$(yq shell-completion bash)"
-
 
 # When set to "1" suggest all commands, including plumbing commands
 # which are hidden by default (e.g. "cat-file" on "git ca<TAB>").
