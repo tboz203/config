@@ -16,6 +16,7 @@ from math import ceil, floor, log2, log10
 from pprint import pprint
 from shutil import get_terminal_size
 from textwrap import dedent
+from typing import Any
 
 SI_SUFFIXES = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
 
@@ -375,4 +376,92 @@ class LoggingContext:
 
 
 def round_sig(x, sig=3):
+    """
+    Round a value to a given number of significant figures.
+
+        >>> round_sig(1234567, sig=3)
+        1230000
+        >>> round_sig(0.003333333, sig=3)
+        0.00333
+        >>> round_sig(2 ** -50, sig=1)
+        9e-16
+        >>> round_sig(0.49, 0), round_sig(0.50, 0), round_sig(0.51, 0)
+        (0.0, 0.0, 1.0)
+    """
     return 0 if x == 0 else round(x, sig - int(floor(log10(abs(x)))) - 1)
+
+
+def desc_type(obj: Any) -> str:
+    """
+    Describe the type of an object.
+
+    Produces type names when possible, or otherwise recursively describes
+    objects as `f"Instance of {desc_type(type(obj))}"`.
+    """
+
+    if isinstance(obj, type):
+        name = getattr(obj, "__qualname__", None) or getattr(obj, "__name__", None)
+        if name:
+            module = getattr(obj, "__module__", None)
+            module = None if module in ("__main__", "builtins") else module
+            if module:
+                return f"{module}.{name}"
+            return name
+    return f"Instance of {desc_type(type(obj))}"
+
+
+def listattrs(obj: Any, local: bool = True) -> list[str]:
+    # return getattr(obj, "__dict__", ())
+
+    # typs: tuple[type] = (type(obj),) if local else type(obj).__mro__
+    #
+    # attrs: list[str] = []
+    # for typ in typs:
+    #     typ_dict = getattr(typ, "__dict__", ())
+    #     typ_slots = getattr(typ, "__slots__", ())
+    #     typ_slots = (typ_slots,) if isinstance(typ_slots, str) else typ_slots
+    #
+    #     attrs.extend(typ_dict)
+    #     attrs.extend(typ_slots)
+    #
+    # return attrs
+
+    attrs: list[str] = []
+
+    subjects = (obj,) if local else (obj,) + type(obj).__mro__
+    for subj in subjects:
+        attrs.extend(getattr(subj, "__dict__", {}))
+        attrs.extend((slots,) if isinstance((slots := getattr(subj, "__slots__", ())), str) else slots)
+
+    return attrs
+
+
+def rvars(obj: Any) -> dict[str, dict[str, Any]]:
+    """Recursive `vars` through an object and its name resolution chain."""
+
+    # the name resolution chain of `obj`
+    subjects = obj.__mro__ if isinstance(obj, type) else ((obj,) + type(obj).__mro__)
+    subject_desc_value_pairs = [(desc_type(subj), subj) for subj in subjects]
+
+    # return {
+    #     desc: {
+    #         name: value
+    #         for name in getattr(subj, "__dict__", {})
+    #         if (value := getattr(obj, name, None))
+    #     }
+    #     for desc, subj in reversed(subject_desc_value_pairs)
+    # }
+
+    seen_attrs = set()
+    marker = object()
+    results = {}
+
+    for desc, subj in subject_desc_value_pairs:
+        results[desc] = {
+            attr: value
+            for attr in listattrs(subj)
+            if attr not in seen_attrs and (value := getattr(obj, attr, marker)) is not marker
+        }
+        seen_attrs.update(results[desc])
+
+    return results

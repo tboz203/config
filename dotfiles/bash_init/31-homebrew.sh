@@ -15,7 +15,7 @@ pathmungex PATH "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin" "$HOMEBREW_PREFIX
 
 pathmungex -Eeb MANPATH "$HOMEBREW_PREFIX/share/man" ""
 pathmungex -Eeb INFOPATH "$HOMEBREW_PREFIX/share/info"
-# pathmungex -Eeb PKG_CONFIG_PATH "$HOMEBREW_PREFIX"/{lib,lib64,share}/pkgconfig
+pathmungex -Eeb PKG_CONFIG_PATH "$HOMEBREW_PREFIX"/{lib,lib64,share}/pkgconfig
 
 # homebrew's version of bash completion is old and breaks things, but we do
 # want to try to load homebrew's installed completion scripts

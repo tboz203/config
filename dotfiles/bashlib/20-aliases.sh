@@ -19,6 +19,6 @@ alias havecmd='type > /dev/null -t'
 # print an error message & return 1
 # usage: throw MESSAGE
 # shellcheck disable=2154  # "message is referenced but not assigned" wrong
-alias throw='{ local __message ; read -r __message ; _err "$__message" ; return 1 ; } <<<'
+alias throw='{ declare __message ; read -r __message ; _err "$__message" ; return 1 ; } <<<'
 
 alias pause='{ read -rp "[press enter to continue] " || return $? ; }'
