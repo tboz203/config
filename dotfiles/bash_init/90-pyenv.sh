@@ -1,6 +1,15 @@
 #!/bin/bash
 
-setpath -er PYENV_ROOT ~/.pyenv || return 0
+if ! setpath -er PYENV_ROOT ~/.pyenv; then
+    if [[ -f ~/.skip-pyenv ]]; then
+        return 0
+    fi
+
+    if ! curl -fsSL https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash; then
+        touch ~/.skip-pyenv
+        return 1
+    fi
+fi
 
 pathmungex --before --replace PATH "$PYENV_ROOT/shims"
 pathmungex PATH "$PYENV_ROOT/bin"
@@ -15,12 +24,12 @@ pyenv() {
     fi
 
     case "$command" in
-    activate | deactivate | rehash | shell)
-        eval "$(command pyenv "sh-$command" "$@")"
-        ;;
-    *)
-        command pyenv "$command" "$@"
-        ;;
+        activate | deactivate | rehash | shell)
+            eval "$(command pyenv "sh-$command" "$@")"
+            ;;
+        *)
+            command pyenv "$command" "$@"
+            ;;
     esac
 }
 
