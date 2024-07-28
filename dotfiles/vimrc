@@ -1,4 +1,3 @@
-
 " Tommy Bozeman
 " my personal additions
 
@@ -6,6 +5,7 @@
 set scrolloff=3         " set minimum number of screen lines to show to three
 set cmdheight=1         " set the command area hight to two
 set laststatus=2        " set the status-line to always showing
+set showtabline=2       " and same for the tab-line
 set list
 let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
 " set listchars=tab:>-,trail:-,extends:$,precedes:$
@@ -29,6 +29,7 @@ set hlsearch
 set sidescroll=20
 set sidescrolloff=20
 
+silent !mkdir -p ~/.vim/undodir
 set undofile
 set undodir=$HOME/.vim/undodir
 
@@ -317,6 +318,7 @@ if version > "500"
             \ ]
         let g:ycm_keep_logfiles = 1
 
+        let g:EditorConfig_max_line_indicator = "none"
 
         " mappings for plugins that don't have these nice settings
         noremap <silent> <leader>u :MundoToggle<cr>
@@ -352,7 +354,7 @@ if version > "500"
         " colorscheme Chasing_Logic
         " colorscheme Tomorrow-Night
         " colorscheme Tomorrow-Night-Eighties
-        " colorscheme apprentice
+        colorscheme apprentice
         " colorscheme atom-dark-256
         " colorscheme badwolf
         " colorscheme bubblegum-256-dark
@@ -382,17 +384,33 @@ if version > "500"
     " end tabs }}}
 
     " powerline {{{
-"     if $HAS_POWERLINE
-"         python3 import sys; sys.path.append("/usr/local/lib/python3.6/site-packages")
-"         python3 << trim endpython
-"             try:
-"                 from powerline.vim import setup as powerline_setup
-"                 powerline_setup()
-"                 del powerline_setup
-"             except ImportError:
-"                 pass
-"         endpython
-"     endif
+    python3 << trim endpython
+        def try_add_powerline():
+            try:
+                from powerline.vim import setup
+                setup()
+                return
+            except ImportError:
+                pass
+
+            import os, sys
+            root = os.environ.get('POWERLINE_ROOT')
+            if not root or not os.path.exists(root):
+                return
+
+            site_packages = os.path.dirname(root)
+            sys.path.append(site_packages)
+
+            try:
+                from powerline.vim import setup
+                setup()
+                return
+            except ImportError:
+                pass
+
+        try_add_powerline()
+        del try_add_powerline
+    endpython
     " }}}
 
 " endif

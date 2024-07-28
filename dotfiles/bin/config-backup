@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+# Commit & push changes to my `config` repositories
+
+# fail fast
+set -euo pipefail
+# export everything (including functions)
+set -o allexport
+
+MY_NAME=$(basename "$0")
+ROOT=$HOME/config
+
+die()
+{
+    echo >&2 "[X] $MY_NAME: $*"
+    exit 1
+}
+
+if [[ $# -gt 0 ]]; then
+    cat >&2 << EOF
+$MY_NAME: Commit & push changes to my 'config' repositories.
+Accepts no arguments.
+
+ROOT is $ROOT
+EOF
+    exit 1
+fi
+
+cd "$ROOT" || die "Could not cd to ROOT ($ROOT)"
+
+backup_current_repository()
+{
+    local status
+    status=$(git status --porcelain)
+    if [[ -z $status ]]; then
+        echo "No changes"
+        return 0
+    fi
+    echo "$status"
+
+    git add --all .
+    git commit -m "$(date +%Y-%m-%d) checkpoint"
+    git push --porcelain
+}
+
+# not sure how this would act recursively, but not a problem yet
+git submodule foreach bash -ec backup_current_repository
+
+echo "Entering '$(pwd -P)'"
+backup_current_repository

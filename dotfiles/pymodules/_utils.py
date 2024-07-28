@@ -1,27 +1,51 @@
 # pylint: disable=missing-docstring
 
-SI_SUFFIXES = ['K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+import getpass
+import inspect
+import json
+import os
+import shlex
+import subprocess
+import timeit
+import warnings
+from datetime import datetime, timedelta
+from decimal import Decimal
+from functools import reduce
+from itertools import zip_longest
+from math import ceil, floor, log2, log10
+from pprint import pprint
+from shutil import get_terminal_size
+from textwrap import dedent
+
+SI_SUFFIXES = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
+
+
+def noop(arg):
+    """Do nothing."""
+    return arg
+
+
+def red(text):
+    return "\x1b[1;31m%s\x1b[0m" % text
 
 
 def green(text):
     return "\x1b[0;32m%s\x1b[0m" % text
 
-def red(text):
-    return "\x1b[1;31m%s\x1b[0m" % text
 
 def yellow(text):
     return "\x1b[1;33m%s\x1b[0m" % text
 
+
 def clear():
-    print("\x1b[2J\x1b[f", end='')
+    print("\x1b[2J\x1b[f", end="")
 
 
-def format_timedelta(delta, use_suffix=True):    # pylint: disable=too-many-branches
-    import datetime
-    if not isinstance(delta, datetime.timedelta):
-        raise ValueError("need instance of datetime.timedelta, not %s" %
-                         type(delta))
-    if delta > datetime.timedelta(0):
+def format_timedelta(delta, use_suffix=True):  # pylint: disable=too-many-branches
+    """Human-friendly timdelta formatting."""
+    if not isinstance(delta, timedelta):
+        raise ValueError("need instance of datetime.timedelta, not %s" % type(delta))
+    if delta > timedelta(0):
         suffix = "from now"
         prefix = ""
     else:
@@ -58,50 +82,50 @@ def format_timedelta(delta, use_suffix=True):    # pylint: disable=too-many-bran
 
 
 def time_since(timestamp, utc=True):
-    import datetime
+    now = datetime.now()
     if utc:
-        now = datetime.datetime.utcnow()
-    else:
-        now = datetime.datetime.now()
+        now = now.astimezone()
     return format_timedelta(timestamp - now)
 
 
 def color_time_since(timestamp, utc=True):
-    import datetime
+    now = datetime.now()
     if utc:
-        now = datetime.datetime.utcnow()
-    else:
-        now = datetime.datetime.now()
+        now = now.astimezone()
 
     delta = timestamp - now
-    if abs(delta) < datetime.timedelta(0, 60*60):
+    if abs(delta) < timedelta(0, 60 * 60):
         colorfunc = red
-    elif abs(delta) < datetime.timedelta(1, 0):
+    elif abs(delta) < timedelta(1, 0):
         colorfunc = yellow
-    elif abs(delta) < datetime.timedelta(7):
+    elif abs(delta) < timedelta(7):
         colorfunc = green
     else:
-        colorfunc = lambda d: d
+        colorfunc = noop
 
     return colorfunc(format_timedelta(delta))
 
+
 # we're using base 2 units (e.g. kibibyte, mebibyte)
-def humanize(num):
+def format_bytes(num):
+    """Integer "bytes" formatting with SI suffixes."""
     # uses side-effects of iterating through a collection to select the
     # correct suffix
-    for suffix in [''] + SI_SUFFIXES:
+    for suffix in [""] + SI_SUFFIXES:
         if num > 1024:
             num /= 1024
         else:
             break
 
-    return "{:.2f}{:}".format(num, suffix)        # pylint: disable=undefined-loop-variable
+    return "{:.2f}{:}".format(num, suffix)  # pylint: disable=undefined-loop-variable
 
-def dehumanize(num):
+
+def parse_bytes(num):
+    """Attempt to reverse integer "bytes" formatting."""
     factor = 1
     suffix = num[-1].upper()
     # may have '100B' or '24KB', etc
-    if suffix == 'B':
+    if suffix == "B":
         num = num[:-1]
         suffix = num[-1].upper()
     if suffix in SI_SUFFIXES:
@@ -112,42 +136,35 @@ def dehumanize(num):
 
 
 def get_creds(env_prefix=None):
-    '''get user credentials.
+    """
+    Get user credentials.
 
     if `env_prefix` is provided, look for environment variables matching
     "%s_USER" and "%s_PASSWORD". if `env_prefix` is not provided, or if
     matching environment variables do not exist, interactively request
-    credentials from the user.'''
-    import getpass
-    import os
-    import warnings
-
+    credentials from the user."""
     user, pw = None, None
     if env_prefix:
-        user_var = '%s_USER' % env_prefix
-        pw_var = '%s_PASSWORD' % env_prefix
+        user_var = "%s_USER" % env_prefix
+        pw_var = "%s_PASSWORD" % env_prefix
         if user_var in os.environ and pw_var in os.environ:
             user = os.environ[user_var]
             pw = os.environ[pw_var]
         else:
-            warnings.warn('Credential environment variables not found: %s, %s'
-                          % (user_var, pw_var))
+            warnings.warn("Credential environment variables not found: %s, %s" % (user_var, pw_var))
 
     if not (user and pw):
         user_guess = getpass.getuser()
-        user = input('Username [%s]: ' % user_guess) or user_guess
+        user = input("Username [%s]: " % user_guess) or user_guess
         pw = getpass.getpass()
         if not pw:
-            raise ValueError('No password supplied')
+            raise ValueError("No password supplied")
 
     return (user, pw)
 
 
 def columnize(alist, yfirst=True, width=None):
-    import itertools
-    import os
-    roundup = lambda f: - int(f // -1)
-    width = width or os.get_terminal_size().columns - 2
+    width = width or get_terminal_size().columns - 2
     alist = list(map(str, alist))
 
     # process is: divide list into two columns. check to see if columns will
@@ -157,8 +174,8 @@ def columnize(alist, yfirst=True, width=None):
 
     def get_columns(alist, numcol):
         if yfirst:
-            height = roundup(len(alist) / numcol)
-            columns = [alist[(i*height):((i+1)*height)] for i in range(numcol)]
+            height = ceil(len(alist) / numcol)
+            columns = [alist[(i * height) : ((i + 1) * height)] for i in range(numcol)]
         else:
             columns = [alist[i::numcol] for i in range(numcol)]
 
@@ -171,7 +188,6 @@ def columnize(alist, yfirst=True, width=None):
 
     numcol = 1
     while True:
-
         columns, c_widths = get_columns(alist, numcol + 1)
 
         # check columns
@@ -185,7 +201,7 @@ def columnize(alist, yfirst=True, width=None):
     columns, c_widths = get_columns(alist, numcol)
 
     lines = []
-    for line in itertools.zip_longest(*columns, fillvalue=""):
+    for line in zip_longest(*columns, fillvalue=""):
         out = []
         for i, word in enumerate(line):
             out.append(word.ljust(c_widths[i]))
@@ -210,30 +226,27 @@ def walk_xml(elem, depth=None):
 
 
 def show(*args, **kwargs):
-    import shutil
-    import pprint
-    if 'width' not in kwargs:
-        kwargs['width'] = shutil.get_terminal_size().columns
-    pprint.pprint(*args, **kwargs)
+    width = kwargs.pop("width", get_terminal_size().columns)
+    pprint(*args, width=width, **kwargs)
 
 
 def group_by(collection, keyfunc):
-    import collections
-    grouped = collections.defaultdict(list)
+    grouped = {}
     for item in collection:
-        grouped[keyfunc(item)].append(item)
-    return dict(grouped)
+        grouped.setdefault(keyfunc(item), []).append(item)
+    return grouped
 
 
 def compose(*functions):
-    import functools
-    compose2 = lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))
-    return functools.reduce(compose2, functions)
+    """
+    Compose a sequence of functions into a single function.
+    E.g. compose(f, g, h)(x) == f(g(h(x)))
+    """
+    return reduce((lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))), functions)
 
 
 def depthwalk(top, depth=0, **kwargs):
-    '''just like `os.walk`, but with new added `depth` parameter!'''
-    import os
+    """just like `os.walk`, but with new added `depth` parameter!"""
     depthmap = {top: 0}
     for path, dirs, files in os.walk(top, **kwargs):
         yield path, dirs, files
@@ -247,42 +260,119 @@ def depthwalk(top, depth=0, **kwargs):
 
 
 def format_seconds(seconds):
-    if seconds > 120:
-        from datetime import timedelta
-        return str(timedelta(seconds=seconds))
+    if not isinstance(seconds, (int, float, Decimal)):
+        raise TypeError("seconds must be a number", seconds)
 
-    value = abs(seconds)
-    unit = "s"
-    if value != 0:
-        if value < 1:
-            unit = "ms"
-            value *= 1000
-        if value < 1:
-            unit = "μs"
-            value *= 1000
-        if value < 1:
-            unit = "ns"
-            value *= 1000
-        if value < 1:
-            unit = "ns, please stop"
-    return f'{value:.6g}{unit}'
+    absval = abs(seconds)
+    cutoff = 1 / 3
+
+    if absval == 0 or absval > cutoff:
+        return str(timedelta(seconds=float(seconds)))
+
+    suffixes = ["ms", "μs", "ns", "ps"]
+
+    sign = int(seconds > 0) or -1
+    del seconds
+
+    for suffix in suffixes:
+        absval *= 1000
+        if absval > cutoff:
+            break
+
+    return f"{absval * sign:.3g}{suffix}"
 
 
-def just_timeit(*args, **kwargs):
+def just_timeit(stmt, **kwargs):
     """
     just_timeit(stmt, setup)
 
     wrapper around timeit.Timer that has all the convenience of the cmdline interface
     """
-    import timeit
+    if not kwargs:
+        # attempt to get caller's globals
+        frame = inspect.currentframe()
+        frame = frame.f_back if frame else None
+        kwargs["globals"] = frame.f_globals if frame else None
+    timer = timeit.Timer(stmt, **kwargs)
+    try:
+        # pick a count where duration > 0.2 sec
+        count, duration = timer.autorange()
+        results = [duration]
+        # take 19 samples (for 20 total) of `count` loops
+        results += timer.repeat(19, count)
+    except Exception:
+        timer.print_exc()
+        return
 
-    timer = timeit.Timer(*args, **kwargs)
-    n, _ = timer.autorange()
-    results = timer.repeat(number=n)
-    return {
-        "min": format_seconds(min(results) / n),
-        "max": format_seconds(max(results) / n),
-        "avg": format_seconds((sum(results) / len(results)) / n),
-    }
+    # take aggregates
+    min_r, avg_r, max_r = min(results), sum(results) / len(results), max(results)
+
+    summary = f"""
+        iterations: {count} (~ 2**{round(log2(count))})
+        min: {min_r:.3f} ({format_seconds(min_r / count)})
+        avg: {avg_r:.3f} ({format_seconds(avg_r / count)})
+        max: {max_r:.3f} ({format_seconds(max_r / count)})
+        """
+    print(dedent(summary).strip())
 
 
+def jql(data, expr=".") -> None:
+    if not isinstance(data, str):
+        data = json.dumps(data)
+
+    subprocess.run(f"jq -C {shlex.quote(expr)} | less", input=data.encode("utf-8"), shell=True)
+
+
+def dig(something, *keys, default=None):
+    """
+    Dig through a nested datastructure.
+
+    ```python
+    value = dig(something, "one", 2, "three", default=...)
+    # is roughly equivalent to
+    try:
+        value = something["one"][2]["three"]
+    except (TypeError, IndexError, KeyError):
+        value = default
+    ```
+    """
+    current = something
+    try:
+        for key in keys:
+            current = current[key]
+        return current
+    except (TypeError, IndexError, KeyError):
+        return default
+
+
+class LoggingContext:
+    """
+    A Context Manager for logging configuration.
+
+    # https://docs.python.org/3/howto/logging-cookbook.html
+    """
+
+    def __init__(self, logger, level=None, handler=None, close=True):
+        self.logger = logger
+        self.level = level
+        self.handler = handler
+        self.close = close
+
+    def __enter__(self):
+        if self.level is not None:
+            self.old_level = self.logger.level
+            self.logger.setLevel(self.level)
+        if self.handler:
+            self.logger.addHandler(self.handler)
+
+    def __exit__(self, et, ev, tb):
+        if self.level is not None:
+            self.logger.setLevel(self.old_level)
+        if self.handler:
+            self.logger.removeHandler(self.handler)
+        if self.handler and self.close:
+            self.handler.close()
+
+
+def round_sig(x, sig=3):
+    return 0 if x == 0 else round(x, sig - int(floor(log10(abs(x)))) - 1)

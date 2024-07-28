@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# script for cron to update brew & brew packages
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" || return
+
+export HOMEBREW_DISPLAY_INSTALL_TIMES=1
+
+brew update && brew upgrade

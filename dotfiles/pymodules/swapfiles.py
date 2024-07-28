@@ -198,27 +198,16 @@ def filter_swap_entries(
     return output
 
 
-def report_swap_entries(
-    swap_entries: list[SwapEntry], /, *, wide: bool = False, as_json: bool = False, delete: bool = False
-) -> None:
-    """Report selected swap entries, and possibly delete them."""
-    if delete:
-        for entry in swap_entries:
-            entry.swap_filepath.unlink()
-
-    if as_json:
-        # swap_entry_dicts = [asdict(entry) | {"deleted": delete} for entry in swap_entries]
-        headers = WIDE_HEADERS if wide else SHORT_HEADERS
-        swap_entry_dicts = [{header: getattr(entry, header) for header in headers} for entry in swap_entries]
-        swap_entry_dicts = [item | {"deleted": delete} for item in swap_entry_dicts]
-        print(json.dumps(swap_entry_dicts, indent=2, default=_encode_more_types))
-    else:
-        print(format_swap_entry_list(swap_entries))
-        if delete:
-            print("Swap files deleted")
+def format_swap_entry_list_json(swap_entries: list[SwapEntry], wide: bool, deleted: bool) -> str:
+    # swap_entry_dicts = [asdict(entry) | {"deleted": delete} for entry in swap_entries]
+    # headers = WIDE_HEADERS if wide else SHORT_HEADERS
+    headers = WIDE_HEADERS
+    swap_entry_dicts = [{header: getattr(entry, header) for header in headers} for entry in swap_entries]
+    swap_entry_dicts = [item | {"deleted": deleted} for item in swap_entry_dicts]
+    return json.dumps(swap_entry_dicts, indent=2, default=_encode_more_types)
 
 
-def format_swap_entry_list(swap_entries: list[SwapEntry], wide: bool = False) -> str:
+def format_swap_entry_list_table(swap_entries: list[SwapEntry], wide: bool, deleted: bool) -> str:
     headers = WIDE_HEADERS if wide else SHORT_HEADERS
     rows = [headers]
 
@@ -228,6 +217,8 @@ def format_swap_entry_list(swap_entries: list[SwapEntry], wide: bool = False) ->
 
     column_widths = [max(len(str(item)) for item in column) for column in zip(*rows)]
     lines = [" | ".join("{!s:{}}".format(item, width) for item, width in zip(row, column_widths)) for row in rows]
+    if deleted:
+        lines.append("Swap files deleted")
     return "\n".join(lines)
 
 
@@ -309,7 +300,17 @@ def main():
     listing = get_swapfile_listing()
     swap_entries = parse_swapfile_listing(listing)
     swap_entries = filter_swap_entries(swap_entries, exists=args.exists, modified=args.modified, running=args.running)
-    report_swap_entries(swap_entries, wide=args.wide, as_json=args.json, delete=args.delete)
+
+    if args.delete:
+        for entry in swap_entries:
+            entry.swap_filepath.unlink()
+
+    if args.json:
+        formatter = format_swap_entry_list_json
+    else:
+        formatter = format_swap_entry_list_table
+
+    print(formatter(swap_entries, args.wide, args.delete))
 
 
 if __name__ == "__main__":

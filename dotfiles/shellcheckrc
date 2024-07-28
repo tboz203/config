@@ -1,0 +1,23 @@
+# ~/.shellcheckrc
+
+# follow other scripts when possible
+external-sources=true
+
+# "Want to escape a single quote? echo 'This is how it'\''s done'"
+disable=1003
+# "Can't follow non-constant source. Use a directive to specify location."
+disable=SC1090
+# "Not following: <FILE> : openBinaryFile: does not exist (No such file or directory)"
+disable=SC1091
+# "Use #!, not just #, for the shebang."
+disable=SC1113
+
+# "Note that A && B || C is not if-then-else. C may run when A is true."
+disable=SC2015
+# "Expanding an array without an index only gives the first element"
+disable=SC2128
+# "<FUNCTION> references arguments, but none are ever passed."
+# disable=SC2120
+# "Command appears to be unreachable. Check usage (or ignore if invoked indirectly)."
+# disable=SC2317
+

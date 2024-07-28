@@ -5,20 +5,21 @@
 [color]
 	ui = true
 [core]
-	editor = vim
+	editor = nvim
 	autocrlf = false
 	excludesfile = ~/.gitignore
-	pager = less
+	; pager = delta
 [merge]
-	tool = vimdiff
+	tool = nvimdiff
 	conflictstyle = diff3
 	ff = false
 [mergetool]
 	; tool itself goes in `merge`
 	prompt = false
 	keepBackup = false
+	hideResolved = true
 [diff]
-	tool = vimdiff
+	tool = nvimdiff
 	algorithm = histogram
 	colorMoved = default
 	whitespace = ignore
@@ -102,7 +103,9 @@
 	logdiff = log --pretty=contrast --no-graph --reverse --patch
 	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
 	; logwatch = !viewpane -- git la --color
-	logwatch = !viewpane -- git la --color -n '$(tput lines)'
+	lw = !viewpane -- git l --color -n '$(tput lines)'
+	lwa = !viewpane -- git la --color -n '$(tput lines)'
+	logwatch = lwa
 	logtab = !git l --pretty=tableable | column -t -s '&'
 	; this is a script now
 	; fixlast = git commit --amend --no-edit
@@ -113,7 +116,7 @@
 	; diffFilter = delta --features=interactive
 	; diffFilter = delta --color-only
 [delta]
-	features = decorations
+	; features = decorations
 	dark = true
 	syntax-theme = Coldark-Dark
 	true-color = always

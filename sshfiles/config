@@ -1,7 +1,8 @@
 # vim: ft=sshconfig
 
 ServerAliveInterval 60
-SendEnv TERM COLORTERM HAS_POWERLINE_FONTS TURBO_MODE
+SendEnv TERM COLORTERM SHLVL HAS_POWERLINE_FONTS TURBO_MODE
 AddKeysToAgent yes
 Host localhost
   SendEnv DBUS_SESSION_BUS_ADDRESS DISPLAY TMUX
+  RequestTTY yes
