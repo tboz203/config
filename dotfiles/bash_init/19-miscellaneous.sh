@@ -2,8 +2,6 @@
 
 # [[ ${SHELL-} != /bin/bash ]] || SHELL=/usr/local/bin/bash
 
-[[ ${_SHELL_LOGIN-} ]] || return 0
-
 export MAILTO=thomas.bozeman@cgifederal.com
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8

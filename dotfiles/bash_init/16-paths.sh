@@ -1,7 +1,5 @@
 # ensure PATH is populated
 
-[[ ${_SHELL_LOGIN-} ]] || return 0
-
 cleanpath
 
 pathmungex --replace PATH \
