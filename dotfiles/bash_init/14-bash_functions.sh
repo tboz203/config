@@ -99,7 +99,7 @@ pstree() {
     command pstree -Uas "$@"
 }
 
-unalias which &>/dev/null || true
+unalias which &> /dev/null || true
 which() {
     {
         alias -p
@@ -126,4 +126,16 @@ make() {
     local retval=$?
     bear citnames --append
     return $retval
+}
+
+nvfd() {
+    local -a files
+    get_array files fd --type file "$@" || return
+    nv "${files[@]}"
+}
+
+nvrg() {
+    local -a files
+    get_array files rg -l "$@" || return
+    nv "${files[@]}"
 }
