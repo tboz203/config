@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# declare -a ARGUMENTS
+#
+# while (($# > 0)); do
+#     arg=$1 && shift
+#     case $arg in
+#         -h | --help) HELP=1 ;;
+#         -t | --target) TARGET="$1" && shift ;;
+#         *) ARGUMENTS+=("$arg") ;;
+#     esac
+# done
+#
+# if [[ ${HELP-} ]]; then
+#     cat << EOF
+# $(basename "$0"): Show number of commits ahead of and behind a given ref.
+#
+# Options:
+#
+# -h | --help             Show this help message
+# -t | --target TARGET    Compare each ref to this target ref (Default is origin/HEAD)
+#
+# Remaining options are passed to \`rev-parse\` and \`rev-list\`.
+# EOF
+# fi
+#
+# [[ ! ${ERROR-} ]] || exit 1
+
+MY_NAME=$(basename "$0")
+
+eval "$(
+    git rev-parse --parseopt -- "$@" << EOF || echo exit $?
+$MY_NAME [--help] [--target TARGET] [rev-list options]
+
+$MY_NAME: Show number of commits ahead of and behind a given ref.
+--
+h,help!              Show this help message
+t,target!=TARGET     Compare each ref to this target ref (Default is origin/HEAD)
+EOF
+)"
+
+[[ ${TARGET-} ]] || TARGET=origin/HEAD
+
+TARGET=$(git rev-parse --symbolic "$TARGET")
+
+readarray -t REFS < <(git rev-parse --revs-only --symbolic --default --branches "${ARGUMENTS[@]}")
+readarray -t OPTIONS < <(git rev-parse --no-revs "${ARGUMENTS[@]}")
+
+for ref in "${REFS[@]}"; do
+    # TODO: make this better
+    [[ "$ref" == "$TARGET" ]] && continue
+    # read -r -a leftright < <(git rev-list --left-right --count "${ref}"..."${TARGET}" )
+    # echo "ref ${ref} is ${leftright[0]} commit(s) ahead and ${leftright[1]} commit(s) behind ${against}"
+    # echo "ref ${against} is ${leftright[1]} commit(s) ahead and ${leftright[0]} commit(s) behind ${ref}"
+    # printf "ref %s is %3g commit(s) ahead and %3g commit(s) behind %s\n" \
+    #     "$TARGET" "${leftright[1]}" "${leftright[0]}" "$ref"
+
+    printf "ref %s is %3g commit(s) ahead and %3g commit(s) behind %s\n" \
+        "$ref" $(git rev-list --left-right --count "$TARGET...$ref" "${OPTIONS[@]}") "$TARGET"
+done

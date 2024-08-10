@@ -5,7 +5,7 @@ startup_mode = "Maximized"
 TURBO_MODE = "1"
 
 [font]
-size = 8.0
+size = 8
 
 [font.normal]
 # NOTE: fonts live in ~/.local/share/fonts,
@@ -14,7 +14,6 @@ size = 8.0
 # XXX 😀😃😄😁🙃😗🤪🤑🤐😏😒🙄🤯🤠😕🙁 XXX
 
 family = "JetBrains Mono with Fallback"
-style = "Retina"
 
 [colors]
 draw_bold_text_with_bright_colors = true

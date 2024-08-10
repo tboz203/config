@@ -14,16 +14,19 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
+alias tree='tree -C --dirsfirst --noreport --filelimit=50'
+if [[ $(tree --version) > "tree v2.0.0" ]]; then
+    BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
+fi
+
 alias ls='ls --color=auto --ignore-backups --group-directories-first --sort=version'
 alias ll='ls -lhF'
 alias la='ls -A'
 alias lla='ll -A'
+alias lt='tree -pugDF --si --du'
+alias ltc='tree --filelimit=1000 | column'
 # alias lt='ls --sort=time'
 # alias llt='ll --sort=time'
-alias lt='tree -pugshD -l --metafirst --dirsfirst --noreport --sort=version --filelimit=50'
-if [[ $(tree --help 2>&1) == *'--gitignore'* ]]; then
-    BASH_ALIASES['lt']+=' --gitignore'
-fi
 alias lta='lt -a'
 alias l.='la -I "[^.]*"'
 alias ll.='lla -I "[^.]*"'
@@ -109,7 +112,7 @@ alias docker-scrub='docker system prune -f --all --volumes'
 alias docker-purge='docker-halt && docker-scrub'
 
 alias dfx='df -h -t xfs'
-alias files='fd . -t f'
+alias files='fd -t f'
 alias open='gio open'
 # alias listening='lsof -i -s TCP:Listen'
 # attempting to sort by listening address; not 100% effective
