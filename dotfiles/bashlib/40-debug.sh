@@ -3,7 +3,7 @@
 # inspired by https://flokoe.github.io/bash-hackers-wiki/scripting/debuggingtips/#making-xtrace-more-useful
 export PS4='+\011\e[02m${EPOCHREALTIME:+[$EPOCHREALTIME] }(${BASH_SOURCE:-main}:$LINENO${FUNCNAME:+:$FUNCNAME}): \e[0m'
 
-alias _if_verbose=': #'
+alias _if_verbose='true #'
 alias _if_debug=': #'
 case ${_BASHLIB_LOGLEVEL-} in
     trace) ;&
@@ -28,10 +28,12 @@ replace_exec() {
     # shellcheck disable=2317
     exec() {
         _if_verbose stackline
-        _log "will run: $*" && pause
+        _log "will run: $*"
+        pause || throw "Interrupted"
         local retval=0
         command "$@" || retval=$?
-        _log "exited with $retval ($*)" && pause
+        _log "exited with $retval ($*)"
+        pause || throw "Interrupted"
         exit "$retval"
     }
 }
@@ -155,7 +157,7 @@ _traceback() {
 
     echo ">> $command ($retval)"
 
-    pause
+    pause || throw "Interrupted"
     return $last_status
 } && alias traceback='_traceback "${BASH_SOURCE-}" "${FUNCNAME-}" "$LINENO" "$BASH_COMMAND" "$?"'
 

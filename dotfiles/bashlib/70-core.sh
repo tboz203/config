@@ -23,14 +23,14 @@ setpath() {
     while (($#)); do
         local arg=$1 && shift
         case $arg in
-        -h | --help) HELP=1 && break ;;
-        -e | --export) EXPORT=1 ;;
-        -r | --return) RETURN=1 ;;
-        -*)
-            _err "Unknown option: \"$arg\""
-            USAGE=1
-            ;;
-        *) POSITIONAL+=("$arg") ;;
+            -h | --help) HELP=1 && break ;;
+            -e | --export) EXPORT=1 ;;
+            -r | --return) RETURN=1 ;;
+            -*)
+                _err "Unknown option: \"$arg\""
+                USAGE=1
+                ;;
+            *) POSITIONAL+=("$arg") ;;
         esac
     done
 
@@ -39,7 +39,7 @@ setpath() {
     USAGE_TEXT="${FUNCNAME[0]} [-e|--export] [-r|--return] VAR PATH"
 
     if [[ ${HELP-} ]]; then
-        trim <<<"
+        trim <<< "
             Set a variable to a path if that path exists
             Usage: $USAGE_TEXT
 
@@ -145,26 +145,26 @@ searchpath() {
     while (($#)); do
         local arg=$1 && shift
         case $arg in
-        -a | --all) ALL=1 ;;
-        -h | --help) HELP=1 ;;
-        -l | --list)
-            if [[ ${1-} && $1 != -* ]]; then
-                LIST=$1 && shift
-            else
-                _err "Argument required: \"$arg\""
+            -a | --all) ALL=1 ;;
+            -h | --help) HELP=1 ;;
+            -l | --list)
+                if [[ ${1-} && $1 != -* ]]; then
+                    LIST=$1 && shift
+                else
+                    _err "Argument required: \"$arg\""
+                    USAGE=1
+                fi
+                ;;
+            -*)
+                _err "Unrecognized option: \"$arg\""
                 USAGE=1
-            fi
-            ;;
-        -*)
-            _err "Unrecognized option: \"$arg\""
-            USAGE=1
-            ;;
-        *) GLOBS+=("$arg") ;;
+                ;;
+            *) GLOBS+=("$arg") ;;
         esac
     done
 
     if [[ ${HELP-} ]]; then
-        dedent <<<"
+        dedent <<< "
             Search PATH for a file matching a pattern
             Usage: ${FUNCNAME[0]} [--all] [--list LIST] GLOB [GLOB...]
 
@@ -227,15 +227,15 @@ searchparents() {
     while (($#)); do
         local arg=$1 && shift
         case $arg in
-        -h | --help) HELP=0 ;;
-        -a | --all) ALL=1 ;;
-        -*)
-            _err "Unrecognized option: \"$arg\""
-            HELP=2
-            ;;
-        *)
-            GLOBS+=("$arg")
-            ;;
+            -h | --help) HELP=0 ;;
+            -a | --all) ALL=1 ;;
+            -*)
+                _err "Unrecognized option: \"$arg\""
+                HELP=2
+                ;;
+            *)
+                GLOBS+=("$arg")
+                ;;
         esac
     done
 
@@ -270,8 +270,8 @@ with_files() {
     while (($#)); do
         local arg="$1" && shift
         case $arg in
-        --) break ;;
-        *) command+=("$arg") ;;
+            --) break ;;
+            *) command+=("$arg") ;;
         esac
     done
 
@@ -300,28 +300,28 @@ pathmungex() {
     while (($#)); do
         local arg=$1 && shift
         case $arg in
-        -e | --export) EXPORT=1 ;;
-        -E | --exists) EXISTS=1 ;;
-        -b | --before) WHERE=before ;;
-        -a | --after) WHERE=after ;;
-        -f | --fail | --fatal) CHECK=fail ;;
-        -n | --no-check | --nocheck) CHECK=nocheck ;;
-        -r | --replace) REPLACE=1 ;;
-        -d | --delete) DELETE=1 ;;
-        -h | --help) HELP=1 ;;
-        -m | --marker)
-            if [[ -v 1 && $1 != -* ]]; then
-                MARKER=$1 && shift
-            else
-                _err "Argument required: \"$arg\""
+            -e | --export) EXPORT=1 ;;
+            -E | --exists) EXISTS=1 ;;
+            -b | --before) WHERE=before ;;
+            -a | --after) WHERE=after ;;
+            -f | --fail | --fatal) CHECK=fail ;;
+            -n | --no-check | --nocheck) CHECK=nocheck ;;
+            -r | --replace) REPLACE=1 ;;
+            -d | --delete) DELETE=1 ;;
+            -h | --help) HELP=1 ;;
+            -m | --marker)
+                if [[ -v 1 && $1 != -* ]]; then
+                    MARKER=$1 && shift
+                else
+                    _err "Argument required: \"$arg\""
+                    USAGE=1
+                fi
+                ;;
+            -*)
+                _err "Unrecognized option: \"$arg\""
                 USAGE=1
-            fi
-            ;;
-        -*)
-            _err "Unrecognized option: \"$arg\""
-            USAGE=1
-            ;;
-        *) POSITIONAL+=("$arg") ;;
+                ;;
+            *) POSITIONAL+=("$arg") ;;
         esac
     done
 
@@ -330,7 +330,7 @@ pathmungex() {
     local USAGE_TEXT="${FUNCNAME[0]} [OPTIONS] PATHVAR ENTRIES..."
 
     if [[ ${HELP-} ]]; then
-        dedent <<<"
+        dedent <<< "
             Add entries to a PATH-like list variable, for each entry that exists on disk
             and is not already in the list. By default, entries are inserted in order into
             PATHVAR before the first entry that begins with '/usr/'.
@@ -445,30 +445,30 @@ pathmungex() {
         _if_verbose _log "Nothing to add"
     else
         case $WHERE in
-        before) unwraplist "$PATHVAR" "${ADDITIONS%:}${PATHLIST}" ;;
-        after) unwraplist "$PATHVAR" "${PATHLIST%:}${ADDITIONS}" ;;
-        insert)
-            # have to split PATHLIST to insert our additions
+            before) unwraplist "$PATHVAR" "${ADDITIONS%:}${PATHLIST}" ;;
+            after) unwraplist "$PATHVAR" "${PATHLIST%:}${ADDITIONS}" ;;
+            insert)
+                # have to split PATHLIST to insert our additions
 
-            local -a PATHARRAY FRONT BACK
-            ADDITIONS=${ADDITIONS%:} && ADDITIONS=${ADDITIONS#:}
-            PATHLIST=${PATHLIST%:} && PATHLIST=${PATHLIST#:}
-            from_list PATHARRAY "$PATHLIST"
+                local -a PATHARRAY FRONT BACK
+                ADDITIONS=${ADDITIONS%:} && ADDITIONS=${ADDITIONS#:}
+                PATHLIST=${PATHLIST%:} && PATHLIST=${PATHLIST#:}
+                from_list PATHARRAY "$PATHLIST"
 
-            # find the index in PATHARRAY of the first element that matches our marker
-            local idx
-            for ((idx = 0; idx < ${#PATHARRAY[@]}; idx++)); do
-                [[ ${PATHARRAY[idx]} =~ $MARKER ]] && break || true
-            done
+                # find the index in PATHARRAY of the first element that matches our marker
+                local idx
+                for ((idx = 0; idx < ${#PATHARRAY[@]}; idx++)); do
+                    [[ ${PATHARRAY[idx]} =~ $MARKER ]] && break || true
+                done
 
-            # split PATHARRAY before that index
-            FRONT=("${PATHARRAY[@]::idx}")
-            BACK=("${PATHARRAY[@]:idx}")
+                # split PATHARRAY before that index
+                FRONT=("${PATHARRAY[@]::idx}")
+                BACK=("${PATHARRAY[@]:idx}")
 
-            # recombine our arrays, with our additions list between them
-            to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
-            ;;
-        *) throw "invalid WHERE ($WHERE)" ;;
+                # recombine our arrays, with our additions list between them
+                to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
+                ;;
+            *) throw "invalid WHERE ($WHERE)" ;;
         esac
     fi
 
@@ -502,18 +502,18 @@ flash_message() {
     while (($#)); do
         local arg="$1" && shift
         case $arg in
-        -s | --sleep) sleep="${1:?$arg: argument required}" && shift ;;
-        -h | --help) HELP=0 ;;
-        -*)
-            _err "Unrecognized option: \"$arg\""
-            HELP=2
-            ;;
-        *) message+="$arg " ;;
+            -s | --sleep) sleep="${1:?$arg: argument required}" && shift ;;
+            -h | --help) HELP=0 ;;
+            -*)
+                _err "Unrecognized option: \"$arg\""
+                HELP=2
+                ;;
+            *) message+="$arg " ;;
         esac
     done
 
     if [[ ${HELP-} ]]; then
-        dedent <<<"
+        dedent <<< "
             Briefly print a message to the screen.
 
             Usage: ${FUNCNAME[0]} [-s|--sleep SLEEP] MESSAGE...
@@ -582,12 +582,12 @@ filetype() {
     local cmd
     for cmd in "$@"; do
         case $(type -t "$cmd") in
-        alias) ;;
-        keyword) ;;
-        function) ;;
-        builtin) ;;
-        file) ;;
-        *) ;;
+            alias) ;;
+            keyword) ;;
+            function) ;;
+            builtin) ;;
+            file) ;;
+            *) ;;
         esac
     done
 } && complete -c filetype
