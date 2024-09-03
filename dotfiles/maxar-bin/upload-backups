@@ -13,14 +13,12 @@ BACKUP_PATTERN="^backup-.*\.tar\.zst\.gpg$"
 
 # --------------------
 
-fatal()
-{
+fatal() {
     echo "[X] $*"
     exit 1
 }
 
-make_set()
-{
+make_set() {
     # make an associative array to be used as a set
     # to_set NAME [VALUE...]
 
@@ -34,16 +32,14 @@ make_set()
     done
 }
 
-pick_wanted_backups()
-{
+pick_wanted_backups() {
     # pick which backups should be kept in s3
     # shellcheck disable=2010 # using `grep` to keep filtering symmetric between filesystem & s3 bucket
     ls | grep "$BACKUP_PATTERN" | sort | tail -n $BACKUP_COUNT
     return $?
 }
 
-check_held_backups()
-{
+check_held_backups() {
     # see what backups are currently in s3
     aws s3api list-objects-v2 --bucket "$S3_BUCKET" 2> /dev/null | jq -r '.Contents[].Key' | grep "$BACKUP_PATTERN" | sort
     return $?

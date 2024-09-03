@@ -8,7 +8,7 @@ _load_builtins() {
     local item name
     for item in ~/.local/lib/bash_loadable_builtins/*.so; do
         name=$(basename "$item" .so)
-        enable -f "$item" "$name" &>/dev/null || continue
+        enable -f "$item" "$name" &> /dev/null || continue
         _LOADED_BUILTINS+=("$name")
     done
 }

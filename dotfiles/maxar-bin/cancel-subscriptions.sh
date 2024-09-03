@@ -12,7 +12,7 @@ envs=(
 for env in "${envs[@]}"; do
     url=$(eureka -e $env event-service-consumer-proxy)
 
-    links=( $(mxcurl $url/subscriptions | jq -r --arg HOST "$HOSTNAME" '._embedded.subscriptions[] | select(.deliveryMethod.endpoint // "" | contains($HOST)).id.href') )
+    links=($(mxcurl $url/subscriptions | jq -r --arg HOST "$HOSTNAME" '._embedded.subscriptions[] | select(.deliveryMethod.endpoint // "" | contains($HOST)).id.href'))
     : "${links[@]}"
     for link in "${links[@]}"; do
         ANYTHING=1

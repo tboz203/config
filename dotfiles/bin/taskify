@@ -4,8 +4,7 @@
 
 MY_NAME="$(basename "$0")"
 
-die()
-{
+die() {
     echo "$MY_NAME: $*"
     [[ $LOG ]] && echo "$MY_NAME: $*" >> "$LOG"
     exit 1
@@ -48,7 +47,7 @@ done
 
 COMMAND=("$@")
 
-if [[ ! $HELP && ! "${COMMAND[*]}" ]]; then
+if [[ ! $HELP && ! ${COMMAND[*]} ]]; then
     echo "[X] No command supplied"
     HELP=1
 fi

@@ -65,7 +65,7 @@ called-at() {
 stackline() {
     local -a stackframes
     for ((i = ${#BASH_SOURCE[@]} - 1; i > 1; i--)); do
-        stackframes+=("${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i - 1]})")
+        stackframes+=("${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[i - 1]})")
     done
 
     join " > " "${stackframes[@]}"
@@ -125,7 +125,7 @@ stacktrace() {
     # iterating through 3 related arrays in reverse
     local idx
     for ((idx = bottom; idx > top; idx--)); do
-        showframe "${BASH_SOURCE[$idx]}" "${FUNCNAME[$idx]}" "${BASH_LINENO[$idx - 1]}"
+        showframe "${BASH_SOURCE[$idx]}" "${FUNCNAME[$idx]}" "${BASH_LINENO[idx - 1]}"
     done
 }
 

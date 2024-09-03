@@ -7,7 +7,7 @@ set -euo pipefail
 
 git for-each-ref "${refs[@]}" --format="%(refname:short)" | while read -r ref; do
     # TODO: make this better
-    [[ "$ref" == "$against" ]] && continue
+    [[ $ref == "$against" ]] && continue
     read -r -a leftright < <(git rev-list --left-right --count "${ref}"..."${against}")
     # echo "ref ${ref} is ${leftright[0]} commit(s) ahead and ${leftright[1]} commit(s) behind ${against}"
     # echo "ref ${against} is ${leftright[1]} commit(s) ahead and ${leftright[0]} commit(s) behind ${ref}"

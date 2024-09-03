@@ -6,8 +6,8 @@
 this_file=$(readlink -f $0)
 outer_helm=
 
-for item in $( whereis -b helm | cut -d' ' -f2- ); do
-    full_item=$( readlink -f $item )
+for item in $(whereis -b helm | cut -d' ' -f2-); do
+    full_item=$(readlink -f $item)
     if [[ $full_item != $this_file ]]; then
         outer_helm=$full_item
         break

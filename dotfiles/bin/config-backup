@@ -10,8 +10,7 @@ set -o allexport
 MY_NAME=$(basename "$0")
 ROOT=$HOME/config
 
-die()
-{
+die() {
     echo >&2 "[X] $MY_NAME: $*"
     exit 1
 }
@@ -28,8 +27,7 @@ fi
 
 cd "$ROOT" || die "Could not cd to ROOT ($ROOT)"
 
-backup_current_repository()
-{
+backup_current_repository() {
     local status
     status=$(git status --porcelain)
     if [[ -z $status ]]; then

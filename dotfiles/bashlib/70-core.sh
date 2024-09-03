@@ -13,7 +13,7 @@ spinner() {
     else
         return 2
     fi
-    printf "\e[1K\e[G%s" "${chars:$idx:1}"
+    printf "\e[1K\e[G%s" "${chars:idx:1}"
 }
 
 setpath() {

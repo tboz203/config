@@ -84,8 +84,7 @@ else
     coloropt="--color=$use_color"
 fi
 
-show_revision_patch()
-{
+show_revision_patch() {
     git diff-tree -m --patch --no-commit-id --ignore-blank-lines "${diff_tree_opts[@]}" "$1" |
         # replace file header & hunk header with `diff --git` line
         awk '/^diff/ { header=$0 ; skip=1 }; /^@@/ { skip=0; $0 = header}; { if (skip) next; print }'

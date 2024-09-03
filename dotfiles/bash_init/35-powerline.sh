@@ -75,7 +75,7 @@ if [[ -d ${POWERLINE_ROOT-} ]]; then
 
     declare -a func_lines
     # if we succeed in reading the lines of the function `_powerline_prompt` ...
-    if get_array func_lines declare -f _powerline_prompt 2>/dev/null; then
+    if get_array func_lines declare -f _powerline_prompt 2> /dev/null; then
         # and the last statement does not match `/ *return( .*)?$/` ...
         if [[ ! ${func_lines[-2]} =~ ^\ *return( .*)?$ ]]; then
             # remove the final closing brace

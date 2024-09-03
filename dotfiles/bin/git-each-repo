@@ -51,8 +51,7 @@ done
 [[ -v HELP || ! -v READY ]] && usage
 
 # https://stackoverflow.com/a/32981392
-faketty()
-{
+faketty() {
     script -qefc "$(printf "%q " "$@")" /dev/null
 }
 

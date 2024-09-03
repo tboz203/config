@@ -19,7 +19,7 @@ set +u # allow unset variables in git-sh-setup
 . "$(git --exec-path)/git-sh-setup"
 set -u # but then turn it back on
 
-if [[ "$*" != "--force" ]]; then
+if [[ $* != "--force" ]]; then
     echo "$LONG_USAGE"
     exit
 fi

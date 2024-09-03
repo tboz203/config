@@ -1,8 +1,7 @@
 #!/bin/bash
 # vim: tabstop=4 shiftwidth=0 expandtab
 
-awsCreds2()
-{
+awsCreds2() {
     # compare program name ($0) against script name (${BASH_SOURCE[0]});
     # if they're the same, we're being executed as a script
     if [[ $0 == "$BASH_SOURCE" ]]; then

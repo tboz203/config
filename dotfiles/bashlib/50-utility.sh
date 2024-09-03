@@ -87,7 +87,7 @@ contains() {
     local target=$1 && shift
     local item
     for item in "$@"; do
-        [[ "$item" != "$target" ]] || return 0
+        [[ $item != "$target" ]] || return 0
     done
     return 1
 }
@@ -139,7 +139,7 @@ attributes() {
     # usage: attributes NAME...
     (($# >= 1)) || throw "Not enough arguments"
     declare -p -- "$@" |& while IFS=$IFS:= read -r _ attrs _; do
-        if [[ "$attrs" == declare ]]; then
+        if [[ $attrs == declare ]]; then
             # got "bash: declare: <name>: not found"
             println u
         else
@@ -327,8 +327,8 @@ dedent() {
         # find longest common prefix
         local common=
         for ((i = 1; i <= ${#prefix}; i++)); do
-            [[ "${curr::$i}" == "${prefix::$i}" ]] || break
-            common=${curr::$i}
+            [[ ${curr::i} == "${prefix::i}" ]] || break
+            common=${curr::i}
         done
 
         # no match?
@@ -341,7 +341,7 @@ dedent() {
         fi
 
         # update our collector value
-        if [[ "$common" != "$prefix" ]]; then
+        if [[ $common != "$prefix" ]]; then
             prefix=$common
             prefix_line=$curr_line
         fi
@@ -367,7 +367,7 @@ _fixargs() {
                 # split `-xyz` flags into `-x -y -z`, and re-consider
                 local split=()
                 for ((i = 1; i < ${#1}; i++)); do
-                    split+=("-${1:$i:1}")
+                    split+=("-${1:i:1}")
                 done
                 set -- "${split[@]}" "${@:2}"
                 ;;
