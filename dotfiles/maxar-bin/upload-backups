@@ -96,12 +96,12 @@ else
     exit 0
 fi
 
-for item in "${TO_DELETE[@]}"; do
-    aws s3 rm "s3://$S3_BUCKET/$item"
-done
-
 for item in "${TO_UPLOAD[@]}"; do
     aws s3 cp "./$item" "s3://$S3_BUCKET"
+done
+
+for item in "${TO_DELETE[@]}"; do
+    aws s3 rm "s3://$S3_BUCKET/$item"
 done
 
 echo "[.] All done"
