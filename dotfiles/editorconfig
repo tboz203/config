@@ -1,22 +1,24 @@
 ; .editorconfig
+; vim: commentstring=;\ %s
 
 root = true
 
-; [*]
+[*]
 ; end_of_line = lf
 ; insert_final_newline = true
 ; charset = utf-8
-; ; indent_style = space
-; ; indent_size = 4
-; trim_trailing_whitespace = true
+; indent_style = space
+; indent_size = 4
 ; max_line_length = 119
-;
-; ; for shfmt
-; switch_case_indent = true
-; space_redirects = true
-;
-; [*.{js,json,lua}]
+
+; for shfmt
+binary_next_line = false
+switch_case_indent = true
+space_redirects = true
+function_next_line = false
+
+; [*.{js,ts,json,xml,html,css,lua}]
 ; indent_size = 2
-;
+
 ; [*.{py,sh}]
 ; indent_size = 4
