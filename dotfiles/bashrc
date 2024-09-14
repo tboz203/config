@@ -31,4 +31,4 @@ _bash_init() {
 [[ ${_BASH_INIT_RUN-} ]] || _bash_init
 
 # and don't let anybody add any extra crap!
-return
+return 0

@@ -172,33 +172,6 @@ quoted() {
     each "${results[@]}"
 }
 
-_get_array() {
-    # execute a command & read lines into an array
-    # usage: get_array [READARRAY_ARGS...] ARRAY_NAME -- COMMAND [COMMAND_ARGS...]
-    local -a readargs commandargs
-    while (($#)); do
-        local arg=$1 && shift
-        case $arg in
-            --) commandargs=("$@") && break ;;
-            *) readargs+=("$arg") ;;
-        esac
-    done
-
-    ((${#commandargs[@]} >= 1)) || throw "No command given"
-
-    # technically you could say something like `get_array -d : -- println $PATH`
-    # and pass this check, but if you've gotten that far, i'll assume you know
-    # what you're doing
-    ((${#readargs[@]} >= 1)) || throw "No array name given"
-
-    # execute the command
-    local fulltext
-    fulltext=$("${commandargs[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
-
-    # map the array
-    readarray -t "${readargs[@]}" <<< "$fulltext"
-}
-
 get_array() {
     # execute a command & read lines into an array
     # usage: get_array ARRAY_NAME COMMAND [COMMAND_ARGS...]

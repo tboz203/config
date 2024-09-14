@@ -10,7 +10,7 @@ trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
 
 # put the git-core directory in the path
 git_core_path=$(git --exec-path)
-[[ :$PATH: == *:$git_core_path:* ]] || PATH="$git_core_path:$PATH"
+[[ :$PATH: == *:"$git_core_path":* ]] || PATH=$git_core_path:$PATH
 
 # shellcheck disable=SC2034
 USAGE="[DIFF_OPTS] LEFT_REVISION RIGHT_REVISION [-- DIFF_TREE_OPTS]"

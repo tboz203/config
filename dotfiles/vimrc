@@ -383,6 +383,9 @@ if version > "500"
     " end tabs }}}
 
     " powerline {{{
+    " set PYTHONHOME to the third parent of $VIMRUNTIME; the default Python
+    " home seems broken rn in linuxbrew vim, causing the next block to explode
+    let $PYTHONHOME = $VIMRUNTIME->fnamemodify(':h:h:h')
     python3 << trim endpython
         def try_add_powerline():
             try:

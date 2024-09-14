@@ -151,7 +151,9 @@ def pick_credentials(registry: Registry, user_string: Optional[str] = None) -> A
     return None
 
 
-def _check_docker_config(registry: Registry, username: Optional[str], password: Optional[str]) -> Auth:
+def _check_docker_config(
+    registry: Registry, username: Optional[str], password: Optional[str]
+) -> Auth:
     config_auth = _get_docker_config_auth()
 
     if not config_auth:
@@ -161,11 +163,14 @@ def _check_docker_config(registry: Registry, username: Optional[str], password: 
         raise ValueError("nonsense")
 
     match config_auth.get(registry):
-        case str() as auth if not (username or password):
+        case str(auth) if not (username or password):
             # lookup found single auth string, no username or password provided
             return auth
-        case lookup_username, lookup_password:
-            if username in (lookup_username, None) and password in (lookup_password, None):
+        case str(lookup_username), str(lookup_password):
+            if username in (lookup_username, None) and password in (
+                lookup_password,
+                None,
+            ):
                 # either we matched the lookup, or we had nothing to check against
                 return cast(Auth, (lookup_username, lookup_password))
         case _:
@@ -218,13 +223,11 @@ def prompt_for_creds(user_guess: Optional[str] = None) -> tuple[str, str]:
 
 def parse_image_name(name) -> Image:
     match name.split("/"):
-        case str():
+        case (path,):
             host = DEFAULT_REGISTRY
-            path = f"library/{name}"
-        case str(), str():
-            host = DEFAULT_REGISTRY
-            path = name
-        case host, group, item:
+        case (host, path):
+            pass
+        case (host, group, item):
             path = group + "/" + item
         case _:
             raise ValueError("invalid image name", name)
@@ -233,10 +236,15 @@ def parse_image_name(name) -> Image:
     return Image(Registry(host), path, tag or None)
 
 
-def collect(patterns: list[str], user_string: Optional[str], verbose: bool = False, tls_verify=True) -> list[Result]:
-
+def collect(
+    patterns: list[str],
+    user_string: Optional[str],
+    verbose: bool = False,
+    tls_verify=True,
+) -> list[Result]:
     conn_table: dict[Registry, Connection] = {}
 
+    results = []
     for pattern in patterns:
         image = parse_image_name(pattern)
         # are there are glob characters in this image path?
@@ -258,7 +266,6 @@ def collect(patterns: list[str], user_string: Optional[str], verbose: bool = Fal
         else:
             partials = [image]
 
-        results = []
         for image in partials:
             # print('gotta get tags & maybe "verbose"')
             tags = conn.get_tags(image.path)
@@ -307,12 +314,19 @@ def collect(patterns: list[str], user_string: Optional[str], verbose: bool = Fal
 
 
 def display_verbose(results: list[Result]):
-    rows = [(result.registry, result.path, result.tag, result.digest, result.created) for result in results]
+    rows = [
+        (result.registry, result.path, result.tag, result.digest, result.created)
+        for result in results
+    ]
     columns = zip(*rows)
     column_widths = [max(len(str(part)) for part in column) for column in columns]
     for row in rows:
         parts = sum(zip(row, column_widths), ())
-        print("{registry!s:{}} | {path!s:{}} | {tag!s:{}} | {digest!s:{}} | {created!s:{}}".format(*parts))
+        print(
+            "{registry!s:{}} | {path!s:{}} | {tag!s:{}} | {digest!s:{}} | {created!s:{}}".format(
+                *parts
+            )
+        )
 
 
 def display_json(results: list[Result]):
@@ -321,6 +335,10 @@ def display_json(results: list[Result]):
 
 
 def display_images(results: list[Result]):
+    if not results:
+        print("[!] No results")
+        return
+
     for result in results:
         print(result.name)
 
@@ -328,7 +346,9 @@ def display_images(results: list[Result]):
 class Connection:
     DATEFORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, registry: Registry, user_string: Optional[str], retries=3, tls_verify=True):
+    def __init__(
+        self, registry: Registry, user_string: Optional[str], retries=3, tls_verify=True
+    ):
         self._registry = registry
 
         self._sesh = requests.Session()
@@ -348,7 +368,9 @@ class Connection:
     def _delete(self, url) -> None:
         self._request("delete", url)
 
-    def _request(self, method: str, url: str, headers: dict = {}, check_status: bool = True) -> requests.Response:
+    def _request(
+        self, method: str, url: str, headers: dict = {}, check_status: bool = True
+    ) -> requests.Response:
         last_exc = None
         for i in range(self._retries):
             resp = None
@@ -432,13 +454,23 @@ class Connection:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "names", nargs="+", help="The name(s) of the repos to list. Accepts shell wildcards. (remember to quote them!)"
+        "names",
+        nargs="+",
+        help="The name(s) of the repos to list. Accepts shell wildcards. (remember to quote them!)",
     )
-    parser.add_argument("-u", "--user", help="user[:password] - credentials for the given repository")
-    parser.add_argument("-k", "--insecure", action="store_true", help="ignore TLS certificate errors")
+    parser.add_argument(
+        "-u", "--user", help="user[:password] - credentials for the given repository"
+    )
+    parser.add_argument(
+        "-k", "--insecure", action="store_true", help="ignore TLS certificate errors"
+    )
 
-    parser.add_argument("-j", "--json", action="store_true", help="output in json format")
-    parser.add_argument("-v", "--verbose", action="store_true", help="lookup & display more details")
+    parser.add_argument(
+        "-j", "--json", action="store_true", help="output in json format"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="lookup & display more details"
+    )
 
     args = parser.parse_args()
 

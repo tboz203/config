@@ -78,35 +78,39 @@
 	s = status
 	si = status --ignored
 	ds = diff --staged
+
 	l = log --graph --date-order --date=relative --pretty=myline
-	; "almost all"
+	;; "almost all"
 	la = l --branches --tags --remotes=origin HEAD
-	; "really all"
+	;; "really all"
 	laa = l --all
-	ll = l --date=human --format=long
+	ll = !echo what
 	lla = ll --branches --remotes=origin
 	llaa = ll --all
 	lg = log --walk-reflogs --format=reflog
 	lgd = log --walk-reflogs --format=reflog --date=relative
 	ls = la --simplify-by-decoration
-	path = l --boundary --ancestry-path
-	refs = for-each-ref --format='%(refname:short)'
-	longrefs = for-each-ref --format='%(refname)'
+	logpath = l --boundary --ancestry-path
+	lp = logpath
+	logdiff = log --pretty=contrast --no-graph --reverse --patch
+	ld = logdiff
+	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
+	lw = !viewpane -- git l --color -n '$(tput lines)'
+	lwa = !viewpane -- git la --color -n '$(tput lines)'
+	logwatch = lwa
+	logtab = !git l --pretty=tableable | column -t -s '&'
+
+	; refs = for-each-ref --format='%(refname:short)'
+	; longrefs = for-each-ref --format='%(refname)'
+	rs = for-each-ref --format='%(refname:short)'
+	lrs = for-each-ref --format='%(refname)'
 	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
 	; lprune = !git checkout develop && git branch --merged develop | grep -v '^. develop$' | xargs git branch -d
 	; pruneable !git for-each-ref --format="%(refname:short) %(upstream)" refs/heads | grep -E " (.+)$" | while read here there; do [[ -z $(git for-each-ref $there) ]] && echo $here; done
 	pruneable = !git branch --format='%(refname:short)%%%(upstream:track)' | grep -F '[gone]' | cut -d% -f1
 	lprune = !git pruneable | xargs -r git branch -D
-	ctags = !.git/hooks/ctags
-	; pull-all = "!git refs refs/heads | while read item ; do git fetch origin $item:$item & done ; wait"
-	logdiff = log --pretty=contrast --no-graph --reverse --patch
-	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
-	; logwatch = !viewpane -- git la --color
-	lw = !viewpane -- git l --color -n '$(tput lines)'
-	lwa = !viewpane -- git la --color -n '$(tput lines)'
-	logwatch = lwa
-	logtab = !git l --pretty=tableable | column -t -s '&'
-	; this is a script now
+	; ctags = !.git/hooks/ctags
+	;; this is a script now
 	; fixlast = git commit --amend --no-edit
 [color "diff"]
 	meta = "bold #000000 brightblue"

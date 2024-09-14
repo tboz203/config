@@ -31,7 +31,13 @@ fi
 # [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
 
 setpath -e M2_HOME ~/.bootstrap/maven/default
+
 setpath -e JAVA_HOME ~/.bootstrap/java/default
+setpath -e JAVA_HOME /usr/lib/jvm/java
+
+if [[ -d ${JAVA_HOME-} ]]; then
+    pathmungex PATH "$JAVA_HOME/bin"
+fi
 
 setpath -e SSL_CERT_FILE /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 

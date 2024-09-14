@@ -74,14 +74,13 @@ alias info='info --vi-keys'
 # editing rc files
 # --------------------
 
-alias vimrc='vim ~/config/dotfiles/vimrc'
-alias bashrc='nv ~/config/dotfiles/{bashrc,bash_init/1?-*.sh}'
-alias aliases='nv ~/config/dotfiles/bash_init/*aliases*'
-alias bashlib='nv ~/config/dotfiles/bashlib{.sh,/*}'
-alias bash_init='nv ~/config/dotfiles/{bashrc,bashlib{.sh,/*},bash_init/*}'
-alias nvrc='nv ~/config/configfiles/nvim/lua/{plugins/core.lua,config/{lazy,options,keymaps}.lua}'
-alias nvconfig='nv ~/config/configfiles/nvim/lua/{plugins,config}/*.lua'
-alias nvimrc=nvrc
+alias vimrc='vim --cmd "cd ~/config/dotfiles" ~/config/dotfiles/vimrc'
+alias bashrc='nv --cmd "cd ~/config/dotfiles" ~/config/dotfiles/{bashrc,bash_init/3?-*.sh}'
+alias aliases='nv --cmd "cd ~/config/dotfiles" ~/config/dotfiles/bash_init/??-aliases.sh'
+alias nvbashlib='nv --cmd "cd ~/config/dotfiles/bashlib" ~/config/dotfiles/bashlib{,/??-*}.sh'
+alias nvbash_init='nv --cmd "cd ~/config/dotfiles/bash_init" ~/config/dotfiles/{bashrc,bash_init/??-*.sh}'
+alias nvrc='nv --cmd "cd ~/config/configfiles/nvim" ~/config/configfiles/nvim/lua/{plugins/{editor,language},config/{autocmds,keymaps,options}}.lua'
+alias nvconfig='nv --cmd "cd ~/config/configfiles/nvim" ~/config/configfiles/nvim/lua/{plugins,config}/*.lua'
 
 # misspellings
 # --------------------
@@ -122,6 +121,8 @@ alias open='gio open'
 # alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
 
 alias super='sudo env HOME=$HOME /usr/local/bin/bash --login -i'
+
+alias notes='nv --cmd "cd ~/workspace/notes" ~/workspace/notes/{tasks,notes,ideas}'
 
 # meta-commands
 # --------------------

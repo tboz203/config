@@ -1,6 +1,7 @@
 # ensure PATH is populated
 
-[[ ${_SHELL_LOGIN-} ]] || return 0
+[[ ! ${_BASH_INIT_PATHS_SET-} ]] || return 0
+export _BASH_INIT_PATHS_SET=1
 
 cleanpath
 
@@ -18,10 +19,6 @@ pathmungex --replace PATH \
     /usr/local/go/bin \
     /usr/local/bin \
     /usr/bin
-
-pathmungex --before PATH \
-    ~/.maxar-bin \
-    ~/.bin
 
 pathmungex --after PATH \
     ~/.local/share/idea/bin \
