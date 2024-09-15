@@ -1,3 +1,0 @@
-#!/bin/bash
-
-exec curl -s -S -H "Authorization: $(token)" -H "Accept: application/json, */*" --max-time 30 "$@"

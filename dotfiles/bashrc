@@ -1,182 +1,34 @@
-# ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc) for examples
-# with (severe) modifications by tboz203
-# vim: tw=119
+#!/usr/bin/env bash
+# bash init script
 
-: top of bashrc
+_bash_init() {
+    declare -g _BASH_INIT_STARTED=1
 
-# .()
-# {
-#     source "$@"
-# }
-# source()
-# {
-#     (shopt -oq verbose && echo "# sourcing $*") || true
-#     builtin source "$@"
-#     (shopt -oq verbose && echo "# leaving $*") || true
-# }
+    shopt -s checkhash
+    shopt -s cdspell
+    shopt -s dirspell
+    shopt -s no_empty_cmd_completion
 
-# functionless pathmunge ~/.local/bin to get powerline into PATH before attempting turbo mode
-[[ :$PATH: == *:$HOME/.local/bin:* ]] || PATH="$HOME/.local/bin:$PATH"
+    # set -eu -o functrace errtrace
+    # # shopt -s extdebug
+    # _BASHLIB_LOGLEVEL=debug
+    # _BASHLIB_FLAGS=:replace_exec:stacktrace:
 
-# ensure ssh, tmux, and powerline
-[[ $- == *i* && -f $HOME/.turbo-mode.sh ]] && . "$HOME/.turbo-mode.sh"
+    local item
+    for item in ~/.bash_init/*; do
+        if [[ $item == *.sh ]]; then
+            source "$item"
+        else
+            echo >&2 "[!] $FUNCNAME: Will not source file: $item"
+        fi
+        set +vx
+    done
 
-export ANSIBLE_NOCOWS=1
-# export SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-# export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-export PIPENV_VENV_IN_PROJECT=1
-export DOCKER_HIDE_LEGACY_COMMANDS=1
-export DOCKER_BUILDKIT=1
-export EDITOR=vim
-export PAGER=less
+    # set +eu
+} && export -f _bash_init
 
-# attempt to set some options for LESS LESS="-SRFXJ"
-export LESS="-SRFi"
-# (less --mouse |& grep -q "no mouse option") || LESS+=" --mouse --wheel-lines=3"
-(less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
-export LESSCHARSET=utf-8
+# don't run twice, and don't recurse
+[[ ${_BASH_INIT_RUN-} ]] || _bash_init
 
-# [[ -x $HOME/.local/bin/vim ]] && export EDITOR=$HOME/.local/bin/vim
-# [[ -x $HOME/.local/bin/less ]] && export PAGER=$HOME/.local/bin/less
-[[ -e $HOME/.pythonrc.py ]] && export PYTHONSTARTUP=$HOME/.pythonrc.py
-
-# if we have our own installation of bash_completion, don't let
-# /etc/profile.d/bash_completion.sh source the system installation
-# LOCAL_BASH_COMPLETION=$HOME/.local/share/bash-completion/bash_completion
-LOCAL_BASH_COMPLETION=/usr/local/share/bash-completion/bash_completion
-[[ -r $LOCAL_BASH_COMPLETION ]] && shopt -u progcomp
-
-[[ -f /etc/bashrc ]] && . /etc/bashrc
-[[ -f $HOME/.bash_aliases ]] && . "$HOME/.bash_aliases"
-[[ -f $HOME/.bash_functions ]] && . "$HOME/.bash_functions"
-
-# counter-intuitively, later lines will be higher in the path
-pathmungex PATH "/usr/local/go/bin"
-pathmungex PATH "$HOME/.local/share/node/bin"
-pathmungex PATH "$HOME/.local/share/flyway"
-pathmungex PATH "$HOME/.local/share/groovy/bin"
-pathmungex PATH "$HOME/.local/share/go/bin"
-pathmungex PATH "$HOME/.local/bin"
-
-pathmungex PATH "$HOME/go/bin"
-pathmungex PATH "$HOME/.cargo/bin"
-pathmungex PATH "$HOME/.poetry/bin"
-pathmungex PATH "$HOME/.rbenv/bin"
-pathmungex PATH "$HOME/.nodenv/bin"
-pathmungex PATH "$HOME/.tfenv/bin"
-pathmungex PATH "$HOME/.tgenv/bin"
-pathmungex PATH "$HOME/.bin"
-
-# export PERL_MB_OPT="--install_base $HOME/perl5"
-# export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
-# pathmungex PATH "$HOME/perl5/bin"
-# pathmungex -e -a PERL_LOCAL_LIB_ROOT "$HOME/perl5"
-# pathmungex -e PERL5LIB "$HOME/perl5/lib/perl5"
-
-pathmungex -e PYTHONPATH "$HOME/.pymodules"
-
-# If not running interactively, don't do anything else
-[[ $- == *i* ]] || return
-
-# number one: complain
-if [[ ${BASH_VERSINFO[0]} -lt 5 ]]; then
-    echo >&2 "Hi! go update your bash please..."
-fi
-
-# if programmable completion wasn't activated by /etc/bashrc
-# (or if we disabled it in ~/.config/bash_completion),
-# re-enable it here
-if ! shopt -q progcomp && [[ -r $LOCAL_BASH_COMPLETION ]]; then
-    shopt -s progcomp
-    [[ ${BASH_VERSINFO[0]} -ge 5 ]] && shopt -s progcomp_alias
-    . "$LOCAL_BASH_COMPLETION"
-fi
-
-# don't save duplicate commands or commands starting with spaces in bash history
-HISTCONTROL=ignoreboth
-# append to the history file, don't overwrite it
-shopt -s histappend
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-# bash 4.2 doesn't seem to like negative values here...
-# HISTSIZE="-1"
-# HISTFILESIZE="-1"
-HISTSIZE=$((2 ** 20))
-HISTFILESIZE=$HISTSIZE
-HISTIGNORE="ls:la:lf:ll:l"
-# HISTTIMEFORMAT="%h %d %H:%M:%S> "
-HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S> "
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
-# set autocd: if command is a directory, cd to it
-shopt -s autocd
-# set recursive globbing w/ "**"
-shopt -s globstar
-# I wanna set this, but it seems like it would probably break things...
-# shopt -s nocaseglob
-# if any command in a pipeline fails, the pipeline should be considered to have failed
-shopt -so pipefail
-
-# these have been written to disk in order to reduce bash startup time. the
-# bash completion ones are in ~/.local/share/bash-completion/completions and
-# are lazily loaded at first use
-
-# doihave kubectl && eval "$(kubectl completion bash)"
-# doihave helm && eval "$(helm completion bash)"
-# doihave kind && eval "$(kind completion bash)"
-# doihave poetry && eval "$(poetry completions bash)"
-# doihave pipenv && eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
-# doihave oc && eval "$(oc completion bash)"
-# doihave yq && eval "$(yq shell-completion bash)"
-
-
-# When set to "1" suggest all commands, including plumbing commands
-# which are hidden by default (e.g. "cat-file" on "git ca<TAB>").
-export GIT_COMPLETION_SHOW_ALL_COMMANDS=1
-# When set to "1" suggest all options, including options which are
-# typically hidden (e.g. '--allow-empty' for 'git commit').
-export GIT_COMPLETION_SHOW_ALL=1
-
-export GIT_PS1_SHOWDIRTYSTATE=1
-export GIT_PS1_SHOWSTASHSTATE=1
-export GIT_PS1_SHOWUNTRACKEDFILES=1
-export GIT_PS1_SHOWUPSTREAM=auto
-# export GIT_PS1_COMPRESSSPARSESTATE=1
-# export GIT_PS1_OMITSPARSESTATE=1
-export GIT_PS1_SHOWCONFLICTSTATE=1
-export GIT_PS1_DESCRIBE_STYLE=branch
-export GIT_PS1_SHOWCOLORHINTS=1
-export GIT_PS1_HIDE_IF_PWD_IGNORED=1
-
-# turn on every option listed in
-# /usr/local/share/bash-completion/completions/docker
-export DOCKER_COMPLETION_SHOW_CONFIG_IDS=yes
-export DOCKER_COMPLETION_SHOW_CONTAINER_IDS=yes
-export DOCKER_COMPLETION_SHOW_NETWORK_IDS=yes
-export DOCKER_COMPLETION_SHOW_NODE_IDS=yes
-export DOCKER_COMPLETION_SHOW_PLUGIN_IDS=yes
-export DOCKER_COMPLETION_SHOW_SECRET_IDS=yes
-export DOCKER_COMPLETION_SHOW_SERVICE_IDS=yes
-
-# export PKG_CONFIG_PATH
-# pathmungex PKG_CONFIG_PATH /usr/share/pkgconfig
-# pathmungex PKG_CONFIG_PATH /usr/lib64/pkgconfig
-# pathmungex PKG_CONFIG_PATH /usr/lib/pkgconfig
-# pathmungex PKG_CONFIG_PATH /usr/local/share/pkgconfig
-# pathmungex PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
-# pathmungex PKG_CONFIG_PATH /usr/local/lib/pkgconfig
-# pathmungex PKG_CONFIG_PATH "$HOME/local/share/pkgconfig"
-# pathmungex PKG_CONFIG_PATH "$HOME/local/lib64/pkgconfig"
-# pathmungex PKG_CONFIG_PATH "$HOME/local/lib/pkgconfig"
-
-for item in ~/.profile.d/*.{sh,bash}; do
-    [[ -f $item && -r $item ]] && . "$item"
-done
-unset item
-
-: end of bashrc
+# and don't let anybody add any extra crap!
+return

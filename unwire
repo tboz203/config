@@ -48,7 +48,6 @@ done
 # 
 # # directories
 # maybe_delete ~/.bin
-# maybe_delete ~/.maxar-bin
 # maybe_delete ~/.config/htop
 # maybe_delete ~/.config/powerline
 # maybe_delete ~/.pymodules

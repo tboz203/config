@@ -16,11 +16,11 @@ if [[ ! -v SSH_CONNECTION && ! -v HAS_POWERLINE_FONTS ]] &&
     export HAS_POWERLINE_FONTS=1
 fi
 
-# special logic for maxar vdi: put an ssh connection between the user and tmux,
-# so that (hopefully) the tmux session will persist through vdi disconnects
-if [[ ! -v SSH_CONNECTION && ! -v TMUX && -v TURBO_MODE ]]; then
-    exec ssh localhost
-fi
+# # put an ssh connection between the user and tmux,
+# # so that (hopefully) the tmux session will persist through disconnects
+# if [[ ! -v SSH_CONNECTION && ! -v TMUX && -v TURBO_MODE ]]; then
+#     exec ssh localhost
+# fi
 
 # set powerline availability flag (for all programs)
 if [[ -x $('which' powerline 2> /dev/null) &&
