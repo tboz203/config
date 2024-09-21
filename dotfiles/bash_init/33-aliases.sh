@@ -104,6 +104,8 @@ alias py='python'
 alias ipy='ipython'
 alias hd='hexdump -C'
 
+alias cloc=tokei
+
 # new creations
 # --------------------
 

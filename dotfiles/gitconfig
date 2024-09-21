@@ -84,7 +84,7 @@
 	la = l --branches --tags --remotes=origin HEAD
 	;; "really all"
 	laa = l --all
-	ll = !echo what
+	ll = l --date=human --format=long
 	lla = ll --branches --remotes=origin
 	llaa = ll --all
 	lg = log --walk-reflogs --format=reflog
@@ -103,7 +103,7 @@
 	; refs = for-each-ref --format='%(refname:short)'
 	; longrefs = for-each-ref --format='%(refname)'
 	rs = for-each-ref --format='%(refname:short)'
-	lrs = for-each-ref --format='%(refname)'
+	rsf = for-each-ref --format='%(refname)'
 	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
 	; lprune = !git checkout develop && git branch --merged develop | grep -v '^. develop$' | xargs git branch -d
 	; pruneable !git for-each-ref --format="%(refname:short) %(upstream)" refs/heads | grep -E " (.+)$" | while read here there; do [[ -z $(git for-each-ref $there) ]] && echo $here; done
