@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Copyright (c) 2009, David Buxton <david@gasmark6.com>
 # All rights reserved.
 #
@@ -23,11 +23,10 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""Tools to convert between Python datetime instances and Microsoft times.
-"""
-from datetime import datetime, timedelta, tzinfo
-from calendar import timegm
+"""Tools to convert between Python datetime instances and Microsoft times."""
 
+from calendar import timegm
+from datetime import datetime, timedelta, tzinfo
 
 # http://support.microsoft.com/kb/167296
 # How To Convert a UNIX time_t to a Win32 FILETIME or SYSTEMTIME
@@ -41,6 +40,7 @@ HOUR = timedelta(hours=1)
 
 class UTC(tzinfo):
     """UTC"""
+
     def utcoffset(self, dt):
         return ZERO
 
@@ -89,5 +89,3 @@ if __name__ == "__main__":
     import doctest
 
     doctest.testmod()
-
-

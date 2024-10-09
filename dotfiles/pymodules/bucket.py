@@ -24,7 +24,7 @@ Put input lines into buckets.
 By default, simply copy lines from each input to stdout.
 """
 
-from __future__ import print_function
+from __future__ import annotations, print_function
 
 import argparse
 import fileinput
@@ -37,7 +37,9 @@ from operator import itemgetter
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument("-c", "--count", action="store_true", help="prefix each item with its count")
+    parser.add_argument(
+        "-c", "--count", action="store_true", help="prefix each item with its count"
+    )
     parser.add_argument("-r", "--reverse", action="store_true", help="reverse order")
     parser.add_argument(
         "files",
@@ -47,7 +49,9 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     sort_group = parser.add_mutually_exclusive_group()
-    sort_group.add_argument("-a", "--alphabetical", action="store_true", help="sort output alphabetically")
+    sort_group.add_argument(
+        "-a", "--alphabetical", action="store_true", help="sort output alphabetically"
+    )
     sort_group.add_argument(
         "-n",
         "--numeric",
@@ -56,8 +60,12 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     show_group = parser.add_mutually_exclusive_group()
-    show_group.add_argument("-d", "--duplicated", action="store_true", help="show only duplicated items")
-    show_group.add_argument("-u", "--unique", action="store_true", help="show only unique items")
+    show_group.add_argument(
+        "-d", "--duplicated", action="store_true", help="show only duplicated items"
+    )
+    show_group.add_argument(
+        "-u", "--unique", action="store_true", help="show only unique items"
+    )
 
     parser.add_argument("-j", "--json", action="store_true", help="output json")
 
@@ -112,7 +120,9 @@ def stream_output(files: list[str], unique: bool, duplicated: bool) -> None:
     """Stream our output as we receive it."""
 
     if unique and duplicated:
-        raise ValueError("Cannout output only unique lines and only duplicated lines simultaneously")
+        raise ValueError(
+            "Cannout output only unique lines and only duplicated lines simultaneously"
+        )
 
     if unique:
         seen = set()
@@ -141,7 +151,7 @@ def stream_output(files: list[str], unique: bool, duplicated: bool) -> None:
             print(line.removesuffix("\n"))
 
 
-def main() -> None:
+def main() -> KeyboardInterrupt | None:
     args = parse_arguments()
     try:
         if args.count or args.reverse or args.alphabetical or args.numeric or args.json:
@@ -154,4 +164,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main())  # type: ignore
