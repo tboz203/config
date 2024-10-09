@@ -1,23 +1,22 @@
-
-" Tommy Bozeman
-" my personal additions
+" ~/.vimrc
+" vim: sw=4 sts=4 et fdm=marker
 
 " basic options {{{
-set scrolloff=3         " set minimum number of screen lines to show to three
-set cmdheight=1         " set the command area hight to two
-set laststatus=2        " set the status-line to always showing
-set showtabline=2       " and same for the tab-line
+set scrolloff=3
+set cmdheight=1
+set laststatus=2
+set showtabline=2
 set list
 let &listchars = "tab:\u21e5 ,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
 " set listchars=tab:>-,trail:-,extends:$,precedes:$
-set background=dark     " make the text easier to read on a dark background
-set modeline            " if a file has a modeline, use it
-set splitbelow          " put new windows to the right or below
+set background=dark
+set modeline
+set splitbelow
 set splitright
-set number              " do line numbering
+set number
 set numberwidth=5
 set foldcolumn=1
-set nowrap              " set linewrapping to behave in an intelligent manner
+set nowrap
 set linebreak
 set textwidth=119
 set ignorecase
@@ -29,8 +28,8 @@ set sidescroll=20
 set sidescrolloff=20
 
 silent !mkdir -p ~/.vim/undodir
-set undofile
 set undodir=~/.vim/undodir
+set undofile
 
 set tabstop=4
 set shiftwidth=4
@@ -51,8 +50,6 @@ let python_highlight_all = 1
 
 " set nofixeol
 
-" set spellfile=~/.vim/spell/en.utf-8.add
-
 " end basic options }}}
 
 if version > "500"
@@ -61,7 +58,7 @@ if version > "500"
         set diffopt+=iwhite,algorithm:patience
     endif
 
-    " messing around with mappings {{{
+    " mappings {{{
     let mapleader = '-'
     let maplocalleader = ','
 
@@ -132,22 +129,6 @@ if version > "500"
     noremap n nzz
     noremap N Nzz
 
-    " end messing around with mappings }}}
-
-    " Vimscript file settings {{{
-    augroup filetype_vim
-        autocmd!
-        autocmd Filetype vim setlocal foldmethod=marker
-    augroup END
-    " }}}
-
-    " notes files settings {{{
-    augroup filetype_notes
-        autocmd!
-    augroup END
-    " }}}
-
-    " custom movements {{{
     " next/last parentheses movement
     onoremap in( :<c-u>normal! f(vi(<cr>
     onoremap il( :<c-u>normal! F)vi(<cr>
@@ -159,9 +140,21 @@ if version > "500"
     " next/last email movement
     onoremap in@ :<c-u>execute "normal! /\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
     onoremap il@ :<c-u>execute "normal! ?\\w\\+@\\w\\+\\.\\w\\+\\(\\.\\w\\+\\)*\r:nohls\rvE"<cr>
-    " }}}
+
+    " end mappings }}}
+
+    augroup filetype_vim
+        autocmd!
+        autocmd Filetype vim setlocal foldmethod=marker
+    augroup END
+
+    augroup filetype_notes
+        autocmd!
+    augroup END
 
     " plugins {{{
+"   curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+"     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     call plug#begin("~/.vim/plugged")
 
     " a vimrc starting point
@@ -257,166 +250,151 @@ if version > "500"
     call plug#end()
     " end plugins }}}
 
-        " plugin settings {{{
-        " " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
-        " " expansion/jumping
-        " let g:UltiSnipsExpandTrigger = '<c-l>'
-        " let g:UltiSnipsJumpForwardTrigger = '<c-j>'
-        " let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
+    " plugin settings {{{
+    " " UltiSnips tab-completion conflicts with YCM, new triggers for snippet
+    " " expansion/jumping
+    " let g:UltiSnipsExpandTrigger = '<c-l>'
+    " let g:UltiSnipsJumpForwardTrigger = '<c-j>'
+    " let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
 
-        " " indent guide settings
-        " let g:indent_guides_enable_on_vim_startup = 0
-        " let g:indent_guides_auto_colors = 0
-        " autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
-        " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
-        " autocmd VimEnter,Colorscheme * :hi Normal NONE
+    " " indent guide settings
+    " let g:indent_guides_enable_on_vim_startup = 0
+    " let g:indent_guides_auto_colors = 0
+    " autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=darkgrey
+    " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven NONE
+    " autocmd VimEnter,Colorscheme * :hi Normal NONE
 
-        " mundo setting(s)
-        let g:mundo_right = 1
+    " mundo setting(s)
+    let g:mundo_right = 1
 
-        " vim-surround settings
-        " instead of surrounding with 'p' use value from prompt
-        let g:surround_112 = "\1surround: \1\r\1\1"
+    " vim-surround settings
+    " instead of surrounding with 'p' use value from prompt
+    let g:surround_112 = "\1surround: \1\r\1\1"
 
-        " javascript tags
-        let g:tagbar_type_javascript = { 'ctagsbin': '/usr/local/bin/jsctags' }
-        " let g:tagbar_type_javascript = { 'ctagsbin': '/home/tommy/config/bin/ejstags' }
+    " javascript tags
+    let g:tagbar_type_javascript = { 'ctagsbin': '/usr/local/bin/jsctags' }
+    " let g:tagbar_type_javascript = { 'ctagsbin': '/home/tommy/config/bin/ejstags' }
 
-        " syntastic settings
-        let g:syntastic_check_on_wq = 0
-        let g:syntastic_mode_map = {
-            \ "mode": "passive",
-            \ "active_filetypes": [],
-            \ "passive_filetypes": [] }
-        let g:syntastic_python_python_exec = 'python3'
-        let g:syntastic_python_checkers = ['python', 'flake8']
+    " syntastic settings
+    let g:syntastic_check_on_wq = 0
+    let g:syntastic_mode_map = {
+        \ "mode": "passive",
+        \ "active_filetypes": [],
+        \ "passive_filetypes": [] }
+    let g:syntastic_python_python_exec = 'python3'
+    let g:syntastic_python_checkers = ['python', 'flake8']
 
-        let g:ycm_goto_buffer_command = 'split-or-existing-window'
-        let g:ycm_confirm_extra_conf = 0
-        let g:ycm_python_interpreter_path = ''
-        let g:ycm_python_sys_path = []
-        let g:ycm_disable_for_files_larger_than_kb = 1000
-        let g:ycm_extra_conf_vim_data = [
-            \   'g:ycm_python_interpreter_path',
-            \   'g:ycm_python_sys_path'
-            \ ]
-        " let g:ycm_filetype_blacklist = {
-        "     \   'sql': 1,
-        "     \   'log': 1,
-        "     \   'json': 1
-        "     \ }
-            " \     'cmdline': ['bundle', 'exec', 'solargraph', 'stdio'],
-        let g:ycm_language_server =
-            \ [
-            \   {
-            \     'name': 'ruby',
-            \     'filetypes': ['ruby'],
-            \     'cmdline': ['env', 'RBENV_VERSION=3.1.2', 'solargraph', 'stdio'],
-            \     'project_root_files': ['Rakefile', 'Gemfile', '.solargraph.yml']
-            \   }
-            \ ]
-        let g:ycm_keep_logfiles = 1
+    let g:ycm_goto_buffer_command = 'split-or-existing-window'
+    let g:ycm_confirm_extra_conf = 0
+    let g:ycm_python_interpreter_path = ''
+    let g:ycm_python_sys_path = []
+    let g:ycm_disable_for_files_larger_than_kb = 1000
+    let g:ycm_extra_conf_vim_data = [
+        \   'g:ycm_python_interpreter_path',
+        \   'g:ycm_python_sys_path'
+        \ ]
+    " let g:ycm_filetype_blacklist = {
+    "     \   'sql': 1,
+    "     \   'log': 1,
+    "     \   'json': 1
+    "     \ }
+        " \     'cmdline': ['bundle', 'exec', 'solargraph', 'stdio'],
+    let g:ycm_language_server =
+        \ [
+        \   {
+        \     'name': 'ruby',
+        \     'filetypes': ['ruby'],
+        \     'cmdline': ['env', 'RBENV_VERSION=3.1.2', 'solargraph', 'stdio'],
+        \     'project_root_files': ['Rakefile', 'Gemfile', '.solargraph.yml']
+        \   }
+        \ ]
+    let g:ycm_keep_logfiles = 1
 
-        let g:EditorConfig_max_line_indicator = "none"
+    let g:EditorConfig_max_line_indicator = "none"
 
-        " mappings for plugins that don't have these nice settings
-        noremap <silent> <leader>u :MundoToggle<cr>
-        noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
-        noremap <silent> <leader>tt :TagbarToggle<cr>
-        noremap <silent> <leader>to :TagbarOpen<cr>
-        noremap <silent> <leader>tc :TagbarClose<cr>
+    " mappings for plugins that don't have these nice settings
+    noremap <silent> <leader>u :MundoToggle<cr>
+    noremap <silent> <leader>n :NERDTreeTabsToggle<cr>
+    noremap <silent> <leader>tt :TagbarToggle<cr>
+    noremap <silent> <leader>to :TagbarOpen<cr>
+    noremap <silent> <leader>tc :TagbarClose<cr>
 
-        noremap <silent> <leader>a :AnsiEsc<cr>
-        noremap <silent> <leader>A :AnsiEsc!<cr>
+    noremap <silent> <leader>a :AnsiEsc<cr>
+    noremap <silent> <leader>A :AnsiEsc!<cr>
 
-        noremap <silent> <leader>se :Errors<cr>
-        noremap <silent> <leader>sc :SyntasticCheck<cr>
-        noremap <silent> <leader>st :SyntasticToggleMode<cr>
-        noremap <silent> <leader>si :SyntasticInfo<cr>
-        noremap <silent> <leader>sr :SyntasticReset<cr>
+    noremap <silent> <leader>se :Errors<cr>
+    noremap <silent> <leader>sc :SyntasticCheck<cr>
+    noremap <silent> <leader>st :SyntasticToggleMode<cr>
+    noremap <silent> <leader>si :SyntasticInfo<cr>
+    noremap <silent> <leader>sr :SyntasticReset<cr>
 
-        noremap <leader>D :YcmCompleter GetDoc<cr>
-        noremap <leader>GR :YcmCompleter GoToReferences<cr>
-        noremap <leader>GG :YcmCompleter GoTo<cr>
-        noremap <leader>GS :vsplit<cr>:YcmCompleter GoTo<cr>
-        noremap <leader>GT :tab YcmCompleter GoTo<cr>
-        " need to type a new name, so trailing space instead of <cr>,
-        exec "noremap <leader>RR :YcmCompleter RefactorRename\x20"
+    noremap <leader>D :YcmCompleter GetDoc<cr>
+    noremap <leader>GR :YcmCompleter GoToReferences<cr>
+    noremap <leader>GG :YcmCompleter GoTo<cr>
+    noremap <leader>GS :vsplit<cr>:YcmCompleter GoTo<cr>
+    noremap <leader>GT :tab YcmCompleter GoTo<cr>
+    " need to type a new name, so trailing space instead of <cr>,
+    exec "noremap <leader>RR :YcmCompleter RefactorRename\x20"
 
-        noremap <leader>gd :Gvdiffsplit<cr>
-        noremap <leader>gb :Git blame<cr>
+    noremap <leader>gd :Gvdiffsplit<cr>
+    noremap <leader>gb :Git blame<cr>
 
-        " align vim-commentary w/ other comment bindings
-        vnoremap <C-_> :'<,'>Commentary<cr>
+    " align vim-commentary w/ other comment bindings
+    vnoremap <C-_> :'<,'>Commentary<cr>
 
-        " colorscheme babymate256
-        " colorscheme Chasing_Logic
-        " colorscheme Tomorrow-Night
-        " colorscheme Tomorrow-Night-Eighties
-        colorscheme apprentice
-        " colorscheme atom-dark-256
-        " colorscheme badwolf
-        " colorscheme bubblegum-256-dark
-        " colorscheme darkula
-        " colorscheme desert
-        " colorscheme iceberg
-        " colorscheme kolor
-        " colorscheme lilypink
-        " colorscheme molokai
-        " colorscheme muon
-        " colorscheme neverland
-        " colorscheme neverland2
-        " colorscheme slate
-        " colorscheme wombat256mod
+    " colorscheme babymate256
+    " colorscheme Chasing_Logic
+    " colorscheme Tomorrow-Night
+    " colorscheme Tomorrow-Night-Eighties
+    colorscheme apprentice
+    " colorscheme atom-dark-256
+    " colorscheme badwolf
+    " colorscheme bubblegum-256-dark
+    " colorscheme darkula
+    " colorscheme desert
+    " colorscheme iceberg
+    " colorscheme kolor
+    " colorscheme lilypink
+    " colorscheme molokai
+    " colorscheme muon
+    " colorscheme neverland
+    " colorscheme neverland2
+    " colorscheme slate
+    " colorscheme wombat256mod
 
-        filetype indent on
-
-    endif
+    filetype indent on
 
     " }}}
-
-    " tabs {{{
-    " set shiftwidth=4
-    " set softtabstop=4
-    " set expandtab
-    " set smarttab
-    " end tabs }}}
 
     " powerline {{{
-    " set PYTHONHOME to the third parent of $VIMRUNTIME; the default Python
-    " home seems broken rn in linuxbrew vim, causing the next block to explode
-    let $PYTHONHOME = $VIMRUNTIME->fnamemodify(':h:h:h')
-    python3 << trim endpython
-        def try_add_powerline():
-            try:
-                from powerline.vim import setup
-                setup()
-                return
-            except ImportError:
-                pass
+    if has('python3')
+        python3 << trim endpython
+            def try_add_powerline():
+                try:
+                    from powerline.vim import setup
+                    setup()
+                    return
+                except ImportError:
+                    pass
 
-            import os, sys
-            root = os.environ.get('POWERLINE_ROOT')
-            if not root or not os.path.exists(root):
-                return
+                import os, sys
+                root = os.environ.get('POWERLINE_ROOT')
+                if not root or not os.path.exists(root):
+                    return
 
-            site_packages = os.path.dirname(root)
-            sys.path.append(site_packages)
+                site_packages = os.path.dirname(root)
+                sys.path.append(site_packages)
 
-            try:
-                from powerline.vim import setup
-                setup()
-                return
-            except ImportError:
-                pass
+                try:
+                    from powerline.vim import setup
+                    setup()
+                    return
+                except ImportError:
+                    pass
 
-        try_add_powerline()
-        del try_add_powerline
-    endpython
+            try_add_powerline()
+            del try_add_powerline
+        endpython
+    endif
     " }}}
-
-" endif
-" vim: sw=4 sts=4 et fdm=marker
-
-
-" let b:cucumber_steps_glob = '%:p:h:s?.*[\/].*step.*\zs[\/].*??'
+endif
