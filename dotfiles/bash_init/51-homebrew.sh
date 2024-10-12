@@ -22,3 +22,10 @@ pathmungex -Eeb XDG_DATA_DIRS "$HOMEBREW_PREFIX/share"
 # # want to try to load homebrew's installed completion scripts
 # # pathmungex --before BASH_COMPLETION_PATHS "$HOMEBREW_PREFIX/etc/bash_completion"
 # pathmungex BASH_COMPLETION_USER_DIR "$HOMEBREW_PREFIX/etc/bash_completion.d"
+
+# remove linuxbrew from the current shell's environment
+unbrew() {
+    for pathvar in PATH MANPATH INFOPATH PKG_CONFIG_PATH XDG_DATA_DIRS; do
+        pathmungex -D $pathvar "$HOMEBREW_PREFIX/*"
+    done
+}

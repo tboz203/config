@@ -4,6 +4,10 @@ startup_mode = "Maximized"
 [env]
 TURBO_MODE = "1"
 
+# [shell]
+# program = "/usr/local/bin/bash"
+# args = ["--login", "-i"]
+
 [font]
 size = 8
 
@@ -13,10 +17,13 @@ size = 8
 
 # XXX 😀😃😄😁🙃😗🤪🤑🤐😏😒🙄🤯🤠😕🙁 XXX
 
+# family = "FiraCode Nerd Font with Fallback"
 family = "JetBrains Mono with Fallback"
 
 [colors]
-draw_bold_text_with_bright_colors = true
+draw_bold_text_with_bright_colors = false
+
+# Colors (Tomorrow Night)
 
 [colors.bright]
 black = "#444444"

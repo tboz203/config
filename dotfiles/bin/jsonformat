@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+echo >&2 "no one home, please go away"
+exit 1
+
+declare HELP USAGE
+declare -a SOURCES
+
+while (($#)); do
+    arg=$1 && shift
+    case $arg in
+        -h | --help) HELP=1 ;;
+        -*) echo >&2 "[X] Unrecognized option: $arg" && USAGE=1 ;;
+        *) SOURCES+=("$arg") ;;
+    esac
+done
+
+MY_NAME=$(basename "$BASH_SOURCE")
+USAGE_LINE="Usage: $MY_NAME [-h] [SOURCES ...]"
+
+if [[ ${HELP-} ]]; then
+    cat >&2 << EOF
+$MY_NAME: format json files
+$USAGE_LINE
+
+Options:
+
+-h      print this help text and exit
+
+Arguments:
+SOURCES     one or more files or directories to find JSON files in
+EOF
+
+    exit 0
+fi
+
+if [[ ${USAGE-} ]]; then
+    echo >&2 "$USAGE_LINE"
+    exit 1
+fi
+
+declare -a FILES DIRS
+declare WARNINGS
+
+jsonformat() {
+    jq . "$1" | sponge "$1"
+}
+
+if [[ ${#SOURCES} -eq 0 ]]; then
+    SOURCES=(.)
+fi
+
+for source in "${SOURCES[@]}"; do
+    if [[ -f $source ]]; then
+        FILES+=("$source")
+    elif [[ -d $source ]]; then
+        DIRS+=("$source")
+    else
+        echo >&2 "File does not exist: $source"
+        WARNINGS=1
+    fi
+done
+
+fulltext=$("${command[@]}") ||
+
+    # read lines into our array
+    readarray -t "$arrayref" <<< "$fulltext"

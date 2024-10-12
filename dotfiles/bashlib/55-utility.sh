@@ -184,7 +184,7 @@ get_array() {
 
     # execute the command
     local fulltext
-    fulltext=$("${command[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
+    fulltext=$("${command[@]}") || throw "Command failed ($(printf '%q ' "${command[@]}")): $?${fulltext:+:$'\n'$fulltext}"
 
     # read lines into our array
     readarray -t "$arrayref" <<< "$fulltext"

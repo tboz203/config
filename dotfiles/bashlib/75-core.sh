@@ -308,6 +308,7 @@ pathmungex() {
             -n | --no-check | --nocheck) CHECK=nocheck ;;
             -r | --replace) REPLACE=1 ;;
             -d | --delete) DELETE=1 ;;
+            -D | --delete-matching) DELETE=1 DELETE_MATCHING=1 ;;
             -h | --help) HELP=1 ;;
             -m | --marker)
                 if [[ -v 1 && $1 != -* ]]; then
@@ -349,6 +350,9 @@ pathmungex() {
             -f | --fail         Fail with an error and leave PATHVAR unmodified if any
                                 ENTRIES do not exist
             -r | --replace      Remove and re-add existing matching entries
+            -d | --delete       Remove matching entries
+            -D | --delete-matching
+                                Remove matching entries, respecting wildcards
             -n | --no-check     Do not check whether entries exist on disk
             -h | --help         Print this message and halt
 
@@ -392,52 +396,68 @@ pathmungex() {
 
     _if_debug inspect_var EXPORT CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" PATHLIST ENTRIES
 
-    local entry
-    for entry in "${ENTRIES[@]}"; do
-        # entries with embedded colons are not allowed
-        [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
-
-        # if the list is not empty, check for our entry
-        if [[ $PATHLIST != : ]]; then
-            # either the entry is `/`, or we should strip a trailing slash
-            local match=$entry
-            [[ $match == / ]] || match=${match%/}
-            # either the entry is null, or we should match list values with trailing slashes
-            local suffix=
-            [[ -z $match ]] || suffix="?(/)"
-
-            if [[ ${REPLACE-} || ${DELETE-} ]]; then
-                # replace `:$entry:` with `:`
-                PATHLIST=${PATHLIST//:"$match"$suffix:/:}
-            else
-                # skip this entry if it already exists in the list
-                [[ ${PATHLIST} != *:"$match"$suffix:* ]] || continue
+    if [[ ${DELETE_MATCHING-} ]]; then
+        local ENTRYGLOB
+        ENTRYGLOB=$(join '|' "${ENTRIES[@]}")
+        ENTRYGLOB="@($ENTRYGLOB)?(/)"
+        local -a PATHARRAY
+        IFS=: read -ra PATHARRAY <<< "${!PATHVAR-}"
+        PATHLIST=:
+        local pathitem
+        for pathitem in "${PATHARRAY[@]}"; do
+            # shellcheck disable=2053  # the glob matching is intentional
+            if [[ $pathitem != $ENTRYGLOB ]]; then
+                PATHLIST+="$pathitem:"
             fi
-        fi
+        done
+    else
+        local entry
+        for entry in "${ENTRIES[@]}"; do
+            # entries with embedded colons are not allowed
+            [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
 
-        if [[ ${DELETE-} ]]; then
-            # no need to check entry or track additions
-            continue
-        fi
+            # if the list is not empty, check for our entry
+            if [[ $PATHLIST != : ]]; then
+                # either the entry is `/`, or we should strip a trailing slash
+                local match=$entry
+                [[ $match == / ]] || match=${match%/}
+                # either the entry is null, or we should match list values with trailing slashes
+                local suffix=
+                [[ -z $match ]] || suffix="?(/)"
 
-        # do any entry checking
-        if [[ $CHECK == nocheck ]]; then
-            # explicitly not checking file existance
-            true
-        elif [[ -z $entry || -e $entry ]]; then
-            # null entry or file exists
-            # strip a trailing slash (unless entry is `/`)
-            [[ $entry == / ]] || entry=${entry%/}
-        elif [[ $CHECK == fail ]]; then
-            throw "entry does not exist: $entry"
-        else
-            continue
-        fi
+                if [[ ${REPLACE-} || ${DELETE-} ]]; then
+                    # replace `:$entry:` with `:`
+                    PATHLIST=${PATHLIST//:"$match"$suffix:/:}
+                else
+                    # skip this entry if it already exists in the list
+                    [[ ${PATHLIST} != *:"$match"$suffix:* ]] || continue
+                fi
+            fi
 
-        # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
-        [[ $ADDITIONS != *:"$entry":* ]] || continue
-        ADDITIONS+="$entry:"
-    done
+            if [[ ${DELETE-} ]]; then
+                # no need to check entry or track additions
+                continue
+            fi
+
+            # do any entry checking
+            if [[ $CHECK == nocheck ]]; then
+                # explicitly not checking file existance
+                true
+            elif [[ -z $entry || -e $entry ]]; then
+                # null entry or file exists
+                # strip a trailing slash (unless entry is `/`)
+                [[ $entry == / ]] || entry=${entry%/}
+            elif [[ $CHECK == fail ]]; then
+                throw "entry does not exist: $entry"
+            else
+                continue
+            fi
+
+            # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
+            [[ $ADDITIONS != *:"$entry":* ]] || continue
+            ADDITIONS+="$entry:"
+        done
+    fi
 
     if [[ ${DELETE-} ]]; then
         unwraplist "$PATHVAR" "$PATHLIST"

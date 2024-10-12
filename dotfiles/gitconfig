@@ -95,8 +95,8 @@
 	logdiff = log --pretty=contrast --no-graph --reverse --patch
 	ld = logdiff
 	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
-	lw = !viewpane -- git l --color -n '$(tput lines)'
-	lwa = !viewpane -- git la --color -n '$(tput lines)'
+	lw = watch l
+	lwa = watch la
 	logwatch = lwa
 	logtab = !git l --pretty=tableable | column -t -s '&'
 

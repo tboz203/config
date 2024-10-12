@@ -1,0 +1,89 @@
+[2024-10-11 02:32:43,938 INFO     viewpane] starting: Namespace(delay=None, command=['git', '-c', 'color.ui=always', 'la'], command_str=None)
+[2024-10-11 02:32:43,939 DEBUG    viewpane] draw rate is None
+[2024-10-11 02:32:43,939 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:43,974 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:43,996 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:44,025 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:46,032 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:46,086 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:46,112 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:46,145 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:48,054 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:48,084 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:48,104 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:48,135 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:50,140 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:50,173 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:50,201 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:50,228 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:52,233 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:52,262 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:52,302 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:52,332 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:54,237 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:54,265 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:54,291 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:54,321 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:56,212 DEBUG    viewpane] moving pad (+15, +0) to (15, 0)
+[2024-10-11 02:32:56,212 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:56,312 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:56,342 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:56,362 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:56,417 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:56,791 DEBUG    viewpane] moving pad (+15, +0) to (30, 0)
+[2024-10-11 02:32:56,791 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:56,972 DEBUG    viewpane] moving pad (+15, +0) to (45, 0)
+[2024-10-11 02:32:56,972 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:57,497 DEBUG    viewpane] moving pad (-30, +0) to (15, 0)
+[2024-10-11 02:32:57,497 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:57,689 DEBUG    viewpane] moving pad (-30, +0) to (0, 0)
+[2024-10-11 02:32:57,689 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:57,883 DEBUG    viewpane] moving pad (-30, +0) to (0, 0)
+[2024-10-11 02:32:57,883 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:58,076 DEBUG    viewpane] moving pad (-30, +0) to (0, 0)
+[2024-10-11 02:32:58,077 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:32:58,378 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:32:58,399 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:32:58,422 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:32:58,451 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:00,456 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:00,478 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:00,496 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:00,518 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:02,523 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:02,568 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:02,593 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:02,630 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:04,540 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:04,576 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:04,604 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:04,640 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:06,545 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:06,566 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:06,590 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:06,622 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:08,642 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:08,665 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:08,691 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:08,727 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:10,734 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:10,775 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:10,801 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:10,842 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:12,746 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:12,773 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:12,800 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:12,823 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:14,831 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:14,862 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:14,889 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:14,938 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:16,846 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:16,874 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:16,892 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:16,913 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:18,920 DEBUG    viewpane] calling command (git -c color.ui=always la)!
+[2024-10-11 02:33:18,968 DEBUG    viewpane] writing 299 lines into pad
+[2024-10-11 02:33:18,998 DEBUG    viewpane] resizing pad to 299, 121
+[2024-10-11 02:33:19,023 DEBUG    viewpane] refreshing the pad
+[2024-10-11 02:33:19,509 INFO     viewpane] stopping: 0
