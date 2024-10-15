@@ -40,7 +40,7 @@ source "$PYENV_ROOT/completions/pyenv.bash"
 
 declare -a func_lines
 # if we succeed in reading the lines of the function `_pyenv` ...
-if get_array func_lines declare -f _pyenv 2>/dev/null; then
+if get_array func_lines declare -f _pyenv 2> /dev/null; then
     # and the last statement does not include "set +o noglob"
     if [[ ${func_lines[-2]} != *"set +o noglob"* ]]; then
         # remove the final closing brace

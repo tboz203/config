@@ -21,9 +21,9 @@ wraplist() {
     valid_name "$name" || throw "Not a valid name: \"$name\""
 
     case $list in
-    "") eval "$name=:" ;;
-    :) eval "$name=::" ;;
-    *) eval "$name=':$list:'" ;;
+        "") eval "$name=:" ;;
+        :) eval "$name=::" ;;
+        *) eval "$name=':$list:'" ;;
     esac
 }
 
@@ -41,17 +41,17 @@ unwraplist() {
     valid_name "$name" || throw "Not a valid name: \"$name\""
 
     case $list in
-    # empty list
-    :) eval "$name=" ;;
-    # list with a single null entry
-    ::) eval "$name=:" ;;
-    # any other wrapped list
-    :*:)
-        list=${list%:} && list=${list#:}
-        eval "$name='$list'"
-        ;;
-    # something else
-    *) throw "Invalid list: \"$list\"" ;;
+        # empty list
+        :) eval "$name=" ;;
+        # list with a single null entry
+        ::) eval "$name=:" ;;
+        # any other wrapped list
+        :*:)
+            list=${list%:} && list=${list#:}
+            eval "$name='$list'"
+            ;;
+        # something else
+        *) throw "Invalid list: \"$list\"" ;;
     esac
 }
 
@@ -130,7 +130,7 @@ declared() {
     # like [[ -v NAME ]], but for declarations
     # usage: declared NAME...
     (($# >= 1)) || throw "Not enough arguments"
-    declare -p -- "$@" &>/dev/null
+    declare -p -- "$@" &> /dev/null
 } && complete -v declared
 
 attributes() {
@@ -179,8 +179,8 @@ _get_array() {
     while (($#)); do
         local arg=$1 && shift
         case $arg in
-        --) commandargs=("$@") && break ;;
-        *) readargs+=("$arg") ;;
+            --) commandargs=("$@") && break ;;
+            *) readargs+=("$arg") ;;
         esac
     done
 
@@ -196,7 +196,7 @@ _get_array() {
     fulltext=$("${commandargs[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
 
     # map the array
-    readarray -t "${readargs[@]}" <<<"$fulltext"
+    readarray -t "${readargs[@]}" <<< "$fulltext"
 }
 
 get_array() {
@@ -214,7 +214,7 @@ get_array() {
     fulltext=$("${command[@]}") || throw "Command execution failure${fulltext:+:$'\n'$fulltext}"
 
     # read lines into our array
-    readarray -t "$arrayref" <<<"$fulltext"
+    readarray -t "$arrayref" <<< "$fulltext"
 }
 
 from_list() {
@@ -232,13 +232,13 @@ from_list() {
     declared "$arrayref" || declare -ga "$arrayref" || return 1
 
     case $list in
-    "") eval "$arrayref=()" ;;
-    :) eval "$arrayref=('')" ;;
-    *)
-        # read into arrayref, splitting on `:`
-        # (seems to use terminator semantics, so add an extra final separator)
-        IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
-        ;;
+        "") eval "$arrayref=()" ;;
+        :) eval "$arrayref=('')" ;;
+        *)
+            # read into arrayref, splitting on `:`
+            # (seems to use terminator semantics, so add an extra final separator)
+            IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
+            ;;
     esac
 }
 
@@ -355,26 +355,26 @@ _fixargs() {
     local -a arguments
     while (($#)); do
         case $1 in
-        --)
-            # halt argument parsing; take all remaining args verbatim
-            arguments+=("$@") && break
-            ;;
-        -*=*)
-            # split --var=value pairs, preserving whitespace, and re-consider
-            set -- "${1%%=*}" "${1#*=}" "${@:2}"
-            ;;
-        -[^-]?*)
-            # split `-xyz` flags into `-x -y -z`, and re-consider
-            local split=()
-            for ((i = 1; i < ${#1}; i++)); do
-                split+=("-${1:$i:1}")
-            done
-            set -- "${split[@]}" "${@:2}"
-            ;;
-        *)
-            # others unmodified
-            arguments+=("$1") && shift
-            ;;
+            --)
+                # halt argument parsing; take all remaining args verbatim
+                arguments+=("$@") && break
+                ;;
+            -*=*)
+                # split --var=value pairs, preserving whitespace, and re-consider
+                set -- "${1%%=*}" "${1#*=}" "${@:2}"
+                ;;
+            -[^-]?*)
+                # split `-xyz` flags into `-x -y -z`, and re-consider
+                local split=()
+                for ((i = 1; i < ${#1}; i++)); do
+                    split+=("-${1:$i:1}")
+                done
+                set -- "${split[@]}" "${@:2}"
+                ;;
+            *)
+                # others unmodified
+                arguments+=("$1") && shift
+                ;;
         esac
     done
 
@@ -412,7 +412,7 @@ file_context() {
     declared "${arrayref:?}" || declare -ga "${arrayref:?}"
     eval "${arrayref:?}=()"
 
-    mapfile -t -O $start -n $count -s $((start - 1)) "${arrayref:?}" <"$filename" &>/dev/null
+    mapfile -t -O $start -n $count -s $((start - 1)) "${arrayref:?}" < "$filename" &> /dev/null
 }
 
 showframe() {
@@ -457,17 +457,17 @@ setopts() {
     while (($#)); do
         local arg=$1 && shift
         case $arg in
-        -h | --help) HELP=1 ;;
-        -s | --store)
-            if [[ -v 1 && $1 != @(-*|*:*) ]]; then
-                STORE=$1 && shift
-            else
-                _err "Argument required: \"$arg\""
-                USAGE=1
-            fi
-            ;;
-        -*) _err "Unrecognized option: \"$arg\"" && USAGE=1 ;;
-        *) POSITIONAL+=("$arg") ;;
+            -h | --help) HELP=1 ;;
+            -s | --store)
+                if [[ -v 1 && $1 != @(-*|*:*) ]]; then
+                    STORE=$1 && shift
+                else
+                    _err "Argument required: \"$arg\""
+                    USAGE=1
+                fi
+                ;;
+            -*) _err "Unrecognized option: \"$arg\"" && USAGE=1 ;;
+            *) POSITIONAL+=("$arg") ;;
         esac
     done
 
@@ -476,7 +476,7 @@ setopts() {
     local USAGE_TEXT="${FUNCNAME[0]} [--help] [--store NAME] OPTS_LIST"
 
     if [[ ${HELP-} ]]; then
-        dedent <<<"
+        dedent <<< "
             ${FUNCNAME[0]}: set shell options from a \$SHELLOPTS-like list
             Usage: ${USAGE_TEXT}
 

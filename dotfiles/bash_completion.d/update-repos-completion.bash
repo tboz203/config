@@ -1,1 +1,0 @@
-../../../workspace/update-repos/update-repos-completion.bash
