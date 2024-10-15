@@ -12,13 +12,11 @@ pathmungex --replace PATH \
     ~/.tgenv/bin \
     ~/.tfenv/bin \
     ~/go/bin \
-    ~/workspace/maxar/dodev \
     /usr/local/go/bin \
     /usr/local/bin \
     /usr/bin
 
 pathmungex --before PATH \
-    ~/.maxar-bin \
     ~/.bin
 
 pathmungex --after PATH \

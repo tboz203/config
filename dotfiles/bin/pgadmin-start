@@ -6,4 +6,4 @@ exec docker run \
     -e 'PGADMIN_DEFAULT_EMAIL=admin@pgadmin.com' \
     -e 'PGADMIN_DEFAULT_PASSWORD=password' \
     --name pgadmin \
-    -d docker.artpro.digitalglobe.com:443/dpage/pgadmin4:latest
+    -d dpage/pgadmin4:latest

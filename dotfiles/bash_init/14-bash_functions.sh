@@ -86,13 +86,6 @@ faketty() {
     script -qefc "$(printf "%q " "$@")" /dev/null
 } && complete -c faketty
 
-mxtime() {
-    # get timestamps for maxar
-    local -a args
-    (($# > 0)) && args=(--date "$*")
-    date -Iseconds "${args[@]}" | sed 's/+0000/Z/'
-}
-
 pstree() {
     # wrapper for pstree default arguments
     (($# == 0)) && set -- -H $$ $$

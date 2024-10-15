@@ -8,6 +8,7 @@
 	editor = nvim
 	autocrlf = false
 	excludesfile = ~/.gitignore
+	pager = less -F
 	; pager = delta
 [merge]
 	tool = nvimdiff

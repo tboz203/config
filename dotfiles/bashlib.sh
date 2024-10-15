@@ -22,10 +22,6 @@ _bashlib() {
 
     shopt -u nocasematch
 
-    if ((BASH_VERSINFO[0] >= 5)); then
-        shopt -s globskipdots
-    fi
-
     if [[ ! -d ${_BASHLIB_ROOT:?} ]]; then
         echo >&2 "_BASHLIB_ROOT ($_BASHLIB_ROOT) does not exist"
         return 1
