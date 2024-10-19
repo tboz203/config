@@ -121,13 +121,13 @@ snip() {
     tail -n "$count"
 }
 
-make() {
-    bear intercept --force-wrapper -- make -j "$(nproc)" "$@"
-    local retval=$?
-    bear citnames --append
-    return $retval
-}
-
+# make() {
+#     bear intercept --force-wrapper -- make -j "$(nproc)" "$@"
+#     local retval=$?
+#     bear citnames --append
+#     return $retval
+# }
+#
 nvfd() {
     local -a files
     get_array files fd --type file "$@" || return
