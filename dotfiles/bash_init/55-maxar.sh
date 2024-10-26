@@ -11,6 +11,8 @@ else
     echo "[X] wb_tools missing"
 fi
 
+export AWS_PROFILE=dg-gov-dev-train-oasis-mcs-PowerUsers
+
 awsCreds2() {
     local -a POSITIONAL
     local HELP USAGE FORCE ROOT FILENAME
