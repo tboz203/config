@@ -6,7 +6,7 @@ trap 'echo "err ($?) on line ($LINENO): $BASH_COMMAND"' ERR
 
 RECIPIENT=thomas.bozeman@maxar.com
 USER=th026106
-INPUTS=("/home/$USER" /usr/local /etc)
+INPUTS=("/home/" /usr/local /etc)
 TITLE="backup-$(date +%Y-%m-%d)"
 TARBALL="$PWD/${TITLE}.tar.zst.gpg"
 

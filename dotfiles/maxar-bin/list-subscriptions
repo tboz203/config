@@ -91,7 +91,7 @@ fi
 
 envs=(
     reg-us-east-1
-    dev-us-east-1
+    int-us-east-1
 )
 
 for env in "${envs[@]}"; do

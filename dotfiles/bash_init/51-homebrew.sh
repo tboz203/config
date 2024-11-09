@@ -11,12 +11,12 @@ setpath -er HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew" || return 0
 export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
 export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
 
-pathmungex PATH "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin" "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin"
+pathmungex -r PATH "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin" "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin"
 
-pathmungex -Eeb MANPATH "$HOMEBREW_PREFIX/share/man" ""
-pathmungex -Eeb INFOPATH "$HOMEBREW_PREFIX/share/info"
-pathmungex -Eeb PKG_CONFIG_PATH "$HOMEBREW_PREFIX"/{lib,lib64,share}/pkgconfig
-pathmungex -Eeb XDG_DATA_DIRS "$HOMEBREW_PREFIX/share"
+pathmungex -Eer MANPATH "$HOMEBREW_PREFIX/share/man" ""
+pathmungex -Eer INFOPATH "$HOMEBREW_PREFIX/share/info"
+pathmungex -Eer PKG_CONFIG_PATH "$HOMEBREW_PREFIX"/{lib,lib64,share}/pkgconfig
+pathmungex -Eer XDG_DATA_DIRS "$HOMEBREW_PREFIX/share"
 
 # # homebrew's version of bash completion is old and breaks things, but we do
 # # want to try to load homebrew's installed completion scripts
