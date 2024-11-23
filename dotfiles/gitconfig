@@ -73,7 +73,7 @@
 	contrast = %C(black blue)COMMIT %h %aN %ad%d %s%n%B
 	; no colors here b/c `column` can't count characters correctly
 	tableable = & %h & %aN & %ad & %<(80,trunc)%s & %d
-	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %gs - %C(dim blue)%s
+	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %C(dim blue)[%gs] %C(auto)%s
 [alias]
 	s = status
 	si = status --ignored

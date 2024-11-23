@@ -62,6 +62,7 @@ if [[ -v ENVIRONMENT ]]; then
         EUREKA_SERVER_URL=$try_url
     else
         echo >&2 "[!] could not match environment '$ENVIRONMENT'"
+        exit 1
     fi
 fi
 
