@@ -5,6 +5,7 @@
 shopt -s expand_aliases
 
 alias rmf='rm -rf'
+alias rimraf='rm -rf'
 alias xargs='xargs -r '
 alias day='date +%Y-%m-%d'
 alias full='date "+%Y.%m.%d-%H.%M.%S"'
@@ -43,6 +44,9 @@ alias view='view -p'
 alias nv=nvim
 alias nvdiff='nv -d'
 alias nvimdiff=nvdiff
+
+alias watch='watch '
+alias sudo='sudo '
 
 # default flags
 # --------------------

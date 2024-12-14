@@ -52,23 +52,21 @@ mw() {
     mv -t "$dest" "${files[@]}" && cd "$dest" || return
 } && complete -f mw
 
+ALT_PAGER=$(type -P bat || type -P less)
+
 jql() {
     # mnemonic: `jq | less`
-    # shellcheck disable=2155
-    local pager=$(type -P bat || type -P less)
-    jq -C "${@:-.}" | "$pager"
+    jq -C "${@:-.}" | "$ALT_PAGER"
 }
 
 yql() {
     # mnemonic: `yq | less`
-    # shellcheck disable=2155
-    local pager=$(type -P bat || type -P less)
-    yq -C "${@:-.}" | "$pager"
+    yq -C "${@:-.}" | "$ALT_PAGER"
 }
 
-xenv() {
-    # list environment variables (like `env`, but better)
-    compgen -v | grep -v "^_" | sort | xargs declare -p
+hdl() {
+    # mnemonic: `hd | less`
+    hd "$@" | "$ALT_PAGER"
 }
 
 dush() {
