@@ -61,3 +61,9 @@ git reflog expire --expire=now --all
 
 # and collect garbage
 git gc --prune=now
+
+echo -e '\e[1m'
+echo "[.] Repository minified. You should ensure fetching from your configured"
+echo "    remotes will not un-minify your repository."
+echo -e '\e[0m'
+git config --get-regexp '^remote\.' | column --table --table-columns-limit 2

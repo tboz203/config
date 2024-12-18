@@ -120,6 +120,7 @@ fi
 if [[ ${LOGFILE-} ]]; then
     {
         echo "[.] date: $(date +%c)"
+        echo "[$] $(quoted "${COMMAND[@]}" | tr '\n' ' ')"
         echo "$output"
     } >> "$LOGFILE"
 fi
