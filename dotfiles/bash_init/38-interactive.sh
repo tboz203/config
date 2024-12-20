@@ -23,8 +23,6 @@ HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S> "
 
 if [[ -n ${SUDO_USER-} ]]; then
     HISTFILE=/root/.bash_history.${SUDO_USER}
-    history -c
-    history -r
 fi
 
 # check the window size after each command

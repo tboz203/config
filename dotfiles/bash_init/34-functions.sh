@@ -97,13 +97,13 @@ pstree() {
     command pstree -Uas "$@"
 }
 
-unalias which &> /dev/null || true
-which() {
-    {
-        alias -p
-        declare -f
-    } | command which --tty-only --read-alias --read-alias --read-functions --show-dot --show-tilde "$@"
-}
+# unalias which &> /dev/null || true
+# which() {
+#     {
+#         alias -p
+#         declare -f
+#     } | command which --tty-only --read-alias --read-alias --read-functions --show-dot --show-tilde "$@"
+# }
 
 snip() {
     if [[ $# -gt 1 || ${1-} == -* ]]; then

@@ -59,6 +59,10 @@ def link_files(
     """
     link files from one directory to another
     """
+    if not dest_dir.exists():
+        logger.info("creating %s", dest_dir)
+        if not dryrun:
+            dest_dir.mkdir(parents=True)
     for path in source_dir.iterdir():
         link = dest_dir.joinpath(path.name)
         if transformer:

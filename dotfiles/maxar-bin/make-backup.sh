@@ -26,27 +26,27 @@ fi
 echo >&2 "[.] Creating backup for $USER: $TARBALL"
 echo >&2 "[.] Starting: $(date)"
 
-WORKSPACE=$(mktemp -d "/tmp/${TITLE}.XXXXXX")
+WORKSPACE="/home/$USER/$TITLE"
 # NOTE: workspace will remain on ERR
 trap 'rm -rf $WORKSPACE' EXIT
-cd "$WORKSPACE"
+mkdir "$WORKSPACE" && cd "$WORKSPACE"
 
 # make a local copy of all yum installs
-yumdb search command_line '*' > installs.txt
+(yumdb search command_line '*' || echo "[X] could not list installs") &> installs.txt
 (yum history info '*' || echo "[X] could not read history") &> yum-history.txt
 
 # and of brew installs
-which brew &> /dev/null && brew list --installed-on-request > brew-installs.txt
+# which brew &> /dev/null && brew list --installed-on-request > brew-installs.txt
+(sudo -u "$USER" -i brew list --installed-on-request || echo "[X] could not list installs") &> brew-installs.txt
 
 # grab crontabs
 crontab -u "$USER" -l > "$USER.crontab" || true
-crontab -l > "$USER.crontab" || true
+crontab -l > "root.crontab" || true
 
 # do the thing
 tar -c \
     --ignore-failed-read --absolute-names \
-    --exclude-caches --exclude-backups --exclude=.cache --exclude=cache \
-    --exclude=node_modules --exclude-tag=pyvenv.cfg --exclude=tmp \
+    --exclude-caches --exclude-backups --exclude=.cache --exclude=cache --exclude=tmp \
     -- * "${INPUTS[@]}" |
     zstd --long -7 |
     gpg --compress-algo none --output "$TARBALL" --encrypt --recipient "$RECIPIENT"

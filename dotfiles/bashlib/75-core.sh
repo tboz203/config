@@ -75,6 +75,7 @@ setpath() {
         return 1
     fi
 }
+alias setpath='withflags +vx -- setpath '
 
 sourcepath() {
     if [[ $# -ne 1 || ${1-} == -* ]]; then
@@ -496,6 +497,7 @@ pathmungex() {
     _if_verbose _log "set $PATHVAR to ([${!PATHVAR//:/], [}])"
     hash -r
 }
+alias pathmungex='withflags +vx -- pathmungex '
 
 cleanpath() {
     if [[ $# -gt 1 || ${1-} == -* ]]; then

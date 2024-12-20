@@ -21,14 +21,18 @@ _bash_init() {
         else
             echo >&2 "[!] $FUNCNAME: Will not source file: $item"
         fi
-        set +vx
+        # set +vx
     done
 
     # set +eu
 } && export -f _bash_init
 
+# set -vx
+
 # don't run twice, and don't recurse
 [[ ${_BASH_INIT_RUN-} ]] || _bash_init
+
+# set +vx
 
 # and don't let anybody add any extra crap!
 return 0

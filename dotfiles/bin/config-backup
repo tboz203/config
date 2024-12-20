@@ -41,8 +41,8 @@ backup_current_repository() {
     git push --porcelain
 }
 
-# not sure how this would act recursively, but not a problem yet
-git submodule foreach bash -ec backup_current_repository
+# # not sure how this would act recursively, but not a problem yet
+# git submodule foreach bash -ec backup_current_repository
 
 echo "Entering '$(pwd -P)'"
 backup_current_repository
