@@ -2,6 +2,7 @@
 # bash init script
 
 _bash_init() {
+    # set +o history
     declare -g _BASH_INIT_STARTED=1
 
     shopt -s checkhash
@@ -24,6 +25,7 @@ _bash_init() {
         # set +vx
     done
 
+    # set -o history
     # set +eu
 } && export -f _bash_init
 

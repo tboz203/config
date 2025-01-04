@@ -1,0 +1,14 @@
+# black
+# GitPython
+# ipython
+# mypy
+# pip-tools
+# pipdeptree
+# requests
+# stransi
+# -----
+GitPython
+python-dateutil
+PyYAML
+requests
+stransi

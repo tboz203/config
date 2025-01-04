@@ -16,7 +16,7 @@ spinner() {
     printf "\e[1K\e[G%s" "${chars:idx:1}"
 }
 
-setpath() {
+_setpath() {
     local -a POSITIONAL
     local EXPORT RETURN HELP USAGE
     fixargs
@@ -74,8 +74,7 @@ setpath() {
     elif [[ ${RETURN-} ]]; then
         return 1
     fi
-}
-alias setpath='withflags +vx -- setpath '
+} && alias setpath='withflags +vx -- _setpath '
 
 sourcepath() {
     if [[ $# -ne 1 || ${1-} == -* ]]; then
@@ -286,7 +285,7 @@ with_files() {
     "${command[@]}" "${files[@]}"
 } && complete -c with_files
 
-pathmungex() {
+_pathmungex() {
     # like pathmunge, but better
 
     _if_verbose _log "$* # called at $(called-at 1)"
@@ -496,8 +495,7 @@ pathmungex() {
     _if_debug inspect_var PATHLIST ADDITIONS FRONT BACK
     _if_verbose _log "set $PATHVAR to ([${!PATHVAR//:/], [}])"
     hash -r
-}
-alias pathmungex='withflags +vx -- pathmungex '
+} && alias pathmungex='withflags +vx -- _pathmungex '
 
 cleanpath() {
     if [[ $# -gt 1 || ${1-} == -* ]]; then

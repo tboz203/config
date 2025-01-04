@@ -6,6 +6,7 @@ pathmungex --replace --before PATH \
 
 if [[ ${_SHELL_INTERACTIVE-} ]]; then
     shopt -s failglob
+    history -c && history -r
 fi
 
 history -c && history -r

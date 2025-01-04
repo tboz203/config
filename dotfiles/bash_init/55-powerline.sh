@@ -1,15 +1,6 @@
 # setup powerline
 # shellcheck disable=2034
 
-# [[
-#     ${_SHELL_INTERACTIVE-} &&
-#     ${HAVE_POWERLINE_FONTS-} &&
-#     ($TERM == *256color || $COLORTERM == truecolor) ]] &&
-#     havebin powerline || return 0
-
-# if this isn't working and you don't know why, make sure that
-# `HAVE_POWERLINE_FONTS` survives the ssh connection
-
 find_powerline_root() {
     if [[ -d ${POWERLINE_ROOT-} && $POWERLINE_ROOT == */powerline ]]; then
         _warn "POWERLINE_ROOT already set"

@@ -8,5 +8,6 @@ if [[ ${_SHELL_INTERACTIVE-} &&
 
     # declare our intention to exec tmux
     unset _SHELL_INTERACTIVE
+    set +o history
     declare -g _SHELL_EXEC_TMUX=1
 fi

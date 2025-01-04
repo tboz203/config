@@ -5,24 +5,22 @@
 
 PS1='\[\e[1;33m\]\u \w \$ \[\e[0m\]'
 
-# append to the history file, don't overwrite it
-shopt -s histappend
-
 # don't save duplicate commands or commands starting with spaces in bash history
 HISTCONTROL=ignoreboth
 
-# bash 4.2 doesn't seem to like negative values here...
 # command history length in memory
-# HISTSIZE="-1"
-HISTSIZE=$((2 ** 20))
+HISTSIZE="-1"
+# # bash 4.2 doesn't seem to like negative values here...
+# HISTSIZE=$((2 ** 20))
 # command history length on disk
 # HISTFILESIZE="-1"
 HISTFILESIZE=$HISTSIZE
-HISTIGNORE="ls:la:lf:ll:l"
+HISTIGNORE="ls:la:ll:lt"
 HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S> "
 
 if [[ -n ${SUDO_USER-} ]]; then
     HISTFILE=/root/.bash_history.${SUDO_USER}
+    history -c && history -r
 fi
 
 # check the window size after each command

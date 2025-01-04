@@ -73,7 +73,7 @@ alias xclip='xclip -selection clipboard'
 alias http='http --ignore-stdin'
 alias ncdu='ncdu --exclude-caches --exclude=node_modules --exclude=cache --exclude=.cache --exclude=venv --exclude=tmp'
 alias help2man='help2man -N -L $LC_ALL'
-alias info='info --vi-keys'
+# alias info='info --vi-keys'
 
 # editing rc files
 # --------------------

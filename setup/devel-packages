@@ -1,0 +1,63 @@
+Loaded plugins: enabled_repos_upload, fastestmirror, langpacks, package_upload,
+              : product-id, search-disabled-repos, subscription-manager
+Installed Packages
+bzip2-devel.x86_64                   1.0.6-13.el7                 @vdi_7_Cent7  
+dbus-devel.x86_64                    1:1.10.24-13.el7_6           @vdi_7_Cent7  
+elfutils-libelf-devel.x86_64         0.176-4.el7                  @vdi_7_Cent7  
+expat-devel.x86_64                   2.1.0-11.el7                 @vdi_7_Cent7  
+fontconfig-devel.x86_64              2.13.0-4.3.el7               @vdi_7_Cent7  
+freetype-devel.x86_64                2.8-14.el7                   @vdi_7_Cent7  
+gdbm-devel.x86_64                    1.10-8.el7                   @vdi_7_Cent7  
+gettext-common-devel.noarch          0.19.8.1-3.el7               @anaconda     
+gettext-devel.x86_64                 0.19.8.1-3.el7               @anaconda     
+glib-devel.x86_64                    1:1.2.10-41.el7              @epel         
+glib2-devel.x86_64                   2.56.1-5.el7                 @vdi_7_Cent7  
+glibc-devel.x86_64                   2.17-307.el7.1               @anaconda     
+java-1.8.0-openjdk-devel.x86_64      1:1.8.0.252.b09-2.el7_8      @vdi_7_updates
+java-11-openjdk-devel.x86_64         1:11.0.7.10-4.el7_8          @vdi_7_updates
+kernel-devel.x86_64                  3.10.0-1127.el7              @anaconda     
+kernel-devel.x86_64                  3.10.0-1127.13.1.el7         @vdi_7_updates
+keyutils-libs-devel.x86_64           1.5.8-3.el7                  @vdi_7_Cent7  
+krb5-devel.x86_64                    1.15.1-46.el7                @vdi_7_Cent7  
+libX11-devel.x86_64                  1.6.7-2.el7                  @anaconda     
+libXau-devel.x86_64                  1.0.8-2.1.el7                @anaconda     
+libXft-devel.x86_64                  2.3.2-2.el7                  @vdi_7_Cent7  
+libXrender-devel.x86_64              0.9.10-1.el7                 @vdi_7_Cent7  
+libcom_err-devel.x86_64              1.42.9-17.el7                @vdi_7_Cent7  
+libcurl-devel.x86_64                 7.29.0-57.el7                @vdi_7_Cent7  
+libevent-devel.x86_64                2.0.21-4.el7                 @vdi_7_Cent7  
+libffi-devel.x86_64                  3.0.13-19.el7                @vdi_7_Cent7  
+libgeotiff16-devel.x86_64            1.6.0-1.rhel7                @pgdg-common  
+libpng-devel.x86_64                  2:1.5.13-7.el7_2             @vdi_7_Cent7  
+libquadmath-devel.x86_64             4.8.5-39.el7                 @anaconda     
+libselinux-devel.x86_64              2.5-15.el7                   @vdi_7_Cent7  
+libsepol-devel.x86_64                2.5-10.el7                   @vdi_7_Cent7  
+libspatialite43-devel.x86_64         4.3.0a-15.rhel7              @pgdg-common  
+libstdc++-devel.x86_64               4.8.5-39.el7                 @anaconda     
+libtiff-devel.x86_64                 4.0.3-32.el7                 @vdi_7_Cent7  
+libuuid-devel.x86_64                 2.23.2-63.el7                @vdi_7_Cent7  
+libva-devel.x86_64                   1.8.3-1.el7                  @anaconda     
+libverto-devel.x86_64                0.2.5-4.el7                  @vdi_7_Cent7  
+libxcb-devel.x86_64                  1.13-1.el7                   @anaconda     
+ncurses-devel.x86_64                 5.9-14.20130511.el7_4        @vdi_7_Cent7  
+openssl-devel.x86_64                 1:1.0.2k-19.el7              @vdi_7_Cent7  
+pcre-devel.x86_64                    8.32-17.el7                  @vdi_7_Cent7  
+postgresql-devel.x86_64              9.2.24-4.el7_8               @vdi_7_updates
+python3-devel.x86_64                 3.6.8-13.el7                 @vdi_7_Cent7  
+readline-devel.x86_64                6.2-11.el7                   @vdi_7_Cent7  
+sqlite-devel.x86_64                  3.7.17-8.el7_7.1             @vdi_7_Cent7  
+systemtap-devel.x86_64               4.0-11.el7                   @anaconda     
+tcl-devel.x86_64                     1:8.5.13-8.el7               @vdi_7_Cent7  
+tk-devel.x86_64                      1:8.5.13-6.el7               @vdi_7_Cent7  
+wayland-devel.x86_64                 1.15.0-1.el7                 @anaconda     
+xorg-x11-proto-devel.noarch          2018.4-1.el7                 @anaconda     
+xz-devel.x86_64                      5.2.2-1.el7                  @vdi_7_Cent7  
+zlib-devel.x86_64                    1.2.7-18.el7                 @vdi_7_Cent7  
+Uploading Enabled Repositories Report
+Loaded plugins: fastestmirror, langpacks, product-id, subscription-manager
+Loaded plugins: fastestmirror, langpacks, product-id, subscription-manager
+Loaded plugins: fastestmirror, langpacks, product-id, subscription-manager
+Loaded plugins: fastestmirror, langpacks, product-id, subscription-manager
+Loaded plugins: fastestmirror, langpacks, product-id, subscription-manager
+Loaded plugins: fastestmirror, langpacks, product-id, subscription-manager
+Loaded plugins: fastestmirror, langpacks, product-id, subscription-manager
