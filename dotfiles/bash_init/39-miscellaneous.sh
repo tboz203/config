@@ -1,7 +1,5 @@
 # miscellaneous bash profile cruft
 
-# [[ ${SHELL-} != /bin/bash ]] || SHELL=/usr/local/bin/bash
-
 # [[ ${_SHELL_LOGIN-} ]] || return 0
 
 export MAILTO=thomas.bozeman@cgifederal.com
@@ -39,7 +37,10 @@ if [[ -d ${JAVA_HOME-} ]]; then
     pathmungex PATH "$JAVA_HOME/bin"
 fi
 
-setpath -e SSL_CERT_FILE /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+# on RHEL/CentOS:
+# setpath -e SSL_CERT_FILE /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+# on Debian/Ubuntu:
+setpath -e SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
 
 export PERL_MB_OPT="--install_base $HOME/perl5"
 export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
@@ -47,8 +48,6 @@ export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
 pathmungex -a PATH ~/perl5/bin
 pathmungex -e PERL5LIB ~/perl5/lib/perl5
 setpath -e PERL_LOCAL_LIB_ROOT ~/perl5
-
-pathmungex BASH_COMPLETION_USER_DIR ~/.local/share/bash-completion
 
 pathmungex -e PYTHONPATH ~/.pymodules
 

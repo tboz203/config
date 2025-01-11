@@ -1,5 +1,7 @@
 # last steps before handoff to user
 
+cleanpath
+
 pathmungex --replace --before PATH \
     ~/.maxar-bin \
     ~/.bin

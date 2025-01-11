@@ -15,7 +15,7 @@ for arg in "$@"; do
 done
 
 if ! type -P certutil > /dev/null; then
-    echo >&2 '[X] certutil not found; do you have `libnss3-tools`?'
+    echo >&2 "[X] certutil not found; do you have 'libnss3-tools'?"
     exit 1
 fi
 

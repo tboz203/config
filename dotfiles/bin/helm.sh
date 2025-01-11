@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# wrapper around helm to allow setting context and namespace via environment variable
+
+# first, find the real helm executable
+this_file=$(readlink -f $0)
+outer_helm=
+
+for item in $(whereis -b helm | cut -d' ' -f2-); do
+    full_item=$(readlink -f $item)
+    if [[ $full_item != $this_file ]]; then
+        outer_helm=$full_item
+        break
+    fi
+done
+
+# then, build up our arguments for it
+declare -a args
+
+if [[ -v KUBE_CONTEXT ]]; then
+    args+=("--kube-context=$KUBE_CONTEXT")
+fi
+
+if [[ -v KUBE_NAMESPACE ]]; then
+    args+=("--namespace=$KUBE_NAMESPACE")
+fi
+
+exec $outer_helm "${args[@]}" "$@"

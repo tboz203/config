@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/home/th026106/.pyenv/versions/docker-ls-remote/bin/python
 
 """List images in a docker registry."""
 
@@ -293,7 +293,11 @@ def main():
         "-k", "--insecure", action="store_true", help="ignore TLS certificate errors"
     )
     parser.add_argument(
-        "-v", "--verbose", action="count", help="be more verbose; may be repeated"
+        "-v",
+        "--verbose",
+        default=0,
+        action="count",
+        help="be more verbose; may be repeated",
     )
     parser.add_argument(
         "-n",

@@ -1,28 +1,27 @@
 #!/usr/bin/env bash
 
-# All the little snippets I've thrown into cron jobs, collected and modularized.
+# Scriptlet to help sanitize commands for cron.
 
-# use all my bashy goodness
-source ~/.bashrc
-
-MY_NAME=$(basename "$0")
+source ~/.bash_profile
 
 die() {
-    echo "$MY_NAME: ${*:-Fatal Error}" | tee -a "${LOG:-/dev/null}"
+    echo "$SELF: ${*:-Fatal Error}" | tee >&2 -a "${LOG:-/dev/null}"
     exit 1
 }
+
+SELF=$(basename "$0")
 
 ARGS=$(
     getopt \
         -o 'hs:qvl:d:L:S:' \
         --long 'help,random-sleep:,quiet,verbose,log:,directory:,longer-than:,shorter-than:' \
-        -n "$MY_NAME" \
+        -n "$SELF" \
         -- "$@"
 ) || die "Halting for invalid arguments"
 eval set -- "$ARGS" && unset ARGS
 
 declare HELP
-declare TIMEOUT LOGFILE DIRECTORY LONGER SHORTER
+declare SLEEP LOGFILE DIRECTORY CHECK_LONGER CHECK_SHORTER
 declare COMMAND
 
 declare VOLUME=3
@@ -30,12 +29,12 @@ declare VOLUME=3
 while (($#)); do
     case $1 in
         -h | --help) HELP=1 && shift ;;
-        -s | --random-sleep) TIMEOUT=$2 && shift 2 ;;
+        -s | --random-sleep) SLEEP=$2 && shift 2 ;;
         -q | --quiet) ((VOLUME--)) && shift ;;
         -l | --log) LOGFILE=$2 && shift 2 ;;
         -d | --directory) DIRECTORY=$2 && shift 2 ;;
-        -L | --longer-than) LONGER=$2 && shift 2 ;;
-        -S | --shorter-than) SHORTER=$2 && shift 2 ;;
+        -L | --longer-than) CHECK_LONGER=$2 && shift 2 ;;
+        -S | --shorter-than) CHECK_SHORTER=$2 && shift 2 ;;
         --) shift && break ;;
         *) break ;;
     esac
@@ -45,7 +44,7 @@ COMMAND=("$@")
 
 if [[ ${HELP-} ]]; then
     cat << EOF
-Usage: $MY_NAME [OPTIONS] [--] COMMAND ...
+Usage: $SELF [OPTIONS] [--] COMMAND ...
 
 Sanitize commands for cron.
 
@@ -53,27 +52,29 @@ Arguments:
 COMMAND                 The command to run, with arguments
 
 Options:
--h|--help       Print out this message.
--q|--quiet      Silence the command, unless it exits with an error (to prevent
+-h | --help     Print out this message.
+-q | --quiet    Silence the command, unless it exits with an error (to prevent
                 useless cron emails from chatty programs). Can be given more
                 than once to also silence errors
--l|--log LOG    Append any output to LOG as well (includes timestamp & exit
+-l | --log LOG  Append any output to LOG as well (includes timestamp & exit
                 code; path LOG is *not* relative to --directory argument)
--s|--random-sleep TIMEOUT
-                Sleep for a random duration up to TIMEOUT seconds before
+-s | --random-sleep SLEEP
+                Sleep for a random duration up to SLEEP seconds before
                 executing the command (to prevent load spikes at midnight,
                 etc).
--S|--shorter-than DURATION
+-S | --shorter-than DURATION
                 If the command executes for fewer seconds than DURATION, 
--d|--directory DIRECTORY
+-d | --directory DIRECTORY
                 change to DIRECTORY before executing command
 EOF
 
     exit
 fi
 
-if [[ ${TIMEOUT-} ]]; then
-    sleep $((RANDOM % TIMEOUT))
+[[ -v COMMAND ]] || die 'no command given'
+
+if [[ ${SLEEP-} ]]; then
+    sleep $((RANDOM % SLEEP))
 fi
 
 if [[ ${DIRECTORY-} ]]; then
@@ -95,11 +96,11 @@ output+="[.] exit code: $exit_code"
 
 duration=$((stoptime - starttime))
 
-if [[ ${LONGER-} && $duration -gt $LONGER ]]; then
+if [[ ${CHECK_LONGER-} && $duration -gt $CHECK_LONGER ]]; then
     TOOK_LONGER=1
 fi
 
-if [[ ${SHORTER-} && $duration -le $SHORTER ]]; then
+if [[ ${CHECK_SHORTER-} && $duration -le $CHECK_SHORTER ]]; then
     TOOK_SHORTER=1
 fi
 

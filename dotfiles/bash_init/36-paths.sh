@@ -3,8 +3,6 @@
 [[ ! ${_BASH_INIT_PATHS_SET-} ]] || return 0
 export _BASH_INIT_PATHS_SET=1
 
-cleanpath
-
 pathmungex --replace PATH \
     ~/.local/bin \
     ~/.local/share/go/bin \
