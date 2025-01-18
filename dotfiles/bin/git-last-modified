@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# show the git last modified time of files in the current directory
+
+git ls-tree -r --name-only HEAD . |
+    xargs -I{} \
+        git log -1 --color --format="%aI@%C(blue)%ad@%C(yellow){}%C(reset)" -- {} |
+    sort |
+    cut -d@ -f2- |
+    column -t -s@ -C right -d -o' '

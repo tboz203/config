@@ -9,6 +9,7 @@
 	autocrlf = false
 	excludesfile = ~/.gitignore
 	pager = delta
+	untrackedCache = true
 [merge]
 	tool = nvimdiff
 	conflictstyle = diff3

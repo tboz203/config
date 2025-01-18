@@ -3,6 +3,8 @@
 
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
+export TZ=UTC
+
 PS1='\[\e[1;33m\]\u \w \$ \[\e[0m\]'
 
 # don't save duplicate commands or commands starting with spaces in bash history
