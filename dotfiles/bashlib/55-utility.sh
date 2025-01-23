@@ -1,67 +1,115 @@
 # bashlib utility
 # shellcheck disable=2016,2059
 
-inlist() {
+function inlist {
     # test whether a path-like list contains an element
     # usage: inlist ELEMENT LIST
     [[ :$2: == *:"$1":* ]]
 }
 
-wraplist() {
-    # Convert an unwrapped list (like $PATH) to a wrapped list (like :$PATH:)
-    if [[ $# != 2 || ${1-} == -* ]]; then
-        _err "Convert an unwrapped list to a wrapped list"
-        _err "Usage: ${FUNCNAME[0]} NAME LIST"
-        return 2
-    fi
+if ((BASH_VERSINFO[0] >= 5)); then
+    function wraplist {
+        # Convert an unwrapped list (like $PATH) to a wrapped list (like :$PATH:)
+        if [[ $# != 2 || ${1-} == -* ]]; then
+            _err "Convert an unwrapped list to a wrapped list"
+            _err "Usage: ${FUNCNAME[0]} NAME LIST"
+            return 2
+        fi
 
-    local name=$1 && shift
-    local list=$1 && shift
+        local -n name=$1 && shift
+        local list=$1 && shift
 
-    valid_name "$name" || throw "Not a valid name: \"$name\""
+        case $list in
+            "") name=: ;;
+            :) name=:: ;;
+            *) name=":$list:" ;;
+        esac
+    }
+else
+    function wraplist {
+        # Convert an unwrapped list (like $PATH) to a wrapped list (like :$PATH:)
+        if [[ $# != 2 || ${1-} == -* ]]; then
+            _err "Convert an unwrapped list to a wrapped list"
+            _err "Usage: ${FUNCNAME[0]} NAME LIST"
+            return 2
+        fi
 
-    case $list in
-        "") eval "$name=:" ;;
-        :) eval "$name=::" ;;
-        *) eval "$name=:$list:" ;;
-    esac
-}
+        local name=$1 && shift
+        local list=$1 && shift
 
-unwraplist() {
-    # Convert a wrapped list (like :$PATH:) to an unwrapped list (like $PATH)
-    if [[ $# != 2 || ${1-} == -* ]]; then
-        _err "Convert a wrapped list to an unwrapped list"
-        _err "Usage: ${FUNCNAME[0]} NAME LIST"
-        return 2
-    fi
+        valid_name "$name" || throw "Not a valid name: \"$name\""
 
-    local name=$1 && shift
-    local list=$1 && shift
+        case $list in
+            "") eval "$name=:" ;;
+            :) eval "$name=::" ;;
+            *) eval "$name=:$list:" ;;
+        esac
+    }
+fi
 
-    valid_name "$name" || throw "Not a valid name: \"$name\""
+if ((BASH_VERSINFO[0] >= 5)); then
+    function unwraplist {
+        # Convert a wrapped list (like :$PATH:) to an unwrapped list (like $PATH)
+        if [[ $# != 2 || ${1-} == -* ]]; then
+            _err "Convert a wrapped list to an unwrapped list"
+            _err "Usage: ${FUNCNAME[0]} NAME LIST"
+            return 2
+        fi
 
-    case $list in
-        # empty list
-        :) eval "$name=" ;;
-        # list with a single null entry
-        ::) eval "$name=:" ;;
-        # any other wrapped list
-        :*:)
-            list=${list%:} && list=${list#:}
-            eval "$name='$list'"
-            ;;
-        # something else
-        *) throw "Invalid list: \"$list\"" ;;
-    esac
-}
+        local -n name=$1 && shift
+        local list=$1 && shift
 
-each() {
+        case $list in
+            # empty list
+            :) name="" ;;
+            # list with a single null entry
+            ::) name=: ;;
+            # any other wrapped list
+            :*:)
+                list=${list%:} && list=${list#:}
+                name="$list"
+                ;;
+            # something else
+            *) throw "Invalid list: \"$list\"" ;;
+        esac
+    }
+else
+    function unwraplist {
+        # Convert a wrapped list (like :$PATH:) to an unwrapped list (like $PATH)
+        if [[ $# != 2 || ${1-} == -* ]]; then
+            _err "Convert a wrapped list to an unwrapped list"
+            _err "Usage: ${FUNCNAME[0]} NAME LIST"
+            return 2
+        fi
+
+        local name=$1 && shift
+        local list=$1 && shift
+
+        valid_name "$name" || throw "Not a valid name: \"$name\""
+
+        case $list in
+            # empty list
+            :) eval "$name=" ;;
+            # list with a single null entry
+            ::) eval "$name=:" ;;
+            # any other wrapped list
+            :*:)
+                list=${list%:} && list=${list#:}
+                eval "$name='$list'"
+                ;;
+            # something else
+            *) throw "Invalid list: \"$list\"" ;;
+        esac
+    }
+fi
+
+function each {
     # print each argument on a separate line
     # usage printeach [ELEMENT...]
     printeach "%s\n" "$@"
 }
 
-printeach() {
+function printeach {
     # like printf, but does nothing without format arguments
     # usage: printeach FORMAT [ARG...]
     (($# >= 1)) || throw "Not enough arguments"
@@ -79,7 +127,7 @@ printeach() {
 #     local arrayref=$2
 # }
 
-contains() {
+function contains {
     # whether or not an element appears in a list
     # usage: contains TARGET [ELEMENTS...]
     (($# >= 1)) || throw "Not enough arguments"
@@ -116,63 +164,65 @@ contains() {
 #     return 1
 # }
 
-valid_name() {
-    # test whether a word is an acceptable variable name
-    # usage: valid_name NAME...
-    (($# >= 1)) || throw "Not enough arguments"
-    while (($#)); do
-        [[ $1 == [a-zA-Z_]*([a-zA-Z0-9_]) ]] || return 1
-        shift
-    done
-}
-
-declared() {
+function declared {
     # like [[ -v NAME ]], but for declarations
     # usage: declared NAME...
     (($# >= 1)) || throw "Not enough arguments"
     declare -p -- "$@" &> /dev/null
 } && complete -v declared
 
-attributes() {
-    # print attributes of variables as understood by `declare`,
-    # with the addition of 'u' to indicate "undefined"
-    # usage: attributes NAME...
-    (($# >= 1)) || throw "Not enough arguments"
-    declare -p -- "$@" |& while IFS=$IFS:= read -r _ attrs _; do
-        if [[ $attrs == declare ]]; then
-            # got "bash: declare: <name>: not found"
-            println u
-        else
-            println "${attrs#-}"
-        fi
-    done
-} && complete -v attributes
+if ((BASH_VERSINFO[0] < 5)); then
+    function quoted {
+        # print each argument on a separate line, quoted if necessary
+        # usage: quoted [ARG...]
+        local -a results
+        local value clean
+        for value in "$@"; do
+            printf -v clean "%q" "$value"
+            if [[ $value == "$clean" ]]; then
+                # printf says no modifications needed
+                results+=("$value")
+            elif [[ $clean == \$* ]]; then
+                # printf used $'...' notation; send the cleaned value
+                results+=("$clean")
+            else
+                # otherwise, printf gave us the "escape\ every\ \$character\ form",
+                # which we hate. we'll force it to use the other form, and then clean
+                # up the result
+                printf -v clean "%q" $'\n'"$value"
+                results+=("'${clean#\$\'\\n}")
+            fi
+        done
+        each "${results[@]}"
+    }
 
-quoted() {
-    # print each argument on a separate line, quoted if necessary
-    # usage: quoted [ARG...]
-    local -a results
-    local value clean
-    for value in "$@"; do
-        printf -v clean "%q" "$value"
-        if [[ $value == "$clean" ]]; then
-            # printf says no modifications needed
-            results+=("$value")
-        elif [[ $clean == \$* ]]; then
-            # printf used $'...' notation; send the cleaned value
-            results+=("$clean")
-        else
-            # otherwise, printf gave us the "escape\ every\ \$character\ form",
-            # which we hate. we'll force it to use the other form, and then clean
-            # up the result
-            printf -v clean "%q" $'\n'"$value"
-            results+=("'${clean#\$\'\\n}")
-        fi
-    done
-    each "${results[@]}"
-}
+    function attributes {
+        # print attributes of variables as understood by `declare`,
+        # with the addition of 'u' to indicate "undefined"
+        # usage: attributes NAME...
+        (($# >= 1)) || throw "Not enough arguments"
+        declare -p -- "$@" |& while IFS=$IFS:= read -r _ attrs _; do
+            if [[ $attrs == declare ]]; then
+                # got "bash: declare: <name>: not found"
+                println u
+            else
+                println "${attrs#-}"
+            fi
+        done
+    } && complete -v attributes
 
-get_array() {
+    function valid_name {
+        # test whether a word is an acceptable variable name
+        # usage: valid_name NAME...
+        (($# >= 1)) || throw "Not enough arguments"
+        while (($#)); do
+            [[ $1 == [a-zA-Z_]*([a-zA-Z0-9_]) ]] || return 1
+            shift
+        done
+    }
+fi
+
+function get_array {
     # execute a command & read lines into an array
     # usage: get_array ARRAY_NAME COMMAND [COMMAND_ARGS...]
     (($# >= 2)) || throw "Not enough arguments"
@@ -190,46 +240,88 @@ get_array() {
     readarray -t "$arrayref" <<< "$fulltext"
 }
 
-from_list() {
-    if [[ $# -ne 2 || ${1-} == -* ]]; then
-        _err "Convert a colon-separated list to a Bash array variable"
-        _err "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
-        return 2
-    fi
+if ((BASH_VERSINFO[0] >= 5)); then
+    function from_list {
+        if [[ $# -ne 2 || ${1-} == -* ]]; then
+            _err "Convert a colon-separated list to a Bash array variable"
+            _err "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
+            return 2
+        fi
 
-    local arrayref=$1
-    local list=$2
+        local -n arrayref=$1
+        local list=$2
 
-    valid_name "$arrayref" || throw "Not a valid array name: \"$arrayref\""
+        if [[ -v $list ]]; then
+            # looks like a variable name; let's dereference it
+            list=${!list}
+        fi
 
-    declared "$arrayref" || declare -ga "$arrayref" || return 1
+        case $list in
+            "") arrayref=() ;;
+            :) arrayref=('') ;;
+            *)
+                # read into arrayref, splitting on `:`
+                # (seems to use terminator semantics, so add an extra final separator)
+                IFS=: read -r -d '' -a arrayref < <(print "${list}:") || true
+                ;;
+        esac
+    }
+else
+    function from_list {
+        if [[ $# -ne 2 || ${1-} == -* ]]; then
+            _err "Convert a colon-separated list to a Bash array variable"
+            _err "Usage: ${FUNCNAME[0]} <ARRAY_NAME> <LIST>"
+            return 2
+        fi
 
-    case $list in
-        "") eval "$arrayref=()" ;;
-        :) eval "$arrayref=('')" ;;
-        *)
-            # read into arrayref, splitting on `:`
-            # (seems to use terminator semantics, so add an extra final separator)
-            IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
-            ;;
-    esac
-}
+        local arrayref=$1
+        local list=$2
 
-to_list() {
-    if [[ $# -lt 1 || ${1-} == -* ]]; then
-        _err "Create a colon-separated list from zero or more elements"
-        _err "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
-        return 2
-    fi
+        valid_name "$arrayref" || throw "Not a valid array name: \"$arrayref\""
 
-    local listref=$1 && shift
-    valid_name "$listref" || throw "Not a valid name: \"$listref\""
-    declared "$listref" || declare -g "$listref"
+        declared "$arrayref" || declare -ga "$arrayref" || return 1
 
-    IFS=: eval "$listref"='"$*"'
-}
+        case $list in
+            "") eval "$arrayref=()" ;;
+            :) eval "$arrayref=('')" ;;
+            *)
+                # read into arrayref, splitting on `:`
+                # (seems to use terminator semantics, so add an extra final separator)
+                IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
+                ;;
+        esac
+    }
+fi
 
-join() {
+if ((BASH_VERSINFO[0] >= 5)); then
+    function to_list {
+        if [[ $# -lt 1 || ${1-} == -* ]]; then
+            _err "Create a colon-separated list from zero or more elements"
+            _err "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
+            return 2
+        fi
+
+        local -n listref=$1 && shift
+        local IFS=:
+        listref="$*"
+    }
+else
+    function to_list {
+        if [[ $# -lt 1 || ${1-} == -* ]]; then
+            _err "Create a colon-separated list from zero or more elements"
+            _err "Usage: ${FUNCNAME[0]} <LIST_NAME> [ELEM...]"
+            return 2
+        fi
+
+        local listref=$1 && shift
+        valid_name "$listref" || throw "Not a valid name: \"$listref\""
+        declared "$listref" || declare -g "$listref"
+
+        IFS=: eval "$listref"='"$*"'
+    }
+fi
+
+function join {
     # join strings
     # usage: join SEPARATOR [ELEMENTS...]
 
@@ -242,7 +334,7 @@ join() {
     println
 }
 
-repeat() {
+function repeat {
     # does something a bit like `TEXT * COUNT`
     # usage: repeat TEXT COUNT
     (($# == 2)) || throw "Wrong number of arguments"
@@ -253,7 +345,7 @@ repeat() {
     println
 }
 
-prefix_lines() {
+function prefix_lines {
     # read from stdin and add a prefix to each line
     (($# == 1)) || throw "Wrong number of arguments"
     local prefix=$1 line
@@ -262,7 +354,7 @@ prefix_lines() {
     done
 }
 
-indent() {
+function indent {
     # read from stdin and indent each line by `$1` spaces, (defaulting to 4)
     (($# <= 1)) || throw "Too many arguments"
     local width=${1:-4}
@@ -271,7 +363,7 @@ indent() {
 }
 
 # shellcheck disable=2120
-dedent() {
+function dedent {
     # read from stdin and trim common leading whitespace (from non-blank lines)
 
     (($# == 0)) || throw "No arguments permitted"
@@ -324,71 +416,127 @@ dedent() {
     println "${lines[@]#"$prefix"}"
 }
 
-_fixargs() {
-    local -a arguments
-    while (($#)); do
-        case $1 in
-            --)
-                # halt argument parsing; take all remaining args verbatim
-                arguments+=("$@") && break
-                ;;
-            -*=*)
-                # split --var=value pairs, preserving whitespace, and re-consider
-                set -- "${1%%=*}" "${1#*=}" "${@:2}"
-                ;;
-            -[^-]?*)
-                # split `-xyz` flags into `-x -y -z`, and re-consider
-                local split=()
-                for ((i = 1; i < ${#1}; i++)); do
-                    split+=("-${1:i:1}")
-                done
-                set -- "${split[@]}" "${@:2}"
-                ;;
-            *)
-                # others unmodified
-                arguments+=("$1") && shift
-                ;;
-        esac
-    done
+if ((BASH_VERSINFO[0] >= 5)); then
+    function fixargs {
+        local -a arguments
+        while (($#)); do
+            case $1 in
+                --)
+                    # halt argument parsing; take all remaining args verbatim
+                    arguments+=("$@") && break
+                    ;;
+                -*=*)
+                    # split --var=value pairs, preserving whitespace, and re-consider
+                    set -- "${1%%=*}" "${1#*=}" "${@:2}"
+                    ;;
+                -[^-]?*)
+                    # split `-xyz` flags into `-x -y -z`, and re-consider
+                    local split=()
+                    for ((i = 1; i < ${#1}; i++)); do
+                        split+=("-${1:i:1}")
+                    done
+                    set -- "${split[@]}" "${@:2}"
+                    ;;
+                *)
+                    # others unmodified
+                    arguments+=("$1") && shift
+                    ;;
+            esac
+        done
+        echo set -- "${arguments[@]@Q}"
+    }
+else
+    function fixargs {
+        local -a arguments
+        while (($#)); do
+            case $1 in
+                --)
+                    # halt argument parsing; take all remaining args verbatim
+                    arguments+=("$@") && break
+                    ;;
+                -*=*)
+                    # split --var=value pairs, preserving whitespace, and re-consider
+                    set -- "${1%%=*}" "${1#*=}" "${@:2}"
+                    ;;&
+                -[^-]?*)
+                    # split `-xyz` flags into `-x -y -z`, and re-consider
+                    local split=()
+                    for ((i = 1; i < ${#1}; i++)); do
+                        split+=("-${1:i:1}")
+                    done
+                    set -- "${split[@]}" "${@:2}"
+                    ;;
+                *)
+                    # others unmodified
+                    arguments+=("$1") && shift
+                    ;;
+            esac
+        done
 
-    ((${#arguments[0]} >= 1)) || return 0
+        ((${#arguments[0]} >= 1)) || return 0
 
-    get_array arguments quoted "${arguments[@]}"
-    echo set -- "${arguments[@]}"
-}
+        get_array arguments quoted "${arguments[@]}"
+        echo set -- "${arguments[@]}"
+    }
+fi
 
 # shellcheck disable=2142  # "Aliases can't use positional parameters" that's fine
-alias fixargs='eval "$(_fixargs "$@")"'
+alias fixargs='eval "$(\fixargs "$@")"'
 
-file_context() {
-    # read lines from $filename at $lineno with $context lines of context
-    # lines are read into sparse array $lines such that array indicies match file line numbers
-    # usage: file_context ARRAY_NAME FILENAME LINENO [CONTEXT]
+if ((BASH_VERSINFO[0] >= 5)); then
+    function file_context {
+        # read lines from $filename at $lineno with $context lines of context
+        # lines are read into sparse array $lines such that array indicies match file line numbers
+        # usage: file_context ARRAY_NAME FILENAME LINENO [CONTEXT]
 
-    (($# >= 3)) || throw "Not enough arguments"
-    (($# <= 4)) || throw "Too many arguments"
-    local arrayref=$1
-    local filename=$2
-    local lineno=$3
-    local context=${4:-2}
+        (($# >= 3)) || throw "Not enough arguments"
+        (($# <= 4)) || throw "Too many arguments"
+        local -n arrayref=$1
+        local filename=$2
+        local lineno=$3
+        local context=${4:-2}
 
-    valid_name arrayref || throw "Not a valid array name: \"$arrayref\""
+        ((lineno >= 0)) || throw "Invalid line number: $lineno"
+        ((lineno >= 1)) || lineno=1
 
-    ((lineno >= 0)) || throw "Invalid line number: $lineno"
-    ((lineno >= 1)) || lineno=1
+        # first line number: max(lineno - context, 1)
+        local start=$((lineno > context ? lineno - context : 1))
+        # max number of lines to read: the line itself, plus leading context, plus trailing context
+        local count=$((1 + (lineno - start) + context))
 
-    # first line number: max(lineno - context, 1)
-    local start=$((lineno > context ? lineno - context : 1))
-    # max number of lines to read: the line itself, plus leading context, plus trailing context
-    local count=$((1 + (lineno - start) + context))
+        mapfile -t -O $start -n $count -s $((start - 1)) arrayref < "$filename" &> /dev/null
+    }
+else
+    function file_context {
+        # read lines from $filename at $lineno with $context lines of context
+        # lines are read into sparse array $lines such that array indicies match file line numbers
+        # usage: file_context ARRAY_NAME FILENAME LINENO [CONTEXT]
 
-    declared "${arrayref:?}" || declare -ga "${arrayref:?}"
-    eval "${arrayref:?}=()"
+        (($# >= 3)) || throw "Not enough arguments"
+        (($# <= 4)) || throw "Too many arguments"
+        local arrayref=$1
+        local filename=$2
+        local lineno=$3
+        local context=${4:-2}
 
-    mapfile -t -O $start -n $count -s $((start - 1)) "${arrayref:?}" < "$filename" &> /dev/null
-}
+        valid_name arrayref || throw "Not a valid array name: \"$arrayref\""
 
-showframe() {
+        ((lineno >= 0)) || throw "Invalid line number: $lineno"
+        ((lineno >= 1)) || lineno=1
+
+        # first line number: max(lineno - context, 1)
+        local start=$((lineno > context ? lineno - context : 1))
+        # max number of lines to read: the line itself, plus leading context, plus trailing context
+        local count=$((1 + (lineno - start) + context))
+
+        declared "${arrayref:?}" || declare -ga "${arrayref:?}"
+        eval "${arrayref:?}=()"
+
+        mapfile -t -O $start -n $count -s $((start - 1)) "${arrayref:?}" < "$filename" &> /dev/null
+    }
+fi
+
+function showframe {
     # display a bash function "frame"
     # e.g: $ showframe ~/.bashrc my_function 10
     #     ~/.bashrc:10 (in my_function):
@@ -423,151 +571,96 @@ showframe() {
     fi
 }
 
-setopts() {
-    # set shell options from a $SHELLOPTS-like list
-    local STORE HELP USAGE
-    local -a POSITIONAL
-    while (($#)); do
-        local arg=$1 && shift
-        case $arg in
-            -h | --help) HELP=1 ;;
-            -s | --store)
-                if [[ -v 1 && $1 != @(-*|*:*) ]]; then
-                    STORE=$1 && shift
-                else
-                    _err "Argument required: \"$arg\""
-                    USAGE=1
-                fi
-                ;;
-            -*) _err "Unrecognized option: \"$arg\"" && USAGE=1 ;;
-            *) POSITIONAL+=("$arg") ;;
-        esac
-    done
-
-    set -- "${POSITIONAL[@]}"
-
-    local USAGE_TEXT="${FUNCNAME[0]} [--help] [--store NAME] OPTS_LIST"
-
-    if [[ ${HELP-} ]]; then
-        dedent <<< "
-            ${FUNCNAME[0]}: set shell options from a \$SHELLOPTS-like list
-            Usage: ${USAGE_TEXT}
-
-            Options:
-
-            -h | --help         print this message and halt
-            -s | --store NAME   store original \$SHELLOPTS into variable NAME
-
-            Parameters:
-
-            OPTS_LIST           A colon-separated list of shell options
-            "
-        return 0
-    fi
-
-    local OPTS_LIST
-    if (($# == 1)); then
-        OPTS_LIST=$1
-    else
-        _err "Exactly 1 parameter expected"
-        USAGE=1
-    fi
-
-    if [[ ${STORE-} ]] && ! valid_name "$STORE"; then
-        _err "Invalid name: \"$STORE\""
-        USAGE=1
-    fi
-
-    if [[ ${USAGE-} ]]; then
-        _err "Usage: $USAGE_TEXT"
+function setopts {
+    if [[ $# != 1 || $1 == -* ]]; then
+        _err "Set shell options from a SHELLOPTS-like list"
+        _err "Usage: ${FUNCNAME[0]} NAME LIST"
         return 2
     fi
 
-    if [[ ${STORE-} ]]; then
-        eval "$STORE=$SHELLOPTS"
-    fi
+    local OPTS_LIST=$1
 
-    local -a oldopts newopts
-    from_list oldopts "$SHELLOPTS"
-    from_list newopts "$OPTS_LIST"
+    local -a OLDOPTS NEWOPTS
+    from_list OLDOPTS "$SHELLOPTS"
+    from_list NEWOPTS "$OPTS_LIST"
 
     # shellcheck disable=2046
-    set $(printf -- "+o %s " "${oldopts[@]}") $(printf -- "-o %s " "${newopts[@]}")
+    set $(printf -- "+o %s " "${OLDOPTS[@]}") $(printf -- "-o %s " "${NEWOPTS[@]}")
 }
 
-withflags() {
+function withflags {
     # run a command with modified shell opts
     # usage: withflags [SHELLOPTS] -- COMMAND [ARGS]
     # ex: withflags -vx -- pathmunge PATH /usr/local/bin /usr/local/sbin
 
-    local oldstate=$SHELLOPTS
+    local OLDSTATE=$SHELLOPTS
     # set flags & positional arguments
     set "$@"
-    local retval=0
+    local RETVAL=0
     # execute (modified) positional arguments
-    "$@" || retval=$?
+    "$@" || RETVAL=$?
 
     set +vx
-    setopts "$oldstate"
-    return $retval
+    setopts "$OLDSTATE"
+    return $RETVAL
 }
 
-arrayzip() {
-    # merge arrays in a zipper fashion
-    # usage: arrayzip DEST [SRC...]
-    (($# >= 1)) || throw "Not enough arguments"
+# function arrayzip {
+#     # merge arrays in a zipper fashion
+#     # usage: arrayzip DEST [SRC...]
+#     (($# >= 1)) || throw "Not enough arguments"
+#
+#     local destref=$1 && shift
+#     valid_name "$destref" || throw "Invalid name: \"$destref\""
+#
+#     # accumulate the lengths and values of our input arrays (collapsing sparse arrays)
+#     local -a _src_counts _src_values
+#     local srcref
+#     for srcref in "$@"; do
+#         valid_name "$srcref" || throw "Invalid name: \"$srcref\""
+#         eval "$(
+#             printf '_src_counts+=( "${#%s[@]}" )\n' "$srcref"
+#             printf '_src_values+=( "${%s[@]}" )\n' "$srcref"
+#         )"
+#     done
+#
+#     # a temporary destination array
+#     local -a dest
+#     # the current index in our (abstract) source arrays
+#     local idx_s
+#     # the index in `_src_values` of the start of our current (abstract) source array
+#     local idx_v
+#     # the length of the current (abstract) source array
+#     local count
+#     # whether or not any source array has values remaining
+#     local any_remaining=1
+#
+#     # iterate through our source arrays in parallel until no array has values remaining
+#     for ((idx_s = 0; any_remaining; idx_s++)); do
+#         any_remaining=0
+#         idx_v=0
+#         # iterate over our source arrays (by proxy)
+#         for count in "${_src_counts[@]}"; do
+#             # are there values left to collect in this source array?
+#             if ((idx_s < count)); then
+#                 # collect the value at (start of current array) + (source array index)
+#                 dest+=("${_src_values[idx_v + idx_s]}")
+#                 any_remaining=1
+#             fi
+#             # move our `values` index past the end of the current source array
+#             ((idx_v += count))
+#         done
+#     done
+#
+#     eval "$destref"'=("${dest[@]}")'
+# }
 
-    local destref=$1 && shift
-    valid_name "$destref" || throw "Invalid name: \"$destref\""
+# function patchfunc {
+#     # modify a function
+#     throw "Not Implemented"
+# }
 
-    # accumulate the lengths and values of our input arrays (collapsing sparse arrays)
-    local -a _src_counts _src_values
-    local srcref
-    for srcref in "$@"; do
-        valid_name "$srcref" || throw "Invalid name: \"$srcref\""
-        eval "$(
-            printf '_src_counts+=( "${#%s[@]}" )\n' "$srcref"
-            printf '_src_values+=( "${%s[@]}" )\n' "$srcref"
-        )"
-    done
-
-    # a temporary destination array
-    local -a dest
-    # the current index in our (abstract) source arrays
-    local idx_s
-    # the index in `_src_values` of the start of our current (abstract) source array
-    local idx_v
-    # the length of the current (abstract) source array
-    local count
-    # whether or not any source array has values remaining
-    local any_remaining=1
-
-    # iterate through our source arrays in parallel until no array has values remaining
-    for ((idx_s = 0; any_remaining; idx_s++)); do
-        any_remaining=0
-        idx_v=0
-        # iterate over our source arrays (by proxy)
-        for count in "${_src_counts[@]}"; do
-            # are there values left to collect in this source array?
-            if ((idx_s < count)); then
-                # collect the value at (start of current array) + (source array index)
-                dest+=("${_src_values[idx_v + idx_s]}")
-                any_remaining=1
-            fi
-            # move our `values` index past the end of the current source array
-            ((idx_v += count))
-        done
-    done
-
-    eval "$destref"'=("${dest[@]}")'
-}
-
-patchfunc() {
-    # modify a function
-    throw "Not Implemented"
-}
-
-pause() {
+function pause {
     # pause for user
     local rc=0 REPLY
     read -rsp "[Press enter to contine] " || rc=$?

@@ -21,10 +21,11 @@ if [[ $(tree --version) > "tree v2.0.0" ]]; then
     BASH_ALIASES['tree']+=' --metafirst --sort=version'
 fi
 
-alias ls='ls --color=auto --ignore-backups --group-directories-first --sort=version'
+alias _ls='command ls --color=auto --group-directories-first --sort=version'
+alias ls='_ls --ignore-backups'
+alias la='_ls -A'
 alias ll='ls -lhF'
-alias la='ls -A'
-alias lla='ll -A'
+alias lla='la -lhF'
 # alias lt='tree -pugDF --si --du'
 alias lt='tree -pugDF --si --du --gitignore'
 # alias lta='lt -a'
@@ -74,6 +75,8 @@ alias http='http --ignore-stdin'
 alias ncdu='ncdu --exclude-caches --exclude=node_modules --exclude=cache --exclude=.cache --exclude=venv --exclude=tmp'
 alias help2man='help2man -N -L $LC_ALL'
 # alias info='info --vi-keys'
+alias c='clear'
+alias clear='clear -x'
 
 # editing rc files
 # --------------------

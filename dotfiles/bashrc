@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bash init script
 
-_bash_init() {
+function _bash_init {
     shopt -s checkhash
     shopt -s cdspell
     shopt -s dirspell
@@ -21,7 +21,6 @@ _bash_init() {
             echo >&2 "[!] $FUNCNAME: Will not source file: $item"
         fi
     done
-
 } && export -f _bash_init
 
 _bash_init

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-_load_builtins() {
+function _load_builtins {
     [[ -d ~/.local/lib/bash_loadable_builtins ]] || return 0
 
     declare -ga _LOADED_BUILTINS

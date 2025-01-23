@@ -24,7 +24,7 @@ pathmungex -Eer XDG_DATA_DIRS "$HOMEBREW_PREFIX/share"
 # pathmungex BASH_COMPLETION_USER_DIR "$HOMEBREW_PREFIX/etc/bash_completion.d"
 
 # remove linuxbrew from the current shell's environment
-unbrew() {
+function unbrew {
     for pathvar in PATH MANPATH INFOPATH PKG_CONFIG_PATH XDG_DATA_DIRS; do
         pathmungex -D $pathvar "$HOMEBREW_PREFIX/*"
     done

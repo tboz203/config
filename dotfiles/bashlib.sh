@@ -1,6 +1,6 @@
 # bashlib.sh
 
-_bashlib() {
+function _bashlib {
     # step one: where are we?
     if [[ $- == *i* ]]; then declare -g _SHELL_INTERACTIVE=1; fi
     if shopt -qp login_shell; then declare -g _SHELL_LOGIN=1; fi

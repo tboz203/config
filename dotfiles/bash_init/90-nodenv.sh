@@ -8,7 +8,7 @@ pathmungex PATH "$NODENV_ROOT/bin"
 
 export NODENV_SHELL=bash
 
-nodenv() {
+function nodenv {
     local command="${1:-}"
     shift || true
 

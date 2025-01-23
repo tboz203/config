@@ -9,7 +9,7 @@ export RBENV_SHELL=bash
 
 pathmungex -e RBENV_HOOK_PATH "$HOME/.local/share/rbenv-hooks"
 
-rbenv() {
+function rbenv {
     local command="${1:-}"
     shift || true
 

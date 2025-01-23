@@ -13,7 +13,7 @@ fi
 
 export AWS_PROFILE=dg-gov-dev-train-oasis-mcs-PowerUsers
 
-awsCreds2() {
+function awsCreds2 {
     local -a POSITIONAL
     local HELP USAGE FORCE ROOT FILENAME
     while (($# > 0)); do

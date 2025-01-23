@@ -1,7 +1,7 @@
 # setup powerline
 # shellcheck disable=2034
 
-find_powerline_root() {
+function find-powerline-root {
     if [[ -d ${POWERLINE_ROOT-} && $POWERLINE_ROOT == */powerline ]]; then
         _warn "POWERLINE_ROOT already set"
         return 0
@@ -32,7 +32,7 @@ find_powerline_root() {
 }
 
 if [[ ! ${POWERLINE_ROOT-} ]]; then
-    find_powerline_root
+    find-powerline-root
 fi
 
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
@@ -50,7 +50,7 @@ if [[ -d ${POWERLINE_ROOT-} ]]; then
     # gross hack to skip slow, redundant checks
     POWERLINE_COMMAND=powerline
     POWERLINE_CONFIG_COMMAND=powerline-config
-    powerline-config() {
+    function powerline-config {
         # shellcheck disable=2317
         return 0
     }
@@ -78,5 +78,4 @@ if [[ -d ${POWERLINE_ROOT-} ]]; then
         fi
     fi
     unset func_lines
-
 fi
