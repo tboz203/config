@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# git-alias: Display, set, or unset aliases from git config
 
 set -eEuo pipefail
 trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
@@ -7,19 +8,16 @@ trap 'echo "err ($?) at ($BASH_SOURCE:$LINENO): $BASH_COMMAND"' ERR
 git_core_path=$(git --exec-path)
 [[ :$PATH: == *:"$git_core_path":* ]] || PATH=$git_core_path:$PATH
 
+# these variables look unused, but are referenced by `git-sh-setup`
 # shellcheck disable=SC2034
-USAGE="[-h|--help] [-d|--delete] [<git config options>] [ALIAS [DEFINITION]]"
-# shellcheck disable=SC2034
-LONG_USAGE="Display, set, or unset aliases from git config"
+{
+    USAGE="[-h|--help] [-d|--delete] [<git config options>] [ALIAS [DEFINITION]]"
+    LONG_USAGE="Display, set, or unset aliases from git config"
 
-# shellcheck disable=SC2034
-NONGIT_OK=1
-# shellcheck disable=SC2034
-SUBDIRECTORY_OK=1
-set +u # allow unset variables in git-sh-setup
-# shellcheck disable=SC1091
-. git-sh-setup
-set -u # but then turn it back on
+    set +u # allow unset variables in git-sh-setup
+    NONGIT_OK=1 SUBDIRECTORY_OK=1 . git-sh-setup
+    set -u # but nowhere else
+}
 
 POSITIONAL=()
 OPTIONS=()
@@ -50,15 +48,24 @@ done
 [[ ${HELP-} ]] && usage
 
 if [[ ${DELETE-} ]]; then
+    if ((${#POSITIONAL[@]} < 1)); then
+        echo >&2 "[X] Not enough arguments"
+        exit 1
+    fi
     # shellcheck disable=2046
-    git config unset "${OPTIONS[@]}" $(printf 'alias.%q ' "${POSITIONAL[@]}")
+    git config unset "${OPTIONS[@]}" $(printf 'alias.%q ' "${POSITIONAL[@]}") || exit
 elif ((${#POSITIONAL[@]} > 2)); then
     echo >&2 "[X] Too many arguments"
     exit 1
 elif ((${#POSITIONAL[@]} == 2)); then
-    git config set "${OPTIONS[@]}" "alias.${POSITIONAL[0]}" "${POSITIONAL[1]}"
+    if type -P -- "git-${POSITIONAL[0]}" > /dev/null; then
+        echo >&2 "[X] Cannot create aliases matching git commands"
+        # even if we did, git would ignore them
+        exit 1
+    fi
+    git config set "${OPTIONS[@]}" "alias.${POSITIONAL[0]}" "${POSITIONAL[1]}" || exit
 elif ((${#POSITIONAL[@]} == 1)); then
-    git config get "${OPTIONS[@]}" "alias.${POSITIONAL[0]}"
+    git config get "${OPTIONS[@]}" "alias.${POSITIONAL[0]}" || exit
 else
-    git config get --all --show-names --regexp '^alias\.' "${OPTIONS[@]}"
+    git config get --all --show-names --regexp '^alias\.' "${OPTIONS[@]}" || exit
 fi

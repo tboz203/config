@@ -54,25 +54,25 @@ def format_timedelta(delta, use_suffix=True):  # pylint: disable=too-many-branch
         prefix = "-"
     delta = abs(delta)
     if delta.days > 365 * 2:
-        timestr = "{} years".format(delta.days // 365)
+        timestr = f"{delta.days // 365} years"
     elif delta.days > 365:
         timestr = "a year"
     elif delta.days > 30 * 2:
-        timestr = "{} months".format(delta.days // 30)
+        timestr = f"{delta.days // 30} months"
     elif delta.days > 30:
         timestr = "a month"
     elif delta.days > 7 * 2:
-        timestr = "{} weeks".format(delta.days // 7)
+        timestr = f"{delta.days // 7} weeks"
     elif delta.days > 7:
         timestr = "a week"
     elif delta.days > 1:
-        timestr = "{} days".format(delta.days)
+        timestr = f"{delta.days} days"
     elif delta.seconds > 60 * 60 * 2:
-        timestr = "{} hours".format(delta.seconds // 3600 + delta.days * 24)
+        timestr = f"{delta.seconds // 3600 + delta.days * 24} hours"
     elif delta.seconds > 60 * 2:
-        timestr = "{} minutes".format(delta.seconds // 60)
+        timestr = f"{delta.seconds // 60} minutes"
     else:
-        timestr = "{} seconds".format(delta.seconds)
+        timestr = f"{delta.seconds} seconds"
 
     if use_suffix:
         timestr = timestr + " " + suffix
@@ -110,15 +110,14 @@ def color_time_since(timestamp, utc=True):
 # we're using base 2 units (e.g. kibibyte, mebibyte)
 def format_bytes(num):
     """Integer "bytes" formatting with SI suffixes."""
-    # uses side-effects of iterating through a collection to select the
-    # correct suffix
     for suffix in [""] + SI_SUFFIXES:
         if num > 1024:
             num /= 1024
-        else:
-            break
+            continue
 
-    return "{:.2f}{:}".format(num, suffix)  # pylint: disable=undefined-loop-variable
+        return f"{num:.2f}{suffix}"
+
+    raise ValueError("to big!!!")
 
 
 def parse_bytes(num):
@@ -152,7 +151,10 @@ def get_creds(env_prefix=None):
             user = os.environ[user_var]
             pw = os.environ[pw_var]
         else:
-            warnings.warn("Credential environment variables not found: %s, %s" % (user_var, pw_var))
+            warnings.warn(
+                "Credential environment variables not found: %s, %s"
+                % (user_var, pw_var)
+            )
 
     if not (user and pw):
         user_guess = getpass.getuser()
@@ -243,7 +245,9 @@ def compose(*functions):
     Compose a sequence of functions into a single function.
     E.g. compose(f, g, h)(x) == f(g(h(x)))
     """
-    return reduce((lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))), functions)
+    return reduce(
+        (lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))), functions
+    )
 
 
 def depthwalk(top, depth=0, **kwargs):
@@ -278,9 +282,9 @@ def format_seconds(seconds):
     for suffix in suffixes:
         absval *= 1000
         if absval > cutoff:
-            break
+            return f"{absval * sign:.3g}{suffix}"
 
-    return f"{absval * sign:.3g}{suffix}"
+    raise ValueError("too small!!!")
 
 
 def just_timeit(stmt, **kwargs):
@@ -321,7 +325,9 @@ def jql(data, expr=".") -> None:
     if not isinstance(data, str):
         data = json.dumps(data)
 
-    subprocess.run(f"jq -C {shlex.quote(expr)} | less", input=data.encode("utf-8"), shell=True)
+    subprocess.run(
+        f"jq -C {shlex.quote(expr)} | less", input=data.encode("utf-8"), shell=True
+    )
 
 
 def dig(something, *keys, default=None):
@@ -431,9 +437,23 @@ def listattrs(obj: Any, local: bool = True) -> list[str]:
     subjects = (obj,) if local else (obj,) + type(obj).__mro__
     for subj in subjects:
         attrs.extend(getattr(subj, "__dict__", {}))
-        attrs.extend((slots,) if isinstance((slots := getattr(subj, "__slots__", ())), str) else slots)
+        attrs.extend(
+            (slots,)
+            if isinstance((slots := getattr(subj, "__slots__", ())), str)
+            else slots
+        )
 
     return attrs
+
+
+def xvars(obj: Any) -> dict[str, Any]:
+    selves = [obj] + type(obj).mro()
+    return {
+        name: attr
+        for name in dir(obj)
+        if getattr((attr := getattr(obj, name, "NOT-FOUND")), "__self__", None)
+        not in selves
+    }
 
 
 def rvars(obj: Any) -> dict[str, dict[str, Any]]:
@@ -460,7 +480,8 @@ def rvars(obj: Any) -> dict[str, dict[str, Any]]:
         results[desc] = {
             attr: value
             for attr in listattrs(subj)
-            if attr not in seen_attrs and (value := getattr(obj, attr, marker)) is not marker
+            if attr not in seen_attrs
+            and (value := getattr(obj, attr, marker)) is not marker
         }
         seen_attrs.update(results[desc])
 

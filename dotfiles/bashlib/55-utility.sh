@@ -222,23 +222,41 @@ if ((BASH_VERSINFO[0] < 5)); then
     }
 fi
 
-function get_array {
-    # execute a command & read lines into an array
-    # usage: get_array ARRAY_NAME COMMAND [COMMAND_ARGS...]
-    (($# >= 2)) || throw "Not enough arguments"
+if ((BASH_VERSINFO[0] >= 5)); then
+    function get_array {
+        # execute a command & read lines into an array
+        # usage: get_array ARRAY_NAME COMMAND [COMMAND_ARGS...]
+        (($# >= 2)) || throw "Not enough arguments"
 
-    local arrayref=$1 && shift
-    local -a command=("$@")
+        local -n arrayref=$1 && shift
+        local -a command=("$@")
 
-    valid_name "$arrayref" || throw "Not a valid name: \"$arrayref\""
+        # execute the command
+        local fulltext
+        fulltext=$("${command[@]}") || throw "Command failed ($(printf '%q ' "${command[@]}")): $?${fulltext:+:$'\n'$fulltext}"
 
-    # execute the command
-    local fulltext
-    fulltext=$("${command[@]}") || throw "Command failed ($(printf '%q ' "${command[@]}")): $?${fulltext:+:$'\n'$fulltext}"
+        # read lines into our array
+        readarray -t arrayref <<< "$fulltext"
+    }
+else
+    function get_array {
+        # execute a command & read lines into an array
+        # usage: get_array ARRAY_NAME COMMAND [COMMAND_ARGS...]
+        (($# >= 2)) || throw "Not enough arguments"
 
-    # read lines into our array
-    readarray -t "$arrayref" <<< "$fulltext"
-}
+        local arrayref=$1 && shift
+        local -a command=("$@")
+
+        valid_name "$arrayref" || throw "Not a valid name: \"$arrayref\""
+
+        # execute the command
+        local fulltext
+        fulltext=$("${command[@]}") || throw "Command failed ($(printf '%q ' "${command[@]}")): $?${fulltext:+:$'\n'$fulltext}"
+
+        # read lines into our array
+        readarray -t "$arrayref" <<< "$fulltext"
+    }
+fi
 
 if ((BASH_VERSINFO[0] >= 5)); then
     function from_list {
@@ -580,12 +598,32 @@ function setopts {
 
     local OPTS_LIST=$1
 
-    local -a OLDOPTS NEWOPTS
+    local -a OLDOPTS NEWOPTS CHANGES
     from_list OLDOPTS "$SHELLOPTS"
     from_list NEWOPTS "$OPTS_LIST"
 
-    # shellcheck disable=2046
-    set $(printf -- "+o %s " "${OLDOPTS[@]}") $(printf -- "-o %s " "${NEWOPTS[@]}")
+    local oldopt newopt
+    # iterate through both lists to find added & removed options
+    while ((${#OLDOPTS[@]} || ${#NEWOPTS[@]})); do
+        oldopt=${OLDOPTS[0]}
+        newopt=${NEWOPTS[0]}
+        _if_debug inspect_var oldopt newopt OLDOPTS NEWOPTS
+        if [[ $oldopt == "$newopt" ]]; then
+            # opt is unchanged; skip it
+            OLDOPTS=("${OLDOPTS[@]:1}")
+            NEWOPTS=("${NEWOPTS[@]:1}")
+        elif [[ $oldopt && $oldopt < $newopt ]]; then
+            # $oldopt is not in ${NEWOPTS[@]}; disable it
+            CHANGES+=(+o "$oldopt")
+            OLDOPTS=("${OLDOPTS[@]:1}")
+        else
+            # $newopt is not in ${OLDOPTS[@]}; enable it
+            CHANGES+=(-o "$newopt")
+            NEWOPTS=("${NEWOPTS[@]:1}")
+        fi
+    done
+
+    ((!${#CHANGES[@]})) || set "${CHANGES[@]}"
 }
 
 function withflags {

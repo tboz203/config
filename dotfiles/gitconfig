@@ -9,7 +9,13 @@
 	autocrlf = false
 	excludesfile = ~/.gitignore
 	pager = delta
+	; pager = less -SRFi
 	untrackedCache = true
+[pager]
+	config = less -SRFi
+[init]
+; 	templatedir = ~/.git_template
+	defaultBranch = main
 [merge]
 	tool = nvimdiff
 	conflictstyle = diff3
@@ -40,9 +46,6 @@
 [fetch]
 	recursesubmodules = on-demand
 	prune = true
-[init]
-; 	templatedir = ~/.git_template
-	defaultBranch = main
 [log]
 	date = relative
 	initialDecorationSet = all
