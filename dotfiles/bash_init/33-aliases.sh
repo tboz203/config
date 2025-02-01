@@ -21,7 +21,7 @@ if [[ $(tree --version) > "tree v2.0.0" ]]; then
     BASH_ALIASES['tree']+=' --metafirst --sort=version'
 fi
 
-alias _ls='command ls --color=auto --group-directories-first --sort=version'
+alias _ls='\ls --color=auto --group-directories-first --sort=version'
 alias ls='_ls --ignore-backups'
 alias la='_ls -A'
 alias ll='ls -lhF'

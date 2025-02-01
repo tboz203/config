@@ -171,31 +171,31 @@ function declared {
     declare -p -- "$@" &> /dev/null
 } && complete -v declared
 
-if ((BASH_VERSINFO[0] < 5)); then
-    function quoted {
-        # print each argument on a separate line, quoted if necessary
-        # usage: quoted [ARG...]
-        local -a results
-        local value clean
-        for value in "$@"; do
-            printf -v clean "%q" "$value"
-            if [[ $value == "$clean" ]]; then
-                # printf says no modifications needed
-                results+=("$value")
-            elif [[ $clean == \$* ]]; then
-                # printf used $'...' notation; send the cleaned value
-                results+=("$clean")
-            else
-                # otherwise, printf gave us the "escape\ every\ \$character\ form",
-                # which we hate. we'll force it to use the other form, and then clean
-                # up the result
-                printf -v clean "%q" $'\n'"$value"
-                results+=("'${clean#\$\'\\n}")
-            fi
-        done
-        each "${results[@]}"
-    }
+function quoted {
+    # print each argument on a separate line, quoted if necessary
+    # usage: quoted [ARG...]
+    local -a results
+    local value clean
+    for value in "$@"; do
+        printf -v clean "%q" "$value"
+        if [[ $value == "$clean" ]]; then
+            # printf says no modifications needed
+            results+=("$value")
+        elif [[ $clean == \$* ]]; then
+            # printf used $'...' notation; send the cleaned value
+            results+=("$clean")
+        else
+            # otherwise, printf gave us the "escape\ every\ \$character\ form",
+            # which we hate. we'll force it to use the other form, and then clean
+            # up the result
+            printf -v clean "%q" $'\n'"$value"
+            results+=("'${clean#\$\'\\n}")
+        fi
+    done
+    each "${results[@]}"
+}
 
+if ((BASH_VERSINFO[0] < 5)); then
     function attributes {
         # print attributes of variables as understood by `declare`,
         # with the addition of 'u' to indicate "undefined"

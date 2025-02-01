@@ -25,6 +25,9 @@ if [[ -n ${SUDO_USER-} ]]; then
     history -c && history -r
 fi
 
+[[ ${MAILCHECK-} ]] || MAILCHECK=60
+pathmungex MAILPATH "/var/mail/$LOGNAME"
+
 # check the window size after each command
 shopt -s checkwinsize
 # if command is a directory, cd to it
