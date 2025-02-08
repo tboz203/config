@@ -26,7 +26,7 @@ if [[ -n ${SUDO_USER-} ]]; then
 fi
 
 [[ ${MAILCHECK-} ]] || MAILCHECK=60
-pathmungex MAILPATH "/var/mail/$LOGNAME"
+pathmungex MAILPATH "${MAIL-/nowhere}" "/var/mail/$LOGNAME"
 
 # check the window size after each command
 shopt -s checkwinsize

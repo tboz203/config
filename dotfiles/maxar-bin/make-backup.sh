@@ -29,7 +29,7 @@ echo >&2 "[.] Starting: $(date)"
 WORKSPACE="/home/$USER/$TITLE"
 # NOTE: workspace will remain on ERR
 trap 'rm -rf $WORKSPACE' EXIT
-mkdir "$WORKSPACE" && cd "$WORKSPACE"
+mkdir -p "$WORKSPACE" && cd "$WORKSPACE"
 
 # make a local copy of all yum installs
 (yumdb search command_line '*' || echo "[X] could not list installs") &> installs.txt
@@ -47,9 +47,10 @@ crontab -l > "root.crontab" || true
 tar -c \
     --ignore-failed-read --absolute-names \
     --exclude-caches --exclude-backups --exclude=.cache --exclude=cache --exclude=tmp \
-    -- * "${INPUTS[@]}" |
+    -- . "${INPUTS[@]}" |
     zstd --long -7 |
-    gpg --compress-algo none --output "$TARBALL" --encrypt --recipient "$RECIPIENT"
+    gpg --batch --encrypt --output "$TARBALL" --recipient "$RECIPIENT" \
+        --trust-model always --compress-algo none
 
 chown "$USER" "$TARBALL"
 chmod 640 "$TARBALL"
