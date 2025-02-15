@@ -27,3 +27,4 @@ _bash_init
 
 # ignore any crap installer scripts try to append to this file
 return 0
+

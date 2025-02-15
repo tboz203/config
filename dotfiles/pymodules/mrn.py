@@ -100,6 +100,7 @@ def parse_args(args: Sequence[str] | None = None) -> Namespace:
     target_group.add_argument(
         "-t",
         "--target-directory",
+        metavar="DEST",
         help="The directory to move files to.",
     )
     target_group.add_argument(

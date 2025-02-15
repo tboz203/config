@@ -52,7 +52,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -v USAGE || -v HELP ]]; then
+if [[ ${USAGE-} || ${HELP-} ]]; then
     cat << EOF
 List event serivice subscriptions. By default, find subscriptions matching our
 client ID (per ~/.ssh/P2020), and output subscription urls.
@@ -60,7 +60,7 @@ Usage: $(basename "$0") [-h|--help] [OPTIONS]
 EOF
 fi
 
-if [[ -v HELP ]]; then
+if [[ ${HELP-} ]]; then
     cat << EOF
 
 Options:
@@ -85,9 +85,12 @@ line takes precedence.
 EOF
 fi
 
-if [[ -v USAGE || -v HELP ]]; then
+if [[ ${USAGE-} || ${HELP-} ]]; then
     exit 0
 fi
+
+declare -gi STATUS=0
+declare -gi ANYTHING
 
 envs=(
     reg-us-east-1
@@ -96,19 +99,20 @@ envs=(
 
 for env in "${envs[@]}"; do
     url=$(eureka -e "$env" event-service-consumer-proxy | sed 's:/$::') || {
+        ((STATUS |= $?))
         echo "[!] event-service-consumer-proxy not found..."
         continue
     }
 
-    if [[ -v DUMP ]]; then
+    if [[ ${DUMP-} ]]; then
         mxcurl "$url/subscriptions" | jq .
         ANYTHING=1
     else
 
-        if [[ -v PATTERN ]]; then
+        if [[ ${PATTERN-} ]]; then
             query="._embedded.subscriptions[]? | select(.name | test(\"$PATTERN\"))"
         else
-            if [[ ! -v IDENTITY ]]; then
+            if [[ ! ${IDENTITY-} ]]; then
                 IDENTITY="$(
                     . ~/.ssh/P2020
                     echo "$P2020_IDENTITY_CLIENT_ID"
@@ -122,22 +126,26 @@ for env in "${envs[@]}"; do
         for body in "${payloads[@]}"; do
             [[ "$body" ]] || continue
             ANYTHING=1
-            if [[ -v VERBOSE ]]; then
+            if [[ ${VERBOSE-} ]]; then
                 jq . <<< "$body"
-            elif [[ -v NAMES ]]; then
+            elif [[ ${NAMES-} ]]; then
                 jq -r '.name' <<< "$body"
-            elif [[ -v LINKS ]]; then
+            elif [[ ${LINKS-} ]]; then
                 jq -r '.deliveryMethod.endpoint' <<< "$body"
             else
                 jq -r '.id.href' <<< "$body"
             fi
-            if [[ -v DELETE ]]; then
+            if [[ ${DELETE-} ]]; then
                 jq -r '.id.href' <<< "$body" | xargs -r mxcurl -X DELETE --write-out "%{method}: %{response_code}"
             fi
         done
     fi
 done
 
-if [[ ! -v ANYTHING && ! -v QUIET ]]; then
+if ((STATUS)); then
+    exit $STATUS
+fi
+
+if [[ ! ${ANYTHING-} && ! ${QUIET-} ]]; then
     echo "[.] Nothing matched"
 fi
