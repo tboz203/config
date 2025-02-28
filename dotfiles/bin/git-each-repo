@@ -29,18 +29,9 @@ while [[ $# -gt 0 ]]; do
     arg="$1"
     shift
     case $arg in
-        -h | --help)
-            HELP=1
-            ;;
-        -p | --print)
-            READY=1
-            PRINT=1
-            ;;
-        --)
-            # stop processing options; remaining arguments are subcommand
-            READY=1
-            break
-            ;;
+        -h | --help) HELP=1 ;;
+        -p | --print) PRINT=1 ;;
+        --) break ;;
         *)
             echo "I don't understand '$arg'"
             HELP=1
@@ -48,7 +39,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-[[ -v HELP || ! -v READY ]] && usage
+[[ -v HELP ]] && usage
 
 # https://stackoverflow.com/a/32981392
 faketty() {
@@ -59,18 +50,9 @@ failures=()
 for item in */; do
     item=$(basename "$item")
     git -C "$item" in-repo || continue
-    [[ -v PRINT ]] && {
-        echo "$item"
-        continue
-    }
+    [[ ${PRINT-} ]] && echo "$item"
     pushd "$item" >&/dev/null
     {
-        # faketty "$@" | sed -r "s/^/\x1b\[1m$item: \x1b[0m/"
-        # faketty "$@" | sed -r -e 's/\x1b/\\e/g' -e 's/\r/(CR)/g' -e 's/\n/(LF)/g'
-        # faketty "$@" | sed -r -e 's/\x1b/\\e/g' -e 's/\x0D/(CR)/g'
-        # faketty "$@" | sed -r -e 's/\x1b/(ESC)/g' -e 's/\x0D(.)/(CR)\1/g'
-        # faketty "$@" | sed -r -e 's/\x1b/(ESC)/g' -e 's/\x0D(.)/(CR)\1/g'
-        # faketty "$@" | sed -r -e 's/\x0D(.)/(CR)\1/g'
         faketty "$@"
         retval=$?
     } || true

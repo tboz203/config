@@ -4,8 +4,8 @@
 # expand aliases even if not interactive
 shopt -s expand_aliases
 
-alias rmf='rm -rf'
-alias rimraf='rm -rf'
+alias rmf='\rm -I --one-file-system -rf'
+alias rimraf='rmf'
 alias xargs='xargs -r '
 alias day='date +%Y-%m-%d'
 alias full='date "+%Y.%m.%d-%H.%M.%S"'
@@ -26,6 +26,7 @@ alias ls='_ls --ignore-backups'
 alias la='_ls -A'
 alias ll='ls -lhF'
 alias lla='la -lhF'
+alias lll='ll -L'
 # alias lt='tree -pugDF --si --du'
 alias lt='tree -pugDF --si --du --gitignore'
 # alias lta='lt -a'

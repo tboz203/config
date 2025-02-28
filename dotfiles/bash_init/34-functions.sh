@@ -75,7 +75,7 @@ ALT_PAGER=$(type -P bat || type -P less)
 function jql {
     # mnemonic: `jq | less`
     jq -C "${@:-.}" | "$ALT_PAGER"
-} && complete -F _jq jql
+}
 
 function yql {
     # mnemonic: `yq | less`
