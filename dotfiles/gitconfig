@@ -1,7 +1,13 @@
 ; vim: ft=gitconfig sw=8 ts=8 noet
 [user]
-	name = Thomas Bozeman th026106
-	email = thomas.bozeman@digitalglobe.com
+	name = Thomas Bozeman
+	email = thomas.bozeman@cgifederal.com
+[credential]
+	helper = cache
+[credential "https://momcode.cgifederal.com"]
+	provider = bitbucket
+[http]
+	sslBackend = schannel
 [color]
 	ui = true
 [core]
@@ -41,8 +47,6 @@
 [column]
 ; 	ui = auto column dense
 	tag = auto column dense
-[credential]
-	helper = cache
 [fetch]
 	recursesubmodules = on-demand
 	prune = true

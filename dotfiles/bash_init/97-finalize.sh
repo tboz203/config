@@ -3,7 +3,6 @@
 cleanpath
 
 pathmungex PATH --replace --before \
-    ~/.maxar-bin \
     ~/.bin
 
 if [[ ${_SHELL_INTERACTIVE-} ]]; then
