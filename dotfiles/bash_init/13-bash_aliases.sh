@@ -14,7 +14,7 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
-alias ls='ls --color=auto --ignore-backups --group-directories-first --sort=version'
+alias ls='ls --color=auto --ignore-backups --group-directories-first --sort=version --ignore="NTUSER*" --ignore="ntuser*"'
 alias ll='ls -lhF'
 alias la='ls -A'
 alias lla='ll -A'

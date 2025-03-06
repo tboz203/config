@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-exec docker run \
-    -p 127.0.0.1:5050:80 \
-    -v pgadmin:/var/lib/pgadmin \
-    -e 'PGADMIN_DEFAULT_EMAIL=admin@pgadmin.com' \
-    -e 'PGADMIN_DEFAULT_PASSWORD=password' \
-    --name pgadmin \
-    -d dpage/pgadmin4:latest

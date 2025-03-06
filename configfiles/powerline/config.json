@@ -1,7 +1,6 @@
 {
   "common": {
-    "term_truecolor": true,
-    "log_level": "INFO"
+    "term_truecolor": true
   },
   "ext": {
     "ipython": {

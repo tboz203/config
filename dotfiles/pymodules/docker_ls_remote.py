@@ -21,10 +21,6 @@ Creds = tuple[str, Optional[str]] | tuple[None, None]
 # if we can't b64decode an auth str, we use it unmodified
 Auth = str | Creds | None
 
-# DEFAULT_REGISTRY = 'https://gntbuild.cgifederal.com:5000'
-# DEFAULT_REGISTRY = 'https://artifacts.cgifederal.com:30100'
-# DEFAULT_REGISTRY = 'https://docker-approved.artpro.digitalglobe.com:443'
-# DEFAULT_REGISTRY = 'https://docker.artpro.digitalglobe.com:443'
 DEFAULT_REGISTRY = "registry-1.docker.io"
 
 
