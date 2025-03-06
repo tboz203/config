@@ -7,12 +7,8 @@ while [[ $# -gt 0 ]]; do
     arg="$1"
     shift
     case $arg in
-        -h | --help)
-            HELP=1
-            ;;
-        -u | --unlock)
-            UNLOCK=1
-            ;;
+        -h | --help) HELP=1 ;;
+        -u | --unlock) UNLOCK=1 ;;
         -?*)
             # taking special care with this pattern to not catch `-`
             echo "I don't understand this argument: $arg"
@@ -23,7 +19,7 @@ while [[ $# -gt 0 ]]; do
                 REQUIREMENTS_IN="$arg"
             elif [[ ! -v REQUIREMENTS_TXT ]]; then
                 REQUIREMENTS_TXT="$arg"
-            else
+            elif [[ ! -v HELP ]]; then
                 echo "[X] too many parameters"
                 FAIL=1
             fi
@@ -31,10 +27,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+MY_NAME=$(basename "$0")
+
 if [[ -v HELP ]]; then
     cat << EOF
-$(basename "$0"): extract soft-lock requirements
-Usage: $(basename "$0") [options] REQUIREMENTS_IN REQUIREMENTS_TXT
+$MY_NAME: extract soft-lock requirements
+Usage: $MY_NAME [options] REQUIREMENTS_IN REQUIREMENTS_TXT
 
 REQUIREMENTS_IN and REQUIREMENTS_TXT should be requirements files of the form
 understood by pip. You may use '-' to specify stdin.
@@ -45,7 +43,7 @@ options:
 -u | --unlock   Extract unlocked requirements. REQUIREMENTS_TXT not required in this mode
 
 EOF
-    exit 1
+    exit 0
 fi
 
 if [[ ! -v REQUIREMENTS_IN || ! (-v REQUIREMENTS_TXT || -v UNLOCK) ]]; then

@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 # bash init script
 
-_bash_init() {
-    declare -g _BASH_INIT_STARTED=1
-
+function _bash_init {
     shopt -s checkhash
     shopt -s cdspell
     shopt -s dirspell
     shopt -s no_empty_cmd_completion
 
+    # shopt -s extdebug
+
     # set -eu -o functrace errtrace
-    # # shopt -s extdebug
     # _BASHLIB_LOGLEVEL=debug
     # _BASHLIB_FLAGS=:replace_exec:stacktrace:
 
@@ -22,12 +21,10 @@ _bash_init() {
             echo >&2 "[!] $FUNCNAME: Will not source file: $item"
         fi
     done
-
-    # set +eu
 } && export -f _bash_init
 
-# don't run twice, and don't recurse
-[[ ${_BASH_INIT_RUN-} ]] || _bash_init
+_bash_init
 
-# and don't let anybody add any extra crap!
-return
+# ignore any crap installer scripts try to append to this file
+return 0
+

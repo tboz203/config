@@ -16,7 +16,9 @@ pathmungex PATH "$RBENV_ROOT/bin"
 # pathmungex -a BASH_COMPLETION_PATHS "$RBENV_ROOT/completions/rbenv.bash"
 export RBENV_SHELL=bash
 
-rbenv() {
+pathmungex -e RBENV_HOOK_PATH "$HOME/.local/share/rbenv-hooks"
+
+function rbenv {
     local command="${1:-}"
     shift || true
 

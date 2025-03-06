@@ -12,14 +12,14 @@ from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from operator import attrgetter
-from typing import Callable, Optional, cast
+from typing import Callable, Optional, Self, cast
 
 NaN = float("nan")
 
 PATTERN = re.compile(
     r"""
     # start of line, one or more plus signs, and optional whitespace
-    ^\++\s*
+    ^(?P<depth>\++)\s*
     # A bracketed floating point number representing seconds since the unix epoch
     \[(?P<timestamp>\d+\.\d+)\]\s
     # the start of a parenthesized group
@@ -39,10 +39,11 @@ PATTERN = re.compile(
 )
 
 
-@dataclass(order=True, frozen=True)
-class ParsedLine:
-    """A parsed line of input."""
+@dataclass(frozen=True)
+class LogLine:
+    """A parsed log line."""
 
+    depth: int
     timestamp: datetime
     filename: str
     lineno: int
@@ -54,12 +55,18 @@ class ParsedLine:
         return f"{self.filename}:{self.lineno}"
 
 
-@dataclass(order=True, frozen=True)
-class DeltaLine:
-    """A parsed line with a time delta."""
+@dataclass(frozen=True)
+class DeltaLine(LogLine):
+    """A parsed log line with a time delta."""
 
     delta: float
-    line: ParsedLine
+
+
+@dataclass(frozen=True)
+class CallTree(DeltaLine):
+    """A call tree parsed from delta lines."""
+
+    nodes: tuple[DeltaLine | Self, ...]
 
 
 @dataclass(order=True, frozen=True)
@@ -71,11 +78,11 @@ class DeltaAggregate:
     delta_median: float
     delta_stdev: float
     common: str
-    lines: tuple[DeltaLine]
+    lines: tuple[DeltaLine, ...]
 
     def __init__(self, common: str, lines: Iterable[DeltaLine]):
         object.__setattr__(self, "common", common)
-        object.__setattr__(self, "lines", tuple(sorted(lines)))
+        object.__setattr__(self, "lines", tuple(sorted(lines, key=attrgetter("delta"))))
 
         if not self.lines:
             raise ValueError("lines may not be empty")
@@ -84,13 +91,21 @@ class DeltaAggregate:
         deltas = [line.delta for line in self.lines if line.delta != NaN] or [NaN]
 
         object.__setattr__(self, "delta_sum", sum(deltas))
-        object.__setattr__(self, "delta_mean", NaN if NaN in deltas else statistics.geometric_mean(deltas))
+        object.__setattr__(
+            self,
+            "delta_mean",
+            NaN if NaN in deltas else statistics.geometric_mean(deltas),
+        )
         object.__setattr__(self, "delta_median", statistics.median(deltas))
-        object.__setattr__(self, "delta_stdev", NaN if len(deltas) < 2 else statistics.stdev(deltas, self.delta_mean))
+        object.__setattr__(
+            self,
+            "delta_stdev",
+            NaN if len(deltas) < 2 else statistics.stdev(deltas, self.delta_mean),
+        )
 
     @property
-    def top_line(self) -> ParsedLine:
-        return self.lines[-1].line
+    def top_line(self) -> DeltaLine:
+        return self.lines[-1]
 
     def __str__(self) -> str:
         fmt = "<8.6f"
@@ -117,7 +132,7 @@ def stripansi(text: str) -> str:
     return text
 
 
-def parse_absolute_lines(lines: Iterable[str]) -> Iterator[ParsedLine]:
+def parse_absolute_lines(lines: Iterable[str]) -> Iterator[LogLine]:
     """Parse AbsoluteLines from an iterable of text lines."""
 
     lineiter = iter(lines)
@@ -143,6 +158,7 @@ def parse_absolute_lines(lines: Iterable[str]) -> Iterator[ParsedLine]:
         # we have a capture, but we don't know if its "complete" yet
 
         line = next(lineiter, None)
+        nextcapture = None
 
         if line is not None:
             line = stripansi(line.rstrip())
@@ -154,15 +170,15 @@ def parse_absolute_lines(lines: Iterable[str]) -> Iterator[ParsedLine]:
         # either input has been exhausted, or we have the next logical line;
         # either way, time to emit the current capture
 
-        timestamp_str = capture.group("timestamp")
-        timestamp = datetime.fromtimestamp(float(timestamp_str))
+        depth = len(capture.group("depth"))
+        timestamp = datetime.fromtimestamp(float(capture.group("timestamp")))
         filename = capture.group("filename")
         lineno = int(capture.group("lineno"))
         function = capture.group("function")
         command = capture.group("command").rstrip()
         command = "\n".join([command] + cmd_extra)
 
-        yield ParsedLine(timestamp, filename, lineno, function, command)
+        yield LogLine(depth, timestamp, filename, lineno, function, command)
 
         # now, did we exhaust our input?
 
@@ -173,7 +189,7 @@ def parse_absolute_lines(lines: Iterable[str]) -> Iterator[ParsedLine]:
         cmd_extra = []
 
 
-def calculate_deltas(lines: Iterable[ParsedLine]) -> Iterator[DeltaLine]:
+def calculate_deltas(lines: Iterable[LogLine]) -> Iterator[DeltaLine]:
     lines = iter(lines)
     try:
         prev = next(lines)
@@ -185,13 +201,46 @@ def calculate_deltas(lines: Iterable[ParsedLine]) -> Iterator[DeltaLine]:
     for curr in lines:
         delta = curr.timestamp - prev.timestamp
         # yield DeltaLine(delta.total_seconds(), curr)
-        yield DeltaLine(delta.total_seconds(), prev)
+        yield DeltaLine(**asdict(prev), delta=delta.total_seconds())
         prev = curr
 
-    yield DeltaLine(NaN, prev)
+    yield DeltaLine(**asdict(prev), delta=NaN)
 
 
-def aggregate_deltas(lines: Iterable[DeltaLine], keyfunc: Callable[[DeltaLine], str]) -> list[DeltaAggregate]:
+def build_call_tree(
+    top_line: DeltaLine, lines: Iterable[DeltaLine]
+) -> tuple[CallTree, DeltaLine | None, Iterator[DeltaLine]]:
+    """
+    Build a call tree from delta lines.
+
+    returns 1) the built call tree, 2) the next top line (if any), and 3) any
+    further remaining lines.
+    """
+    # Trying to figure out 1) what I want, and 2) what that looks like
+    # maybe instead of starting at the top, i should start at the bottom?
+    # what's the simplest case? A single delta line? or a call tree with no
+    # nested trees? if the output is a call tree with multiple delta lines but
+    # no nested trees, what did the input look like? In order to populate the
+    # tree itself, we need that one line at depth = N, and then we need all the
+    # following lines at depth = N-1. Further, in order to know where to stop,
+    # we'll have to take off one more line that we use, which we'll then have
+    # to return as well. So: we ask for that top line and all the lines after
+    # it; we look at lines one by one until we find one at the same level as
+    # our top line (or until we run out), and then give that and the remainder
+    # back.
+    #
+    # 1) should we recurse when depth < N-1?
+    # 2) how would we handle the top-level tree? is it possible with `CallTree` the shape it is?
+
+    lines = iter(lines)
+    nodes = []
+    while True:
+        line = next(lines)
+
+
+def aggregate_deltas(
+    lines: Iterable[DeltaLine], keyfunc: Callable[[DeltaLine], str]
+) -> list[DeltaAggregate]:
     groups: dict[str, list[DeltaLine]] = {}
     for line in lines:
         groups.setdefault(keyfunc(line), []).append(line)
@@ -199,11 +248,15 @@ def aggregate_deltas(lines: Iterable[DeltaLine], keyfunc: Callable[[DeltaLine], 
     return sorted([DeltaAggregate(key, group) for key, group in groups.items()])
 
 
-def output_aggregates(aggregates: Iterable[DeltaAggregate], format: OutputFormat = LINES) -> None:
+def output_aggregates(
+    aggregates: Iterable[DeltaAggregate], format: OutputFormat = LINES
+) -> None:
     if format is LINES:
         print("\n".join(str(agg) for agg in aggregates))
     elif format is JSON:
-        json.dump(aggregates, sys.stdout, indent=2, allow_nan=False, default=json_default)
+        json.dump(
+            aggregates, sys.stdout, indent=2, allow_nan=False, default=json_default
+        )
         # json.dump(aggregates, sys.stdout, indent=2, default=json_default)
     else:
         raise ValueError("Invalid OutputFormat", format)
@@ -222,8 +275,9 @@ def json_default(obj):
 
 
 def main():
-
-    parser = argparse.ArgumentParser(description="Collect timestamped log lines, and sort and display their durations")
+    parser = argparse.ArgumentParser(
+        description="Collect timestamped log lines, and sort and display their durations"
+    )
 
     outformat = parser.add_mutually_exclusive_group()
     outformat.add_argument(
@@ -237,11 +291,14 @@ def main():
     )
 
     parser.add_argument(
-        "files", nargs="*", default=("-",), help="files to be read. `-` means stdin, which is the default"
+        "files",
+        nargs="*",
+        default=("-",),
+        help="files to be read. `-` means stdin, which is the default",
     )
 
     args = parser.parse_args()
-    delta_keyfunc = attrgetter("line.location")
+    delta_keyfunc = attrgetter("location")
 
     raw_lines = fileinput.input(args.files)
     abs_lines = parse_absolute_lines(raw_lines)

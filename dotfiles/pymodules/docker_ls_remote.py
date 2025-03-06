@@ -2,34 +2,35 @@
 
 """List images in a docker registry."""
 
+from __future__ import annotations
+
 import argparse
 import dataclasses
 import fnmatch
 import getpass
 import json
+import logging
 from base64 import b64decode
-from datetime import datetime
-from functools import cached_property
+from functools import cache, cached_property
 from netrc import netrc
 from pathlib import Path
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Self
 
 import requests
 
-# both are optional, but we won't have a password without a username
-Creds = tuple[str, Optional[str]] | tuple[None, None]
-# if we can't b64decode an auth str, we use it unmodified
-Auth = str | Creds | None
+if TYPE_CHECKING:
+    # if we can't b64decode an auth str, we use it unmodified
+    Auth = requests.sessions._Auth | None
 
-DEFAULT_REGISTRY = "registry-1.docker.io"
+DEFAULT_REGISTRY_NAME = "registry-1.docker.io"
+
+logger = logging.getLogger("docker-ls-remote")
 
 
 def urljoin(head, *parts):
-    """smash url parts together"""
-    url = head
-    for part in parts:
-        url = url.rstrip("/") + "/" + part.lstrip("/")
-    return url
+    """smash url path parts together"""
+    parts = [part.strip("/") for part in parts]
+    return "/".join([head] + parts)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -45,18 +46,18 @@ class Registry:
 
     @property
     def is_default(self) -> bool:
-        return self.name == DEFAULT_REGISTRY
+        return self.name == DEFAULT_REGISTRY_NAME
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Image:
-    """A dataclass representing a docker image name. may contain wildcards"""
+    """A dataclass representing a docker image or a docker image pattern."""
 
     registry: Registry
     path: str
-    tag: Optional[str] = None
+    tag: str | None = None
 
-    @property
+    @cached_property
     def name(self):
         if self.registry.is_default:
             name = self.path
@@ -66,185 +67,130 @@ class Image:
             name += ":" + self.tag
         return name
 
+    @cached_property
+    def has_glob_path(self) -> bool:
+        return bool(set("[]?*") ^ set(self.path))
 
-@dataclasses.dataclass
-class Result(Image):
-    """A dataclass representing a docker image. may contain extra metadata,
-    may *not* contain wildcards"""
+    @classmethod
+    def parse(cls, name: str) -> Self:
+        match name.split("/"):
+            case (path,) | ("library", path):
+                host = DEFAULT_REGISTRY_NAME
+                path = f"library/{path}"
+            case (host, path):
+                pass
+            case (host, group, item):
+                path = group + "/" + item
+            case _:
+                raise ValueError("invalid image name", name)
 
-    digest: Optional[str] = None
-    created: Optional[datetime] = None
+        path, _, tag = path.partition(":")
+        return cls(Registry(host), path, tag or None)
 
 
-def pick_credentials(registry: Registry, user_string: Optional[str] = None) -> Auth:
-    """pick credentials based on user input, registry, and configuration."""
+class AuthManager:
+    """A class to manage authentication information."""
 
-    # we need to pick a registry, a username, and a password. we may be given
-    # any of these on the command line; we may be able to collect these from
-    # docker config, and/or netrc; we can use a default for the registry and
-    # we can guess that our process username matches our docker username; and
-    # as a final recourse, we can ask the user directly.
-    #
-    # should also be noted; credentials are not always required?
-    #
-    # additionally, we may decide that we want to write whatever information we
-    # gather back *into* docker config
-    #
-    # if they give us all three, give them right back
-    # elif they give us username & password (registry is missing),
-    # ... do we try to look up a matching registry from docker config??
-    # no, i think that's a bad idea.
-    #
-    #  host
-    #   |  username
-    #   v   v  password
-    # +---+---+---+
-    # | X | X | X |  everything given to us!
-    # | X | X | _ |  docker config; netrc; prompt
-    # | X | _ | X |  impossible
-    # | X | _ | _ |  docker config; netrc; empty creds
-    # | _ | X | X |  ???
-    # | _ | X | _ |  ???
-    # | _ | _ | X |  impossible
-    # | _ | _ | _ |  docker config; ???
-    #
-    # so in general:
-    # 1) if we don't have a host ...
-    #    i think we should always have a host, as a requirement. either an
-    #    explicit one in an image name, or an implicit `docker hub` one.
-    # 2) try to match what we have to docker config
-    # 3) if we have a host; try to match it to netrc
-    # 4) if we have a username without a password, prompt the user
+    def __init__(self, default_auth: Auth = None, *, prompting: bool = True):
+        """Initialize a new AuthManager."""
+        self.default_auth: Auth = default_auth
+        self.auth_map: dict[Registry | None, Auth] = {}
 
-    username, password = try_split_creds(user_string)
+        self.prompting: bool = prompting
 
-    if username and password:
-        # we've got something from CLI args
-        return username, password
-
-    if auth := _check_docker_config(registry, username, password):
-        # found a match in the docker config
+    def pick_auth(self, registry: Registry):
+        auth = self.auth_map.get(registry)
+        if not auth:
+            auth = self._pick_auth(registry)
+            self.auth_map[registry] = auth
         return auth
 
-    if netrc_match := netrc().authenticators(registry.name):
-        # found a netrc match based on hostname...
-        lookup_username, _, lookup_password = netrc_match
-        if username in (lookup_username, None) and password in (lookup_password, None):
-            # and either our username/password matched, or we didn't have them
+    def _pick_auth(self, registry: Registry) -> Auth:
+        """Pick an authorization value based on user input, registry, and configuration."""
+
+        if auth := self.check_docker_config(registry):
+            logger.debug("Using credentials from docker config")
+            return auth
+
+        if netrc_match := netrc().authenticators(registry.name):
+            logger.debug("Using credentials from netrc")
+            lookup_username, _, lookup_password = netrc_match
             return lookup_username, lookup_password
 
-    if username:
-        # got a username but no password; ask user directly
-        return prompt_for_creds(username)
+        if self.prompting:
+            logger.debug("Prompting for credentials")
+            return self.prompt_for_creds()
 
-    # if not host and not username:
-    #     if config_auth:
-    #         # take the first pair listed
-    #         registry, auth = list(config_auth.items())[0]
-    #         return registry, auth
-
-    # raise RuntimeError("can't determine registry & credentials")
-    return None
-
-
-def _check_docker_config(registry: Registry, username: Optional[str], password: Optional[str]) -> Auth:
-    config_auth = _get_docker_config_auth()
-
-    if not config_auth:
+        logger.debug("Proceeding without credentials")
         return None
 
-    if password and not username:
-        raise ValueError("nonsense")
+    def check_docker_config(self, registry: Registry) -> Auth:
+        config_auth = self.get_docker_config_auth()
+        return config_auth.get(registry) if config_auth else None
 
-    match config_auth.get(registry):
-        case str() as auth if not (username or password):
-            # lookup found single auth string, no username or password provided
-            return auth
-        case lookup_username, lookup_password:
-            if username in (lookup_username, None) and password in (lookup_password, None):
-                # either we matched the lookup, or we had nothing to check against
-                return cast(Auth, (lookup_username, lookup_password))
-        case _:
-            return None
+    @staticmethod
+    @cache
+    def get_docker_config_auth(
+        filename: str | Path | None = None,
+    ) -> dict[Registry, Auth]:
+        if not filename:
+            filename = Path("~/.docker/config.json").expanduser()
 
+        with open(filename) as fin:
+            config_data = json.load(fin)
 
-def _get_docker_config_auth(filename=None) -> dict[Registry, Auth]:
-    if not filename:
-        filename = Path("~/.docker/config.json").expanduser()
+        if "auths" not in config_data:
+            return {}
 
-    with open(filename) as fin:
-        config_data = json.load(fin)
+        config_dict = {}
+        for host, hostdict in config_data["auths"].items():
+            registry = Registry(host)
+            raw_auth: str = hostdict.get("auth")
+            auth: str | tuple[str, str] = raw_auth
+            try:
+                # undo http basic auth encoding so we can compare usernames later
+                username, password = b64decode(auth).decode("utf-8").split(":", 1)
+                auth = (username, password)
+            except ValueError:
+                pass
+            config_dict[registry] = auth
+        return config_dict
 
-    if "auths" not in config_data:
-        return {}
-
-    # return {f'https://{host}': hostdict['auth'] for host, hostdict in config_data.get('auths', {}).items()}
-    config_dict = {}
-    for host, hostdict in config_data["auths"].items():
-        registry = Registry(host)
-        auth = hostdict.get("auth")
-        try:
-            # undo http basic auth encoding so we can compare usernames later
-            auth = b64decode(auth).decode("utf-8").split(":", 1)
-        except ValueError:
-            pass
-        config_dict[registry] = auth
-    return config_dict
-
-
-def try_split_creds(user_string: Optional[str]) -> Creds:
-    """Attempt to split a `user[:password]`string."""
-    if not user_string:
-        return (None, None)
-    user, password = user_string.split(":", 1)
-    return user, password
-
-
-def prompt_for_creds(user_guess: Optional[str] = None) -> tuple[str, str]:
-    """Ask the user for a username & password"""
-    if not user_guess:
+    @staticmethod
+    def prompt_for_creds() -> tuple[str, str] | None:
+        """Ask for a username & password"""
         user_guess = getpass.getuser()
-    username = input("Username [%s]: " % user_guess) or user_guess
-    password = getpass.getpass()
-    if not password:
-        raise ValueError("No password supplied")
-
-    return username, password
-
-
-def parse_image_name(name) -> Image:
-    match name.split("/"):
-        case str():
-            host = DEFAULT_REGISTRY
-            path = f"library/{name}"
-        case str(), str():
-            host = DEFAULT_REGISTRY
-            path = name
-        case host, group, item:
-            path = group + "/" + item
-        case _:
-            raise ValueError("invalid image name", name)
-
-    path, _, tag = path.partition(":")
-    return Image(Registry(host), path, tag or None)
+        username = input("Username [%s]: " % user_guess) or user_guess
+        password = getpass.getpass()
+        if password:
+            return username, password
+        return None
 
 
-def collect(patterns: list[str], user_string: Optional[str], verbose: bool = False, tls_verify=True) -> list[Result]:
-
+def collect(
+    patterns: list[str],
+    auth_manager: AuthManager,
+    *,
+    tls_verify: bool = True,
+) -> list[Image]:
+    """Collect matching Image results."""
     conn_table: dict[Registry, Connection] = {}
 
+    results = []
     for pattern in patterns:
-        image = parse_image_name(pattern)
+        image = Image.parse(pattern)
+
+        logger.info("Examining input: %s", pattern)
         # are there are glob characters in this image path?
-        glob_pattern = bool(set("[]?*") ^ set(image.path))
+        glob_pattern = bool(set("[]?*") & set(image.path))
         if glob_pattern and image.registry.is_default:
             # we can't access the catalog for `docker hub`, so we can't
             # do image path globbing
-            print(f"Cannot glob image paths in default registry: {image}")
+            logger.warning("Cannot glob image paths in default registry: %s", image)
             continue
 
         if not (conn := conn_table.get(image.registry)):
-            conn = Connection(image.registry, user_string, tls_verify=tls_verify)
+            conn = Connection(image.registry, auth_manager, tls_verify=tls_verify)
             conn_table[image.registry] = conn
 
         partials: list[Image]
@@ -254,77 +200,45 @@ def collect(patterns: list[str], user_string: Optional[str], verbose: bool = Fal
         else:
             partials = [image]
 
-        results = []
         for image in partials:
-            # print('gotta get tags & maybe "verbose"')
+            logger.info("Processing Image: %s", image)
             tags = conn.get_tags(image.path)
-            results += [Result(image.registry, image.path, tag) for tag in tags]
+            results += [Image(image.registry, image.path, tag) for tag in tags]
 
     return results
 
-    con = Connection(registry, credentials, tls_verify=tls_verify)
 
-    catalog = con.get_catalog()
-    matches = list()
-    for image in names:
-        matches += fnmatch.filter(catalog, image)
+def display_table(results: list[Image]):
+    if not results:
+        print("[!] No results")
+        return
 
-    lines = []
-    for repo in matches:
-        try:
-            tags = con.get_tags(repo)
-        except OSError as exc:
-            print((exc, exc.filename))
-            tags = []
-        if tags:
-            pairs = []
-            if tag_pattern:
-                tags = fnmatch.filter(tags, tag_pattern)
-
-            if fast:
-                for tag in tags:
-                    lines.append((repo, tag, None, None))
-            else:
-                for tag in tags:
-                    created = con.get_created_date(repo, tag)
-                    if not created:
-                        created = None
-                    else:
-                        created = str(created.replace(microsecond=0))
-                    try:
-                        digest = con.get_digest(repo, tag)
-                    except (NotImplementedError, OSError):
-                        digest = None
-                    lines.append((repo, tag, digest, created))
-        else:
-            lines.append((repo, None, None, None))
-
-    return lines
+    table_rows = [(result.registry, result.path, result.tag) for result in results]
+    table_columns = zip(*table_rows)
+    column_widths = [max(len(str(part)) for part in column) for column in table_columns]
+    for row in table_rows:
+        # zip together row values and column widths into a tuple
+        values_and_widths: tuple = sum(zip(row, column_widths), ())
+        # pass that information into a cleverly constructed string formatting template
+        print("{registry!s:{}} | {path!s:{}} | {tag!s:{}}".format(*values_and_widths))
 
 
-def display_verbose(results: list[Result]):
-    rows = [(result.registry, result.path, result.tag, result.digest, result.created) for result in results]
-    columns = zip(*rows)
-    column_widths = [max(len(str(part)) for part in column) for column in columns]
-    for row in rows:
-        parts = sum(zip(row, column_widths), ())
-        print("{registry!s:{}} | {path!s:{}} | {tag!s:{}} | {digest!s:{}} | {created!s:{}}".format(*parts))
-
-
-def display_json(results: list[Result]):
+def display_json(results: list[Image]):
     structure = [dataclasses.asdict(result) for result in results]
     print(json.dumps(structure, sort_keys=True, indent=2))
 
 
-def display_images(results: list[Result]):
+def display_list(results: list[Image]):
+    if not results:
+        print("[!] No results")
+        return
+
     for result in results:
         print(result.name)
 
 
 class Connection:
-    DATEFORMAT = "%Y-%m-%dT%H:%M:%S.%f"
-
-    def __init__(self, registry: Registry, user_string: Optional[str], retries=3, tls_verify=True):
+    def __init__(self, registry: Registry, auth_manager: AuthManager, tls_verify=True):
         self._registry = registry
 
         self._sesh = requests.Session()
@@ -334,119 +248,101 @@ class Connection:
             "User-Agent": "docker or something",
         }
 
-        self._sesh.auth = pick_credentials(registry, user_string)  # type: ignore
-
-        self._retries = retries
+        self._sesh.auth = auth_manager.pick_auth(registry)
 
     def _get_json(self, url) -> dict:
         return self._request("get", url).json()
 
-    def _delete(self, url) -> None:
-        self._request("delete", url)
-
-    def _request(self, method: str, url: str, headers: dict = {}, check_status: bool = True) -> requests.Response:
-        last_exc = None
-        for i in range(self._retries):
-            resp = None
-            try:
-                resp = self._sesh.request(method, url, headers=headers)
-                if check_status:
-                    resp.raise_for_status()
-                return resp
-            except requests.HTTPError as exc:
-                last_exc = exc
-                if exc.response.status_code == 401:
-                    print("Request failed: Unauthorized")
-                    # don't prompt for credentials if we're not trying again
-                    if i != (self._retries - 1):
-                        self._sesh.auth = prompt_for_creds()
-                else:
-                    raise
-            except OSError as exc:
-                last_exc = exc
-                print(f"request: caught exception (attempt {i}): {exc}")
-
-        raise RuntimeError("too many attempts") from last_exc
+    def _request(
+        self, method: str, url: str, headers: dict = {}, check_status: bool = True
+    ) -> requests.Response:
+        resp = self._sesh.request(method, url, headers=headers)
+        if check_status:
+            resp.raise_for_status()
+        return resp
 
     @cached_property
     def catalog(self):
         # this url is disabled on the global registry...
-        url = urljoin(self._registry.url, "v2/_catalog")
+        url = urljoin(self._registry.url, "v2", "_catalog")
+        logger.debug("Fetching catalog: %s", url)
         data = self._get_json(url)
         return data["repositories"]
 
     def get_tags(self, name):
-        url = urljoin(self._registry.url, "v2/%s/tags/list" % name)
+        url = urljoin(self._registry.url, "v2", name, "tags", "list")
+        logger.debug("Fetching tags: %s", url)
         data = self._get_json(url)
         return data["tags"]
 
     def get_manifest(self, name, tag):
-        url = urljoin(self._registry.url, "v2/%s/manifests/%s" % (name, tag))
+        url = urljoin(self._registry.url, "v2", name, "manifests", tag)
+        logger.debug("Fetching manifest: %s", url)
         data = self._get_json(url)
         return data
-
-    # def get_digest(self, name, tag):
-    #     manifest = self.get_manifest(name, tag)
-    #     blob = manifest['history'][0].get('v1Compatibility', None)
-    #     if not blob:
-    #         raise NotImplementedError("Can't do that :)")
-    #     data = json.loads(blob)
-    #     return data['id']
-
-    # def get_created_date(self, name, tag):
-    #     try:
-    #         manifest = self.get_manifest(name, tag)
-    #     except OSError:
-    #         return None
-    #     nested = manifest['history'][0]['v1Compatibility']
-    #     nested = json.loads(nested)
-    #     # cutting off the last few digits b/c python can't natively handle nanoseconds
-    #     timestamp = nested['created'][:-4]
-    #     return datetime.strptime(timestamp, self.DATEFORMAT)
-
-    def get_blob(self, name, digest):
-        url = urljoin(self._registry.url, f"v2/{name}/blobs/{digest}")
-        data = self._get_json(url)
-        return data
-
-    def get_digest(self, name, tag):
-        return self.get_manifest(name, tag).get("config", {}).get("digest", "?????")
-
-    def get_created_date(self, name, tag):
-        try:
-            digest = self.get_digest(name, tag)
-        except (RuntimeError, OSError):
-            return None
-        blob = self.get_blob(name, digest)
-        if "created" not in blob:
-            return None
-        # cutting off the last few digits b/c python can't natively handle nanoseconds
-        timestamp = blob["created"][:-4]
-        return datetime.strptime(timestamp, self.DATEFORMAT)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "names", nargs="+", help="The name(s) of the repos to list. Accepts shell wildcards. (remember to quote them!)"
+        "names",
+        nargs="+",
+        help="The name(s) of the repos to list. Accepts shell wildcards. (remember to quote them!)",
     )
-    parser.add_argument("-u", "--user", help="user[:password] - credentials for the given repository")
-    parser.add_argument("-k", "--insecure", action="store_true", help="ignore TLS certificate errors")
+    parser.add_argument(
+        "-k", "--insecure", action="store_true", help="ignore TLS certificate errors"
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        default=0,
+        action="count",
+        help="be more verbose; may be repeated",
+    )
+    parser.add_argument(
+        "-n",
+        "--non-interactive",
+        action="store_true",
+        help="Run without user interaction",
+    )
 
-    parser.add_argument("-j", "--json", action="store_true", help="output in json format")
-    parser.add_argument("-v", "--verbose", action="store_true", help="lookup & display more details")
+    display_group = parser.add_mutually_exclusive_group()
+    display_group.add_argument(
+        "-j",
+        "--json",
+        dest="display",
+        action="store_const",
+        const="json",
+        help="output in json format",
+    )
+    display_group.add_argument(
+        "-t",
+        "--table",
+        dest="display",
+        action="store_const",
+        const="table",
+        help="output in ascii table format",
+    )
 
     args = parser.parse_args()
 
-    try:
-        results = collect(args.names, args.verbose, not args.insecure)
+    log_level = logging.WARNING - (args.verbose * 10)
+    logging.basicConfig(
+        level=max(log_level, logging.DEBUG),
+        format="[%(asctime)s %(levelname)-8s] %(message)s",
+    )
 
-        if args.json:
+    try:
+        auth_manager = AuthManager()
+
+        results = collect(args.names, auth_manager, tls_verify=not args.insecure)
+
+        if args.display == "json":
             display_json(results)
-        elif args.verbose:
-            display_verbose(results)
+        elif args.display == "table":
+            display_table(results)
         else:
-            display_images(results)
+            display_list(results)
     except (KeyboardInterrupt, BrokenPipeError):
         pass
 

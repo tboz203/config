@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# if there's not exactly one arg, or if it doesn't match HOSTNAME:PORT
+if [[ $# -ne 1 || ! $1 =~ ^[^:/]+:[0-9]+$ ]]; then
+    SELF=$(basename "$0")
+    echo >&2 "$SELF: Capture tls certificates used by an http host."
+    echo >&2 "Usage: $SELF HOST:PORT"
+    exit 1
+fi
+
+openssl s_client --no-interactive --showcerts --connect "$1" < /dev/null | extract-certificates

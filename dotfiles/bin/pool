@@ -46,7 +46,7 @@ reader() {
     done
 }
 
-pids=( $(seq $proc_count 2>/dev/null) ) || (
+pids=($(seq $proc_count 2> /dev/null)) || (
     echo "[X] could not parse proc count ; expected a number ($proc_count)"
     exit 1
 )

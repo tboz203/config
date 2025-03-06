@@ -1,23 +1,33 @@
+# Alacritty config file
+# see `man -s 5 alacritty` or [https://alacritty.org/config-alacritty.html] for more
+
 [window]
 startup_mode = "Maximized"
 
 [env]
 TURBO_MODE = "1"
 
+# [shell]
+# program = "/usr/local/bin/bash"
+# args = ["--login", "-i"]
+
 [font]
-size = 8.0
+size = 8
 
 [font.normal]
 # NOTE: fonts live in ~/.local/share/fonts,
 # font config lives in ~/.config/fontconfig/fonts.conf
 
-# XXX 😀😃😄😁🙃😗🤪🤑🤐😏😒🙄🤯🤠😕🙁 XXX
+# ┌────────────────────────────────┐
+# │😀😃😄😁🙃😗🤪🤑🤐😏😒🙄🤯🤠😕🙁│
+# └────────────────────────────────┘
 
 family = "JetBrains Mono with Fallback"
-style = "Retina"
 
 [colors]
-draw_bold_text_with_bright_colors = true
+draw_bold_text_with_bright_colors = false
+
+# Colors (Tomorrow Night)
 
 [colors.bright]
 black = "#444444"

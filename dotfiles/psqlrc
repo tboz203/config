@@ -1,5 +1,6 @@
 -- https://github.com/datachomp/dotfiles/blob/master/.psqlrc
 -- with -minor- some modifications
+-- vim: ft=sql commentstring=--\ %s
 
 \set QUIET 1
 -- formatting
@@ -98,4 +99,3 @@
 \set ll '\\! ls -lrt;'
 
 \unset QUIET
--- vim: ft=sql commentstring=--\ %s

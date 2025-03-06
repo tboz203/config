@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-"""Clean extracted packages.
+"""
+Clean extracted packages.
 
 This script examines tar & zip packages, and removes files and directories that
 have been extracted from them.
 """
+
+from __future__ import annotations
 
 import argparse
 import logging
@@ -42,7 +45,9 @@ def list_packages(directory: Pathlike) -> Iterator[Path]:
         yield from directory.glob(f"*{suffix}")
 
 
-def determine_package_root(package_file: Pathlike, strict: bool = False) -> Optional[str]:
+def determine_package_root(
+    package_file: Pathlike, strict: bool = False
+) -> Optional[str]:
     """Given a package filename, examine it and pick its contained root file.
 
     If the given package has more than one root member, return None. If `strict`,
@@ -96,7 +101,9 @@ def guess_package_root(package_file: Pathlike) -> Optional[str]:
     logger.log(NOTICE, "no guesses for package??: %s", package_file)
 
 
-def find_package_extraction(package_file: Pathlike, directory: Pathlike, strict: bool = False) -> Optional[Path]:
+def find_package_extraction(
+    package_file: Pathlike, directory: Pathlike, strict: bool = False
+) -> Optional[Path]:
     """Determine where a package has been extracted to.
 
     May guess based on package name; may read package to determine contents.
@@ -105,7 +112,9 @@ def find_package_extraction(package_file: Pathlike, directory: Pathlike, strict:
     package_file = Path(package_file)
     directory = Path(directory)
     if package_file.is_dir():
-        raise ValueError("cannot find extraction: package_file is a directory", package_file)
+        raise ValueError(
+            "cannot find extraction: package_file is a directory", package_file
+        )
 
     maybe_root_guess = guess_package_root(package_file)
     if maybe_root_guess:
@@ -114,7 +123,11 @@ def find_package_extraction(package_file: Pathlike, directory: Pathlike, strict:
             logger.info("guessing %s -> %s", package_file, maybe_extracted_path)
             return maybe_extracted_path
         else:
-            logger.debug("guessed root does not exist: %s, %s", package_file, maybe_extracted_path)
+            logger.debug(
+                "guessed root does not exist: %s, %s",
+                package_file,
+                maybe_extracted_path,
+            )
 
     maybe_root = determine_package_root(package_file, strict)
     if not maybe_root:
@@ -128,7 +141,9 @@ def find_package_extraction(package_file: Pathlike, directory: Pathlike, strict:
     return None
 
 
-def clean_extracted_packages(directory: Pathlike, dryrun: bool = False, strict: bool = False) -> list[str]:
+def clean_extracted_packages(
+    directory: Pathlike, dryrun: bool = False, strict: bool = False
+) -> list[str]:
     """Clean extracted packages in a directory.
 
     returns any exceptions encountered as strings."""
@@ -157,7 +172,9 @@ def clean_extracted_packages(directory: Pathlike, dryrun: bool = False, strict: 
 def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
     """Parse arguments for this script."""
     # use module docstring as description
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "-n",
         "--dryrun",

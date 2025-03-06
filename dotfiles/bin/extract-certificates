@@ -1,5 +1,8 @@
 #!/usr/bin/awk -f
 
-/^-----BEGIN/ { cert=1 }
-{ if (cert) print }
-/^-----END/ { cert=0 }
+# reading each line, track whether we are within a PEM block,
+# printing each qualifying line
+
+/^-----BEGIN/ { inside_block=1 }
+{ if (inside_block) print }
+/^-----END/ { inside_block=0 }
