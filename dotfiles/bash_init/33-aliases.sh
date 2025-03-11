@@ -15,10 +15,17 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
-alias tree='tree -C --dirsfirst --noreport --filelimit=50'
-if [[ $(tree --version) > "tree v2.0.0" ]]; then
-    # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
-    BASH_ALIASES['tree']+=' --metafirst --sort=version'
+if type -P tree &>/dev/null; then
+    alias tree='tree -C --dirsfirst --noreport --filelimit=50'
+    if [[ $(tree --version) > "tree v2.0.0" ]]; then
+        # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
+        BASH_ALIASES['tree']+=' --metafirst --sort=version'
+    fi
+    # alias lt='tree -pugDF --si --du'
+    alias lt='tree -pugDF --si --du --gitignore'
+    # alias lta='lt -a'
+    alias lta='tree -pugDF --si --du -a'
+    alias ltc='tree --filelimit=1000 | column'
 fi
 
 alias _ls='\ls --color=auto --group-directories-first --sort=version'
@@ -27,11 +34,6 @@ alias la='_ls -A'
 alias ll='ls -lhF'
 alias lla='la -lhF'
 alias lll='ll -L'
-# alias lt='tree -pugDF --si --du'
-alias lt='tree -pugDF --si --du --gitignore'
-# alias lta='lt -a'
-alias lta='tree -pugDF --si --du -a'
-alias ltc='tree --filelimit=1000 | column'
 # alias lt='ls --sort=time'
 # alias llt='ll --sort=time'
 alias l.='la -I "[^.]*"'

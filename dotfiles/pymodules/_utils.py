@@ -486,3 +486,30 @@ def rvars(obj: Any) -> dict[str, dict[str, Any]]:
         seen_attrs.update(results[desc])
 
     return results
+
+
+def link_paths(
+    target: Path | str, link: Path | str, *, symbolic: bool | None = None
+) -> None:
+    """
+    Create a link to path `target` at path `link`.
+
+    `target` should exist, and `link` should not. If `symbolic` is True, a
+    symbolic link is created. If `symbolic` is False, a hard link (or a
+    Junction) is created. If `symbolic` is None, then hard links (or Junctions)
+    are created on Windows (`os.name == "nt"`), and symbolic links are created
+    otherwise.
+    """
+
+    assert isinstance(target, Path | str)
+    assert isinstance(link, Path | str)
+    assert isinstance(symbolic, bool | None)
+
+    target, link = Path(target), Path(link)
+
+    if symbolic or (symbolic is None and os.name != "nt"):
+        link.symlink_to(target)
+    elif target.is_dir():
+        CreateJunction(str(target), str(link))
+    else:
+        link.hardlink_to(target)

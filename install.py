@@ -11,6 +11,14 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
+try:
+    from _winapi import CreateJunction
+except ImportError:
+
+    def CreateJunction(*args, **kwargs):
+        raise NotImplementedError("CreateJunction not available")
+
+
 ROOT = Path(__file__).absolute().parent
 DESCRIPTION = __doc__
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -26,15 +34,15 @@ class Settings:
     # the home directory to install to
     home_dir: Path = Path.home()
     # the config directory to install to
-    config_dir: Path = Path.home() / '.config'
+    config_dir: Path = Path.home() / ".config"
     # the ssh directory to install to
-    ssh_dir: Path = Path.home() / '.ssh'
+    ssh_dir: Path = Path.home() / ".ssh"
     # whether to perform any actions
     dry_run: bool = False
     # whether to create relative symbolic links
-    relative_links: bool = False
+    relative_links: bool | None = None
     # whether to create hard links
-    hard_links: bool = False
+    symbolic_links: bool | None = None
     # what to do for file conflicts
     on_conflict: Literal["skip", "rename", "overwrite"] = "skip"
 
@@ -68,6 +76,33 @@ def relative_to(path: Path, target: Path) -> Path:
     return Path(backtrack + str(target.relative_to(ancestor)))
 
 
+def link_paths(
+    target: Path | str, link: Path | str, *, symbolic: bool | None = None
+) -> None:
+    """
+    Create a link to path `target` at path `link`.
+
+    `target` should exist, and `link` should not. If `symbolic` is True, a
+    symbolic link is created. If `symbolic` is False, a hard link (or a
+    Junction) is created. If `symbolic` is None, then hard links (or Junctions)
+    are created on Windows (`os.name == "nt"`), and symbolic links are created
+    otherwise.
+    """
+
+    assert isinstance(target, Path | str)
+    assert isinstance(link, Path | str)
+    assert isinstance(symbolic, bool | None)
+
+    target, link = Path(target), Path(link)
+
+    if symbolic or (symbolic is None and os.name != "nt"):
+        link.symlink_to(target)
+    elif target.is_dir():
+        CreateJunction(str(target), str(link))
+    else:
+        link.hardlink_to(target)
+
+
 def link_files(
     source_dir: Path,
     dest_dir: Path,
@@ -96,7 +131,9 @@ def link_files(
         if transformer:
             link = transformer(link)
 
-        if (link.exists() and link.samefile(target)) or (link.is_symlink() and link.readlink() == target):
+        if (link.exists() and link.samefile(target)) or (
+            link.is_symlink() and link.readlink() == target
+        ):
             # same file!
             if settings.dry_run:
                 logger.info("would skip %s", link)
@@ -127,12 +164,7 @@ def link_files(
 
         logger.info("%s -> %s", link, target)
         if not settings.dry_run:
-            if settings.hard_links:
-                if path.is_dir():
-                    raise NotImplementedError("we don't have that yet :(", link, target)
-                link.hardlink_to(target)
-            else:
-                link.symlink_to(target)
+            link_paths(target=target, link=link, symbolic=settings.symbolic_links)
 
 
 def config_install(settings: Settings) -> None:
@@ -153,26 +185,27 @@ def config_install(settings: Settings) -> None:
     link_files(settings.config_root / "sshfiles", settings.ssh_dir, settings)
 
 
-def get_settings() -> Settings:
-    
+def get_settings(argv: list[str] | None = None) -> Settings:
+    """Build a Settings object based on CLI arguments."""
+
     parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument(
         "-R",
         "--relative-links",
-        action="store_true",
-        help="make symlinks relative",
+        action=argparse.BooleanOptionalAction,
+        help="make relative symbolic links (implies `--symbolic-links`)",
     )
     parser.add_argument(
         "-D",
         "--dry-run",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         help="make no changes; describe what actions would be taken",
     )
     parser.add_argument(
-        "-H",
-        "--hard-links",
-        action="store_true",
-        help="use hard links instead of symbolic links",
+        "-S",
+        "--symbolic-links",
+        action=argparse.BooleanOptionalAction,
+        help="Create symbolic links",
     )
 
     conflict_group = parser.add_mutually_exclusive_group()
@@ -200,13 +233,13 @@ def get_settings() -> Settings:
         const="overwrite",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     return Settings(
-        relative_links=args.relative_links,
         dry_run=args.dry_run,
-        hard_links=args.hard_links,
-        on_conflict=args.conflict
+        relative_links=args.relative_links,
+        symbolic_links=args.relative_links or args.symbolic_links,
+        on_conflict=args.conflict,
     )
 
 
