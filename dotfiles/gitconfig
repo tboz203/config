@@ -17,6 +17,7 @@
 	; pager = delta
 	; pager = less -SRFi
 	untrackedCache = true
+	fsmonitor = false
 [pager]
 	config = less -SRFi
 [init]

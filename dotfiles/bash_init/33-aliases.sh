@@ -136,6 +136,8 @@ alias super='sudo env HOME=$HOME /usr/local/bin/bash --login -i'
 
 alias notes='nv --cmd "cd ~/workspace/notes" ~/workspace/notes/{tasks,notes,ideas}'
 
+alias cyg-install='cyg-setup -B -n -q -P'
+
 # meta-commands
 # --------------------
 
