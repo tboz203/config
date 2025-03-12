@@ -705,3 +705,13 @@ function pause {
     echo
     return $rc
 }
+
+if type -P cygpath &>/dev/null ; then
+    function _cygpath {
+        cygpath "$@"
+    }
+else
+    function _cygpath {
+        echo "$@"
+    }
+fi

@@ -497,6 +497,9 @@ if ((BASH_VERSINFO[0] >= 5)); then
         else
             local entry
             for entry in "${ENTRIES[@]}"; do
+                # either attempt cygwin path translation, or noop
+                [[ $entry == *\\* ]] && entry=$( _cygpath "$entry" )
+
                 # entries with embedded colons are not allowed
                 [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
 
@@ -711,6 +714,9 @@ else
         else
             local entry
             for entry in "${ENTRIES[@]}"; do
+                # either attempt cygwin path translation, or noop
+                [[ $entry == *\\* ]] && entry=$( _cygpath "$entry" )
+
                 # entries with embedded colons are not allowed
                 [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
 

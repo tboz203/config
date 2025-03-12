@@ -20,7 +20,7 @@ export LESS="-SRi"
 export LESSCHARSET=utf-8
 
 setpath -e PYTHONSTARTUP ~/.pythonrc.py
-setpath -e REQUESTS_CA_BUNDLE /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
+# setpath -e REQUESTS_CA_BUNDLE /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
 setpath -e BOOST_ROOT ~/.local/boost_1_82_0
 
 if setpath -er SDKMAN_DIR ~/.sdkman; then

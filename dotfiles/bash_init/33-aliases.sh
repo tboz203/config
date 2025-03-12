@@ -29,7 +29,7 @@ if type -P tree &>/dev/null; then
 fi
 
 alias _ls='\ls --color=auto --group-directories-first --sort=version'
-alias ls='_ls --ignore-backups'
+alias ls='_ls --ignore-backups --ignore="ntuser.dat*" --ignore="NTUSER.DAT*"'
 alias la='_ls -A'
 alias ll='ls -lhF'
 alias lla='la -lhF'
