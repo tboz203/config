@@ -8,17 +8,19 @@ from traitlets.config import get_config
 
 c = get_config()
 
-c.TerminalInteractiveShell.autoindent = True
-c.TerminalInteractiveShell.colors = "Linux"
+c.TerminalInteractiveShell.colors = "linux"
 c.TerminalInteractiveShell.confirm_exit = False
 c.TerminalInteractiveShell.editing_mode = "vi"
-c.TerminalInteractiveShell.highlighting_style = "gruvbox-dark"
+# v This seems to break some assertion as of 9.0.1
+# c.TerminalInteractiveShell.highlighting_style = "gruvbox-dark"
 
 c.PlainTextFormatter.max_width = 119
-c.PlainTextFormatter.pprint = True
 
 
-def _text_repr_pretty_(value: AnyStr, pp: pretty.RepresentationPrinter, cycle: bool) -> None:
+# currently unused
+def _text_repr_pretty_(
+    value: AnyStr, pp: pretty.RepresentationPrinter, cycle: bool
+) -> None:
     """Pretty print text more like `pprint`."""
     # I feel like i'm taking crazy pills
     from unicodedata import east_asian_width
@@ -55,7 +57,9 @@ def _text_repr_pretty_(value: AnyStr, pp: pretty.RepresentationPrinter, cycle: b
         """Find the index of the last whitespace character (repr) in `line`, if any."""
 
         whitespace_set = {" ", "\\t", "\\r", "\\x0b", "\\x0c"}
-        idx, item = max((line.rfind(item, start, stop), item) for item in whitespace_set)
+        idx, item = max(
+            (line.rfind(item, start, stop), item) for item in whitespace_set
+        )
         if idx >= 0:
             return idx + len(item)
 
@@ -97,7 +101,10 @@ def _text_repr_pretty_(value: AnyStr, pp: pretty.RepresentationPrinter, cycle: b
             elif boundary and (idx := rfind_whitespace(text, 0, boundary)) is not None:
                 # doesn't fit, but we found a whitespace to break at
                 boundary = idx
-            elif boundary and (idx := rfind_before_escape_sequence(text, boundary)) is not None:
+            elif (
+                boundary
+                and (idx := rfind_before_escape_sequence(text, boundary)) is not None
+            ):
                 # doesn't fit, no whitespace; just make sure we don't split
                 # an escape sequence
                 boundary = idx
@@ -144,7 +151,9 @@ def _text_repr_pretty_(value: AnyStr, pp: pretty.RepresentationPrinter, cycle: b
             pp.text(f"{prefix}{quote}{line}{quote}")
 
 
-def _sequence_repr_pretty(value: Sequence, pp: pretty.RepresentationPrinter, cycle: bool) -> None:
+def _sequence_repr_pretty(
+    value: Sequence, pp: pretty.RepresentationPrinter, cycle: bool
+) -> None:
     """pretty-print a sequence better"""
     # wanna be able to specify "compact"; use `! verbose`?
     # breakpoint()
