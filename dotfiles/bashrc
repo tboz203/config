@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 # bash init script
 
+# order of operations:
+# for interactive login shells:
+#   /etc/profile
+#     /etc/bash.bashrc (does basically nothing lol)
+#     /etc/profile.d/*
+#       /etc/profile.d/bash_completion.sh
+#         ~/.config/bash_completion (<<<)
+#         /usr/share/bash-completion/bash_completion (IF shopt -q progcomp; BIG)
+#   ~/.bash_profile (or ~/.bash_login or ~/.profile; symlink to this file)
+#
+# interactive non-login shells:
+#   /etc/bash.bashrc (does basically nothing lol)
+#   ~/.bashrc (this file)
+# non-interactive shells:
+#   $BASH_ENV
+
 function _bash_init {
     shopt -s checkhash
     shopt -s cdspell
@@ -21,10 +37,9 @@ function _bash_init {
             echo >&2 "[!] $FUNCNAME: Will not source file: $item"
         fi
     done
-} && export -f _bash_init
+}
 
 _bash_init
 
 # ignore any crap installer scripts try to append to this file
 return 0
-

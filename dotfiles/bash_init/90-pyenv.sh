@@ -35,8 +35,7 @@ function pyenv {
 
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
-# pathmungex -a BASH_COMPLETION_PATHS "$PYENV_ROOT/completions"
-source "$PYENV_ROOT/completions/pyenv.bash"
+pathmungex BASH_COMPLETION_LOAD_PATH "$PYENV_ROOT/completions"
 
 declare -a func_lines
 # if we succeed in reading the lines of the function `_pyenv` ...

@@ -13,7 +13,7 @@ fi
 
 pathmungex --before --replace PATH "$NODENV_ROOT/shims"
 pathmungex PATH "$NODENV_ROOT/bin"
-# pathmungex -a BASH_COMPLETION_PATHS "$NODENV_ROOT/completions/nodenv.bash"
+pathmungex BASH_COMPLETION_LOAD_PATH "$NODENV_ROOT/completions"
 
 export NODENV_SHELL=bash
 

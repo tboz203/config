@@ -13,7 +13,7 @@ fi
 
 pathmungex --before --replace PATH "$RBENV_ROOT/shims"
 pathmungex PATH "$RBENV_ROOT/bin"
-# pathmungex -a BASH_COMPLETION_PATHS "$RBENV_ROOT/completions/rbenv.bash"
+pathmungex BASH_COMPLETION_LOAD_PATH "$RBENV_ROOT/completions"
 export RBENV_SHELL=bash
 
 pathmungex -e RBENV_HOOK_PATH "$HOME/.local/share/rbenv-hooks"
