@@ -116,6 +116,8 @@ if version > "500"
     " navigation like lazy-vim
     noremap <C-l> <C-w>l
     noremap <C-h> <C-w>h
+    noremap <C-j> <C-w>j
+    noremap <C-k> <C-w>k
     noremap L gt
     noremap H gT
 

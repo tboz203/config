@@ -498,7 +498,7 @@ if ((BASH_VERSINFO[0] >= 5)); then
             local entry
             for entry in "${ENTRIES[@]}"; do
                 # either attempt cygwin path translation, or noop
-                [[ $entry == *\\* ]] && entry=$( _cygpath "$entry" )
+                [[ $entry == *\\* ]] && entry=$( cygpath "$entry" )
 
                 # entries with embedded colons are not allowed
                 [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
@@ -715,7 +715,7 @@ else
             local entry
             for entry in "${ENTRIES[@]}"; do
                 # either attempt cygwin path translation, or noop
-                [[ $entry == *\\* ]] && entry=$( _cygpath "$entry" )
+                [[ $entry == *\\* ]] && entry=$( cygpath "$entry" )
 
                 # entries with embedded colons are not allowed
                 [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
@@ -887,3 +887,45 @@ function filetype {
         esac
     done
 } && complete -c filetype
+
+if type -P cygpath &>/dev/null ; then
+    # function _cygpath {
+    #     cygpath "$@"
+    # }
+
+    function cygvar {
+        local help arg
+        local -a names options
+        for arg in "$@"; do
+            case $name in
+                -h|--help) help=1 && break ;;
+                -*) options+=( "$arg" ) ;;
+                *) names+=( "$arg" ) ;;
+            esac
+        done
+
+        if [[ ${help-} ]]; then
+            _err "Convert named environment variables using cygpath"
+            _err "Usage: ${FUNCNAME[0]} [OPTION...] NAME [NAME...]"
+            return 2
+        fi
+
+        local -n var
+        for var in "${names[@]}"; do
+            if [[ -v ${!var} ]]; then
+                var=$( cygpath "${options[@]}" "$var" ) || throw "Failed to update var: ${!var}"
+            else
+                _warn "Variable not set: ${!var}"
+            fi
+        done
+    }
+else
+    function _cygpath {
+        echo "$@"
+    }
+
+    function cygvar {
+        true
+    }
+fi
+

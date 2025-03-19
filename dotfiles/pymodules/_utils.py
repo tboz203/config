@@ -13,12 +13,20 @@ from decimal import Decimal
 from functools import reduce
 from itertools import zip_longest
 from math import ceil, floor, log2, log10
+from pathlib import Path
 from pprint import pprint
 from shutil import get_terminal_size
 from textwrap import dedent
 from typing import Any
 
 SI_SUFFIXES = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
+
+try:
+    from _winapi import CreateJunction  # type: ignore
+except ImportError:
+    def CreateJunction(*args, **kwargs):
+        raise NotImplementedError("CreateJunction not available")
+
 
 
 def noop(arg):
