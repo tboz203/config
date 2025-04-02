@@ -15,9 +15,9 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
-if type -P tree &>/dev/null; then
-    alias tree='tree -C --dirsfirst --noreport --filelimit=50'
-    if [[ $(tree --version) > "tree v2.0.0" ]]; then
+if type -P tree &> /dev/null; then
+    BASH_ALIASES['tree']='tree -C --dirsfirst --noreport --filelimit=50'
+    if [[ $(\tree --version) > "tree v2.0.0" ]]; then
         # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
         BASH_ALIASES['tree']+=' --metafirst --sort=version'
     fi
@@ -60,8 +60,9 @@ alias cp='cp -vri'
 alias rm='rm -vI --one-file-system'
 
 alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
+alias fgrep='grep -F'
+alias egrep='grep -E'
+alias rgrep='grep -r'
 
 if [[ $(diff --help 2>&1) == *'--color'* ]]; then
     alias diff='diff --color=auto'
@@ -134,7 +135,7 @@ alias open='gio open'
 
 alias super='sudo env HOME=$HOME /usr/local/bin/bash --login -i'
 
-alias notes='nv --cmd "cd ~/workspace/notes" ~/workspace/notes/{tasks,notes,ideas}'
+alias open='explorer.exe'
 
 alias cyg-install='cyg-setup -B -n -q -P'
 

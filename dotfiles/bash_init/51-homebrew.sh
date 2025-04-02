@@ -18,10 +18,9 @@ pathmungex -Eer INFOPATH "$HOMEBREW_PREFIX/share/info"
 pathmungex -Eer PKG_CONFIG_PATH "$HOMEBREW_PREFIX"/{lib,lib64,share}/pkgconfig
 pathmungex -Eer XDG_DATA_DIRS "$HOMEBREW_PREFIX/share"
 
-# # homebrew's version of bash completion is old and breaks things, but we do
-# # want to try to load homebrew's installed completion scripts
-# # pathmungex --before BASH_COMPLETION_PATHS "$HOMEBREW_PREFIX/etc/bash_completion"
-# pathmungex BASH_COMPLETION_USER_DIR "$HOMEBREW_PREFIX/etc/bash_completion.d"
+# homebrew's version of bash completion is old and breaks things, but we do
+# want to try to load homebrew's installed completion scripts
+pathmungex BASH_COMPLETION_LOAD_PATH "$HOMEBREW_PREFIX/etc/bash_completion"
 
 # remove linuxbrew from the current shell's environment
 function unbrew {

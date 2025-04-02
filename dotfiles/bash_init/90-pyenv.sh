@@ -1,6 +1,15 @@
 #!/bin/bash
 
-setpath -er PYENV_ROOT ~/.pyenv || return 0
+if ! setpath -er PYENV_ROOT ~/.pyenv; then
+    if [[ -f ~/.skip-pyenv ]]; then
+        return 0
+    fi
+
+    if ! curl -fsSL https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash; then
+        touch ~/.skip-pyenv
+        return 1
+    fi
+fi
 
 pathmungex --before --replace PATH "$PYENV_ROOT/shims"
 pathmungex PATH "$PYENV_ROOT/bin"
@@ -26,8 +35,7 @@ function pyenv {
 
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
-# pathmungex -a BASH_COMPLETION_PATHS "$PYENV_ROOT/completions"
-source "$PYENV_ROOT/completions/pyenv.bash"
+pathmungex BASH_COMPLETION_LOAD_PATH "$PYENV_ROOT/completions"
 
 declare -a func_lines
 # if we succeed in reading the lines of the function `_pyenv` ...

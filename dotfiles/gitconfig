@@ -4,10 +4,6 @@
 	email = thomas.bozeman@cgifederal.com
 [credential]
 	helper = cache
-[credential "https://momcode.cgifederal.com"]
-	provider = bitbucket
-[http]
-	sslBackend = schannel
 [color]
 	ui = true
 [core]
@@ -15,13 +11,11 @@
 	autocrlf = false
 	excludesfile = ~/.gitignore
 	; pager = delta
-	; pager = less -SRFi
-	untrackedCache = true
-	fsmonitor = false
+	pager = less -SRFi
 [pager]
 	config = less -SRFi
 [init]
-; 	templatedir = ~/.git_template
+	; templatedir = ~/.git_template
 	defaultBranch = main
 [merge]
 	tool = nvimdiff
@@ -46,7 +40,7 @@
 [checkout]
 	defaultRemote = origin
 [column]
-; 	ui = auto column dense
+	; ui = auto column dense
 	tag = auto column dense
 [fetch]
 	recursesubmodules = on-demand
@@ -86,8 +80,8 @@
 [alias]
 	s = status
 	si = status --ignored
-	ds = diff --staged
-
+	d = diff --stat
+	ds = d --staged
 	l = log --graph --date-order --date=relative --pretty=myline
 	;; "almost all"
 	la = l --branches --tags --remotes=origin HEAD
@@ -124,8 +118,8 @@
 [color "diff"]
 	meta = "bold #000000 brightblue"
 	frag = "bold #000000 yellow"
-; [interactive]
-; 	diffFilter = delta --features=interactive
+[interactive]
+	; diffFilter = delta --features=interactive
 	; diffFilter = delta --color-only
 [delta]
 	; features = decorations

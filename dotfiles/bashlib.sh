@@ -35,6 +35,6 @@ function _bashlib {
             echo >&2 "[!] $FUNCNAME: Will not source file: $item"
         fi
     done
-} && export -f _bashlib
+}
 
 _bashlib

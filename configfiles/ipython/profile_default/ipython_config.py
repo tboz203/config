@@ -8,16 +8,16 @@ from traitlets.config import get_config
 
 c = get_config()
 
-c.TerminalInteractiveShell.autoindent = True
 c.TerminalInteractiveShell.colors = "linux"
 c.TerminalInteractiveShell.confirm_exit = False
 c.TerminalInteractiveShell.editing_mode = "vi"
+# v This seems to break some assertion as of 9.0.1
 # c.TerminalInteractiveShell.highlighting_style = "gruvbox-dark"
 
 c.PlainTextFormatter.max_width = 119
-c.PlainTextFormatter.pprint = True
 
 
+# currently unused
 def _text_repr_pretty_(
     value: AnyStr, pp: pretty.RepresentationPrinter, cycle: bool
 ) -> None:

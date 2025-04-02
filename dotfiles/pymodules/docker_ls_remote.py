@@ -1,4 +1,4 @@
-#!/home/th026106/.pyenv/versions/docker-ls-remote/bin/python
+#!/usr/bin/env python
 
 """List images in a docker registry."""
 
