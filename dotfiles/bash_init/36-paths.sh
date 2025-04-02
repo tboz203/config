@@ -5,16 +5,14 @@ export _BASH_INIT_PATHS_SET=1
 
 pathmungex --replace PATH \
     ~/.local/bin \
-    ~/.local/share/go/bin \
     ~/.local/share/groovy/bin \
     ~/.local/share/node/bin \
     ~/.cargo/bin \
     ~/.poetry/bin \
     ~/.tgenv/bin \
     ~/.tfenv/bin \
-    ~/go/bin \
-    /usr/local/go/bin \
     /usr/local/bin \
+    /usr/lib/cargo/bin \
     /usr/bin
 
 pathmungex --after PATH \

@@ -52,3 +52,7 @@ setpath -e PERL_LOCAL_LIB_ROOT ~/perl5
 pathmungex -e PYTHONPATH ~/.pymodules
 
 pathmungex -er PKG_CONFIG_PATH {~/.local,/usr/local,/usr}/{lib,lib64,share}/pkgconfig
+
+# ---
+
+setpath -e SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
