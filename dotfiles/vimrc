@@ -115,6 +115,14 @@ if version > "500"
     " create folds for block under cursor
     noremap <leader>c V%zf
 
+    " navigation like lazy-vim
+    noremap <C-l> <C-w>l
+    noremap <C-h> <C-w>h
+    noremap <C-j> <C-w>j
+    noremap <C-k> <C-w>k
+    noremap L gt
+    noremap H gT
+
     " visual mode
     vnoremap <leader>" di""<esc>hp
 

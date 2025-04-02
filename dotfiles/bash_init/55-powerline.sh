@@ -48,7 +48,7 @@ function find-powerline-root {
         return 0
     done
 
-    _warn "Powerline root not found"
+    # _warn "Powerline root not found"
     return 1
 }
 

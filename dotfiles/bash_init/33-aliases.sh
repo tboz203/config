@@ -15,23 +15,25 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
-alias tree='tree -C --dirsfirst --noreport --filelimit=50'
-if [[ $(tree --version) > "tree v2.0.0" ]]; then
-    # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
-    BASH_ALIASES['tree']+=' --metafirst --sort=version'
+if type -P tree &> /dev/null; then
+    BASH_ALIASES['tree']='tree -C --dirsfirst --noreport --filelimit=50'
+    if [[ $(\tree --version) > "tree v2.0.0" ]]; then
+        # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
+        BASH_ALIASES['tree']+=' --metafirst --sort=version'
+    fi
+    # alias lt='tree -pugDF --si --du'
+    alias lt='tree -pugDF --si --du --gitignore'
+    # alias lta='lt -a'
+    alias lta='tree -pugDF --si --du -a'
+    alias ltc='tree --filelimit=1000 | column'
 fi
 
 alias _ls='\ls --color=auto --group-directories-first --sort=version'
-alias ls='_ls --ignore-backups --ignore="NTUSER*" --ignore="ntuser*"'
+alias ls='_ls --ignore-backups --ignore="ntuser.dat*" --ignore="NTUSER.DAT*"'
 alias la='_ls -A'
 alias ll='ls -lhF'
 alias lla='la -lhF'
 alias lll='ll -L'
-# alias lt='tree -pugDF --si --du'
-alias lta='tree -pugDF --si --du'
-alias lt='lta --gitignore'
-alias ltaa='lta -a'
-alias ltc='tree --filelimit=1000 | column'
 # alias lt='ls --sort=time'
 # alias llt='ll --sort=time'
 alias l.='la -I "[^.]*"'
@@ -131,9 +133,7 @@ alias open='gio open'
 # attempting to sort by listening address; not 100% effective
 # alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
 
-alias super='sudo env HOME=$HOME /usr/local/bin/bash --login -i'
-
-alias open='explorer.exe'
+alias super='sudo HOME=$HOME bash --login -i'
 
 # meta-commands
 # --------------------

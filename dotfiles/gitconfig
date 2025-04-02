@@ -1,7 +1,9 @@
 ; vim: ft=gitconfig sw=8 ts=8 noet
 [user]
-	name = Tommy Bozeman
-	email = tboz203@gmail.com
+	name = Thomas Bozeman
+	email = thomas.bozeman@cgifederal.com
+[credential]
+	helper = cache
 [color]
 	ui = true
 [core]
@@ -10,11 +12,10 @@
 	excludesfile = ~/.gitignore
 	; pager = delta
 	pager = less -SRFi
-	untrackedCache = true
 [pager]
 	config = less -SRFi
 [init]
-; 	templatedir = ~/.git_template
+	; templatedir = ~/.git_template
 	defaultBranch = main
 [merge]
 	tool = nvimdiff
@@ -39,10 +40,8 @@
 [checkout]
 	defaultRemote = origin
 [column]
-; 	ui = auto column dense
+	; ui = auto column dense
 	tag = auto column dense
-[credential]
-	helper = cache
 [fetch]
 	recursesubmodules = on-demand
 	prune = true

@@ -705,3 +705,4 @@ function pause {
     echo
     return $rc
 }
+
