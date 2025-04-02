@@ -372,25 +372,26 @@ if ((BASH_VERSINFO[0] >= 5)); then
 
         _if_verbose _log "$* # called at $(called-at 1)"
 
-        local EXPORT EXISTS REPLACE DELETE HELP USAGE
+        local HELP USAGE
         local CHECK=silent
         local WHERE=insert
-        local MARKER="^/usr/"
+        local MARKER="^/usr/|^/c/windows/"
         local -a POSITIONAL
 
         fixargs
         while (($#)); do
             local arg=$1 && shift
             case $arg in
-                -e | --export) EXPORT=1 ;;
-                -E | --exists) EXISTS=1 ;;
+                -e | --export) local EXPORT=1 ;;
+                -E | --exists) local EXISTS=1 ;;
                 -b | --before) WHERE=before ;;
                 -a | --after) WHERE=after ;;
                 -f | --fail | --fatal) CHECK=fail ;;
                 -n | --no-check | --nocheck) CHECK=nocheck ;;
-                -r | --replace) REPLACE=1 ;;
-                -d | --delete) DELETE=1 ;;
-                -D | --delete-matching) DELETE=1 DELETE_MATCHING=1 ;;
+                -r | --replace) local REPLACE=1 ;;
+                -R | --replace-matching) local REPLACE=1 MATCHING=1 ;;
+                -d | --delete) local DELETE=1 ;;
+                -D | --delete-matching) local DELETE=1 MATCHING=1 ;;
                 -h | --help) HELP=1 ;;
                 -m | --marker)
                     if [[ -v 1 && $1 != -* ]]; then
@@ -470,6 +471,13 @@ if ((BASH_VERSINFO[0] >= 5)); then
             declare -gx PATHVAR
         fi
 
+        # if the file system is not case sensitive, make everything lowercase
+        if [[ ${PWD,,} -ef ${PWD^^} ]]; then
+            PATHVAR=${PATHVAR,,}
+            ENTRIES=("${ENTRIES[@],,}")
+            MARKER=${MARKER,,}
+        fi
+
         # In PATHVAR, `` represents an empty list, and `:` represents a list with a
         # single null element. In PATHLIST and ADDITIONS, `:` represents an empty
         # list, and `::` represents a list with a single null element. otherwise,
@@ -480,7 +488,7 @@ if ((BASH_VERSINFO[0] >= 5)); then
 
         _if_debug inspect_var EXPORT CHECK WHERE MARKER POSITIONAL PATHVAR PATHLIST ENTRIES
 
-        if [[ ${DELETE_MATCHING-} ]]; then
+        if [[ ${MATCHING-} ]]; then
             local ENTRYGLOB
             ENTRYGLOB=$(join '|' "${ENTRIES[@]}")
             ENTRYGLOB="@($ENTRYGLOB)?(/)"
@@ -490,7 +498,9 @@ if ((BASH_VERSINFO[0] >= 5)); then
             local pathitem
             for pathitem in "${PATHARRAY[@]}"; do
                 # shellcheck disable=2053  # the glob matching is intentional
-                if [[ $pathitem != $ENTRYGLOB ]]; then
+                if [[ $pathitem = $ENTRYGLOB ]]; then
+                    ADDITIONS+="$pathitem:"
+                else
                     PATHLIST+="$pathitem:"
                 fi
             done
@@ -498,7 +508,7 @@ if ((BASH_VERSINFO[0] >= 5)); then
             local entry
             for entry in "${ENTRIES[@]}"; do
                 # either attempt cygwin path translation, or noop
-                [[ $entry == *\\* ]] && entry=$( cygpath "$entry" )
+                [[ $entry == *\\* ]] && entry=$(cygpath "$entry")
 
                 # entries with embedded colons are not allowed
                 [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
@@ -592,7 +602,7 @@ else
         local EXPORT EXISTS REPLACE DELETE HELP USAGE
         local CHECK=silent
         local WHERE=insert
-        local MARKER="^/usr/"
+        local MARKER="^/usr/|^/c/WINDOWS/"
         local -a POSITIONAL
 
         fixargs
@@ -712,10 +722,10 @@ else
                 fi
             done
         else
-            local entry
+            local entry match suffix
             for entry in "${ENTRIES[@]}"; do
                 # either attempt cygwin path translation, or noop
-                [[ $entry == *\\* ]] && entry=$( cygpath "$entry" )
+                [[ $entry == *\\* ]] && entry=$(cygpath "$entry")
 
                 # entries with embedded colons are not allowed
                 [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
@@ -723,10 +733,10 @@ else
                 # if the list is not empty, check for our entry
                 if [[ $PATHLIST != : ]]; then
                     # either the entry is `/`, or we should strip a trailing slash
-                    local match=$entry
+                    match=$entry
                     [[ $match == / ]] || match=${match%/}
                     # either the entry is null, or we should match list values with trailing slashes
-                    local suffix=
+                    suffix=
                     [[ -z $match ]] || suffix="?(/)"
 
                     if [[ ${REPLACE-} || ${DELETE-} ]]; then
@@ -888,7 +898,7 @@ function filetype {
     done
 } && complete -c filetype
 
-if type -P cygpath &>/dev/null ; then
+if type -P cygpath &> /dev/null; then
     # function _cygpath {
     #     cygpath "$@"
     # }
@@ -898,9 +908,9 @@ if type -P cygpath &>/dev/null ; then
         local -a names options
         for arg in "$@"; do
             case $name in
-                -h|--help) help=1 && break ;;
-                -*) options+=( "$arg" ) ;;
-                *) names+=( "$arg" ) ;;
+                -h | --help) help=1 && break ;;
+                -*) options+=("$arg") ;;
+                *) names+=("$arg") ;;
             esac
         done
 
@@ -913,7 +923,7 @@ if type -P cygpath &>/dev/null ; then
         local -n var
         for var in "${names[@]}"; do
             if [[ -v ${!var} ]]; then
-                var=$( cygpath "${options[@]}" "$var" ) || throw "Failed to update var: ${!var}"
+                var=$(cygpath "${options[@]}" "$var") || throw "Failed to update var: ${!var}"
             else
                 _warn "Variable not set: ${!var}"
             fi
@@ -928,4 +938,3 @@ else
         true
     }
 fi
-
