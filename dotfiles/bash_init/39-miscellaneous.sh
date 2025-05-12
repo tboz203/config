@@ -10,12 +10,14 @@ export PAGER=less
 
 # export DOCKER_HIDE_LEGACY_COMMANDS=1
 export DOCKER_BUILDKIT=1
+export COMPOSE_BAKE=1
 export NODE_NO_WARNINGS=1
 
 export LESS="-SRi"
 (less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
 export LESSCHARSET=utf-8
 
+export PYTHONDONTWRITEBYTECODE=1
 setpath -e PYTHONSTARTUP ~/.pythonrc.py
 
 # [ -z $SSH_AUTH_SOCK ] && eval $(ssh-agent -s) >/dev/null 2>&1
@@ -26,6 +28,10 @@ setpath -e M2_HOME ~/.bootstrap/maven/default
 setpath -e SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
 # on RHEL/CentOS:
 setpath -e SSL_CERT_FILE /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+
+setpath -e CURL_CA_BUNDLE "${SSL_CERT_FILE-}"
+setpath -e REQUESTS_CA_BUNDLE "${SSL_CERT_FILE-}"
+setpath -e GIT_SSL_CAINFO "${SSL_CERT_FILE-}"
 
 pathmungex -e PYTHONPATH ~/.pymodules
 

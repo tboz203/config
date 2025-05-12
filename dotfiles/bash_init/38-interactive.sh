@@ -3,7 +3,8 @@
 
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
-export TZ=UTC
+# export TZ=UTC
+# export TZ='America/Chicago'
 
 PS1='\[\e[1;33m\]\u \w \$ \[\e[0m\]'
 

@@ -11,7 +11,12 @@ setpath -er HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew" || return 0
 export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
 export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
 
-pathmungex -r PATH "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin" "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin"
+pathmungex -r PATH \
+    "$HOMEBREW_PREFIX/bin" \
+    "$HOMEBREW_PREFIX/sbin" \
+    "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin" \
+    "$HOMEBREW_PREFIX/opt/postgresql@17/bin" \
+    "$HOMEBREW_PREFIX/lib/ruby/gems/3.4.0/bin"
 
 pathmungex -Eer MANPATH "$HOMEBREW_PREFIX/share/man" ""
 pathmungex -Eer INFOPATH "$HOMEBREW_PREFIX/share/info"

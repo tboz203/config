@@ -70,8 +70,11 @@ if ((BASH_VERSINFO[0] >= 5)); then
         local path=$1 && shift
 
         if [[ -e $path ]]; then
+            declare -g "${!name}"
             name=$path
-            [[ ! ${EXPORT-} ]] || declare -x name
+            if [[ ${EXPORT-} ]]; then
+                declare -xg "${!name}"
+            fi
         elif [[ ${RETURN-} ]]; then
             return 1
         fi

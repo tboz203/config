@@ -21,3 +21,6 @@ disable=SC2128
 # "Command appears to be unreachable. Check usage (or ignore if invoked indirectly)."
 # disable=SC2317
 
+
+# "VAR" appears to be unused (most commonly seen in dotenv files...)
+disable=SC2034

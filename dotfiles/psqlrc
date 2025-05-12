@@ -14,9 +14,11 @@
 \timing
 -- replace nulls
 -- \pset null ¤
+-- \pset null ␀
 -- U+200B is zero-width space; compensation for double-width emoji for things
 -- that don't know about emoji
-\pset null ❌​
+\pset null ❌
+-- \pset null ❌​
 \pset linestyle unicode
 \pset border 2
 \pset numericlocale on
