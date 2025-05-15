@@ -36,3 +36,5 @@ setpath -e GIT_SSL_CAINFO "${SSL_CERT_FILE-}"
 pathmungex -e PYTHONPATH ~/.pymodules
 
 pathmungex -er PKG_CONFIG_PATH {~/.local,/usr/local,/usr}/{lib,lib64,share}/pkgconfig
+
+setpath -e RIPGREP_CONFIG_PATH ~/.ripgreprc

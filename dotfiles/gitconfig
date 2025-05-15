@@ -91,12 +91,12 @@
 	lla = ll --branches --remotes=origin
 	llaa = ll --all
 	lg = log --walk-reflogs --format=reflog
-	lgd = log --walk-reflogs --format=reflog --date=relative
+	lgd = lg --date=relative
 	ls = la --simplify-by-decoration
 	logpath = l --boundary --ancestry-path
 	lp = logpath
-	logdiff = log --pretty=contrast --no-graph --reverse --patch
-	ld = logdiff
+	ld = log --pretty=contrast --no-graph --reverse --ancestry-path --stat
+	logdiff = ld --patch
 	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
 	lw = watch l
 	lwa = watch la

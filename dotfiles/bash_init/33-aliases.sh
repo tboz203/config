@@ -81,7 +81,6 @@ alias help2man='help2man -N -L $LC_ALL'
 # alias info='info --vi-keys'
 alias c='clear'
 alias clear='clear -x'
-alias rg='rg --smart-case'
 
 # editing rc files
 # --------------------
