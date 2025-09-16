@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Install dotfiles as symlinks
+Install configuration files.
 """
 
 from __future__ import annotations
@@ -14,11 +14,24 @@ from pathlib import Path
 from typing import Literal
 
 try:
-    from _winapi import CreateJunction
+    from _winapi import CreateJunction  # type: ignore
 except ImportError:
 
     def CreateJunction(*args, **kwargs):
+        del args, kwargs
         raise NotImplementedError("CreateJunction not available")
+
+
+def is_junction(path: Path | str) -> bool:
+    if os.path.islink(path) or not os.path.isdir(path):
+        # junctions return `False` for `islink` and `True` for `isdir`
+        return False
+    try:
+        # junctions are processed by `readlink` without error (usually)
+        os.readlink(path)
+        return True
+    except OSError:
+        return False
 
 
 ROOT = Path(__file__).absolute().parent
@@ -107,7 +120,7 @@ class Installer:
                 link = transformer(link)
 
             if (link.exists() and target.exists() and link.samefile(target)) or (
-                link.is_symlink() and link.readlink() == target
+                link.is_symlink() and link.resolve() == target.resolve()
             ):
                 # same file!
                 if self.dry_run:
@@ -140,14 +153,14 @@ class Installer:
             return
 
         logger.info("removing %s", path)
-        if path.is_dir() and not path.is_symlink():
+        if path.is_dir() and not path.is_symlink() and not is_junction(path):
             shutil.rmtree(path)
         else:
             path.unlink()
 
     def _rename_path(self, path: Path) -> None:
         replacement = self._tr_backup(path)
-        if self.dryrun:
+        if self.dry_run:
             logger.info("would preserve %s as %s", path, replacement)
             return
 
@@ -170,8 +183,8 @@ class Installer:
         otherwise.
         """
 
-        assert isinstance(target, Path | str)
-        assert isinstance(link, Path | str)
+        assert isinstance(target, (Path, str))
+        assert isinstance(link, (Path, str))
 
         target, link = Path(target), Path(link)
 
@@ -180,11 +193,11 @@ class Installer:
             return
 
         if self.symbolic_links:
-            link.symlink_to(target)
+            os.symlink(target, link)
         elif target.is_dir():
             CreateJunction(str(target), str(link))
         else:
-            link.hardlink_to(target)
+            os.link(target, link)
 
     def _tr_dotfile(self, path):
         """Transform `Path('filename.txt')` to `Path('.filename.txt')`."""
@@ -210,19 +223,19 @@ def get_installer(argv: list[str] | None = None) -> Installer:
     parser.add_argument(
         "-R",
         "--relative-links",
-        action=argparse.BooleanOptionalAction,
+        action="store_true",
         help="make relative symbolic links (implies `--symbolic-links`)",
     )
     parser.add_argument(
         "-D",
         "--dry-run",
-        action=argparse.BooleanOptionalAction,
+        action="store_true",
         help="make no changes; describe what actions would be taken",
     )
     parser.add_argument(
         "-S",
         "--symbolic-links",
-        action=argparse.BooleanOptionalAction,
+        action="store_true",
         help="Create symbolic links",
     )
 
