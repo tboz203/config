@@ -116,11 +116,6 @@ function pretty-prompt {
     # working directory (shortened in home directory) in blue
     parts+=(" $(build-color reset bold blue)" '\w')
 
-    # add git prompt, if available
-    if (declare -F __git_ps1 && type -P git) > /dev/null; then
-        parts+=("$(build-color reset)" '$(__git_ps1 ":(%s)")')
-    fi
-
     # include the result of the last command, in color
     parts+=(' $(__last_status_ps1)')
 

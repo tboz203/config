@@ -12,6 +12,7 @@
 	excludesfile = ~/.gitignore
 	; pager = delta
 	pager = less -SRFi
+	fsmonitor = false
 [pager]
 	config = less -SRFi
 [init]
