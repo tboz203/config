@@ -15,7 +15,7 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
-if type -P tree &> /dev/null; then
+if type -P tree &>/dev/null; then
     BASH_ALIASES['tree']='tree -C --dirsfirst --noreport --filelimit=50'
     if [[ $(\tree --version) > "tree v2.0.0" ]]; then
         # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
@@ -101,6 +101,7 @@ alias s=ls
 alias fl=lf
 alias ivm=vim
 alias vmi=vim
+alias dc=cd
 alias cdd=cd
 alias dfn=dnf
 alias qgit=git
@@ -114,6 +115,8 @@ alias vn=nv
 alias py='python'
 alias ipy='ipython'
 alias hd='hexdump -C'
+# more complicated git aliases live in gitconfig
+alias gits='git s'
 
 alias cloc=tokei
 
