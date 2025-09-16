@@ -14,3 +14,5 @@ pathmungex --replace PATH \
     /usr/lib/cargo/bin \
     /usr/local/bin \
     /usr/bin
+
+pathmungex --delete-matching PATH '/mnt/c/*'
