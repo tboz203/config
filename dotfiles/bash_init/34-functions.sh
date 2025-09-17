@@ -46,11 +46,40 @@ function nvrg {
     nv "${files[@]}"
 }
 
+function nvz {
+    local -a files
+    get_array files fzf "$@" || return
+    nv "${files[@]}"
+}
+
 function catwhich {
     local -a targets
     get_array targets type -P "$@" || return
     cat "${targets[@]}"
 } && complete -c catwhich
+
+function filewhich {
+    local arg help
+    local -a opts patterns targets
+    for arg in "$@"; do
+        shift
+        case $arg in
+            --) opts+=("$@") && break ;;
+            -h | --help) help=1 ;;
+            -*) opts+=("$arg") ;;
+            *) patterns+=("$arg") ;;
+        esac
+    done
+
+    if [[ ${help-} ]]; then
+        _err "Call 'file' on names on the PATH"
+        _err "Usage: ${FUNCNAME[0]} [FILE_FLAGS...] NAME [NAME...] [-- FILE_ARGS...]"
+        return 2
+    fi
+
+    get_array targets type -P "${patterns[@]}" || return
+    file "${opts[@]}" "${targets[@]}"
+} && complete -c filewhich
 
 function mw {
     # move a file & cd to that directory

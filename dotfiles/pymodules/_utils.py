@@ -1,5 +1,7 @@
 # pylint: disable=missing-docstring
 
+from _typeshed import GenericPath
+from collections.abc import Callable, Collection, Generator, Iterable
 import getpass
 import inspect
 import json
@@ -17,16 +19,16 @@ from pathlib import Path
 from pprint import pprint
 from shutil import get_terminal_size
 from textwrap import dedent
-from typing import Any
+from typing import Any, AnyStr
 
 SI_SUFFIXES = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
 
 try:
     from _winapi import CreateJunction  # type: ignore
 except ImportError:
+
     def CreateJunction(*args, **kwargs):
         raise NotImplementedError("CreateJunction not available")
-
 
 
 def noop(arg):
@@ -34,23 +36,23 @@ def noop(arg):
     return arg
 
 
-def red(text):
+def red(text: str) -> str:
     return "\x1b[1;31m%s\x1b[0m" % text
 
 
-def green(text):
+def green(text: str) -> str:
     return "\x1b[0;32m%s\x1b[0m" % text
 
 
-def yellow(text):
+def yellow(text: str) -> str:
     return "\x1b[1;33m%s\x1b[0m" % text
 
 
-def clear():
+def clear() -> None:
     print("\x1b[2J\x1b[f", end="")
 
 
-def format_timedelta(delta, use_suffix=True):  # pylint: disable=too-many-branches
+def format_timedelta(delta: timedelta, use_suffix: bool = True) -> str:  # pylint: disable=too-many-branches
     """Human-friendly timdelta formatting."""
     if not isinstance(delta, timedelta):
         raise ValueError("need instance of datetime.timedelta, not %s" % type(delta))
@@ -90,34 +92,38 @@ def format_timedelta(delta, use_suffix=True):  # pylint: disable=too-many-branch
     return timestr
 
 
-def time_since(timestamp, utc=True):
+def time_since(timestamp: datetime, utc: bool = True) -> str:
+    """A shortcut for `format_timedelta(timestamp - datetime.now())`"""
     now = datetime.now()
     if utc:
         now = now.astimezone()
     return format_timedelta(timestamp - now)
 
 
-def color_time_since(timestamp, utc=True):
-    now = datetime.now()
-    if utc:
-        now = now.astimezone()
+# def color_time_since(timestamp, utc=True):
+#     now = datetime.now()
+#     if utc:
+#         now = now.astimezone()
+#
+#     delta = timestamp - now
+#     if abs(delta) < timedelta(0, 60 * 60):
+#         colorfunc = red
+#     elif abs(delta) < timedelta(1, 0):
+#         colorfunc = yellow
+#     elif abs(delta) < timedelta(7):
+#         colorfunc = green
+#     else:
+#         colorfunc = noop
+#
+#     return colorfunc(format_timedelta(delta))
 
-    delta = timestamp - now
-    if abs(delta) < timedelta(0, 60 * 60):
-        colorfunc = red
-    elif abs(delta) < timedelta(1, 0):
-        colorfunc = yellow
-    elif abs(delta) < timedelta(7):
-        colorfunc = green
-    else:
-        colorfunc = noop
 
-    return colorfunc(format_timedelta(delta))
+def format_bytes(num: int | float) -> str:
+    """
+    Integer "bytes" formatting with SI suffixes.
 
-
-# we're using base 2 units (e.g. kibibyte, mebibyte)
-def format_bytes(num):
-    """Integer "bytes" formatting with SI suffixes."""
+    Uses base 2 units (e.g. kibibyte, mebibyte).
+    """
     for suffix in [""] + SI_SUFFIXES:
         if num > 1024:
             num /= 1024
@@ -128,7 +134,7 @@ def format_bytes(num):
     raise ValueError("to big!!!")
 
 
-def parse_bytes(num):
+def parse_bytes(num: str) -> float:
     """Attempt to reverse integer "bytes" formatting."""
     factor = 1
     suffix = num[-1].upper()
@@ -143,7 +149,7 @@ def parse_bytes(num):
     return float(num[:-1]) * factor
 
 
-def get_creds(env_prefix=None):
+def get_creds(env_prefix: str | None = None) -> tuple[str, str]:
     """
     Get user credentials.
 
@@ -159,10 +165,7 @@ def get_creds(env_prefix=None):
             user = os.environ[user_var]
             pw = os.environ[pw_var]
         else:
-            warnings.warn(
-                "Credential environment variables not found: %s, %s"
-                % (user_var, pw_var)
-            )
+            warnings.warn("Credential environment variables not found: %s, %s" % (user_var, pw_var))
 
     if not (user and pw):
         user_guess = getpass.getuser()
@@ -174,7 +177,7 @@ def get_creds(env_prefix=None):
     return (user, pw)
 
 
-def columnize(alist, yfirst=True, width=None):
+def columnize(alist: Collection, yfirst: bool = True, width: int | None = None) -> list[str]:
     width = width or get_terminal_size().columns - 2
     alist = list(map(str, alist))
 
@@ -221,48 +224,50 @@ def columnize(alist, yfirst=True, width=None):
     return lines
 
 
-def print_columns(alist, yfirst=True, width=None):
+def print_columns(alist: list[str], yfirst: bool = True, width: int | None = None) -> None:
     print("\n".join(columnize(alist, yfirst, width)))
 
 
-def walk_xml(elem, depth=None):
-    if depth == 0:
-        return elem
-    children = elem.getchildren()
-    if not children:
-        return elem
-    if depth is not None:
-        depth -= 1
-    return (elem, [walk_xml(c, depth) for c in children])
+# def walk_xml(elem, depth=None):
+#     if depth == 0:
+#         return elem
+#     children = elem.getchildren()
+#     if not children:
+#         return elem
+#     if depth is not None:
+#         depth -= 1
+#     return (elem, [walk_xml(c, depth) for c in children])
 
 
-def show(*args, **kwargs):
+def show(*args, **kwargs) -> None:
+    """pretty print arguments"""
     width = kwargs.pop("width", get_terminal_size().columns)
     pprint(*args, width=width, **kwargs)
 
 
-def group_by(collection, keyfunc):
-    grouped = {}
-    for item in collection:
-        grouped.setdefault(keyfunc(item), []).append(item)
+def group_by[I, K, V](
+    items: Iterable[I], keyfunc: Callable[[I], K], valuefunc: Callable[[I], V] = noop
+) -> dict[K, list[V]]:
+    """group items from an iterable using a key function and optionally a value function."""
+    grouped: dict[K, list[V]] = {}
+    for item in items:
+        grouped.setdefault(keyfunc(item), []).append(valuefunc(item))
     return grouped
 
 
-def compose(*functions):
+def compose(*functions: Callable) -> Callable:
     """
     Compose a sequence of functions into a single function.
     E.g. compose(f, g, h)(x) == f(g(h(x)))
     """
-    return reduce(
-        (lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))), functions
-    )
+    return reduce((lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))), functions)
 
 
-def depthwalk(top, depth=0, **kwargs):
+def depthwalk(top: GenericPath[str], depth: int = 0, **kwargs) -> Generator[tuple[str, list[str], list[str]]]:
     """just like `os.walk`, but with new added `depth` parameter!"""
     depthmap = {top: 0}
     for path, dirs, files in os.walk(top, **kwargs):
-        yield path, dirs, files
+        yield path, list(dirs), files
         here = depthmap[path]
         if here >= depth:
             dirs.clear()
@@ -272,7 +277,7 @@ def depthwalk(top, depth=0, **kwargs):
             depthmap[child] = here + 1
 
 
-def format_seconds(seconds):
+def format_seconds(seconds: int | float | Decimal):
     if not isinstance(seconds, (int, float, Decimal)):
         raise TypeError("seconds must be a number", seconds)
 
@@ -295,7 +300,7 @@ def format_seconds(seconds):
     raise ValueError("too small!!!")
 
 
-def just_timeit(stmt, **kwargs):
+def just_timeit(stmt: str | Callable[[], Any], **kwargs) -> None:
     """
     just_timeit(stmt, setup)
 
@@ -333,9 +338,7 @@ def jql(data, expr=".") -> None:
     if not isinstance(data, str):
         data = json.dumps(data)
 
-    subprocess.run(
-        f"jq -C {shlex.quote(expr)} | less", input=data.encode("utf-8"), shell=True
-    )
+    subprocess.run(f"jq -C {shlex.quote(expr)} | less", input=data.encode("utf-8"), shell=True)
 
 
 def dig(something, *keys, default=None):
@@ -445,11 +448,7 @@ def listattrs(obj: Any, local: bool = True) -> list[str]:
     subjects = (obj,) if local else (obj,) + type(obj).__mro__
     for subj in subjects:
         attrs.extend(getattr(subj, "__dict__", {}))
-        attrs.extend(
-            (slots,)
-            if isinstance((slots := getattr(subj, "__slots__", ())), str)
-            else slots
-        )
+        attrs.extend((slots,) if isinstance((slots := getattr(subj, "__slots__", ())), str) else slots)
 
     return attrs
 
@@ -459,8 +458,7 @@ def xvars(obj: Any) -> dict[str, Any]:
     return {
         name: attr
         for name in dir(obj)
-        if getattr((attr := getattr(obj, name, "NOT-FOUND")), "__self__", None)
-        not in selves
+        if getattr((attr := getattr(obj, name, "NOT-FOUND")), "__self__", None) not in selves
     }
 
 
@@ -488,17 +486,14 @@ def rvars(obj: Any) -> dict[str, dict[str, Any]]:
         results[desc] = {
             attr: value
             for attr in listattrs(subj)
-            if attr not in seen_attrs
-            and (value := getattr(obj, attr, marker)) is not marker
+            if attr not in seen_attrs and (value := getattr(obj, attr, marker)) is not marker
         }
         seen_attrs.update(results[desc])
 
     return results
 
 
-def link_paths(
-    target: Path | str, link: Path | str, *, symbolic: bool | None = None
-) -> None:
+def link_paths(target: Path | str, link: Path | str, *, symbolic: bool | None = None) -> None:
     """
     Create a link to path `target` at path `link`.
 

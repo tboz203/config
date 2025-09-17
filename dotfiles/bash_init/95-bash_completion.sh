@@ -38,49 +38,59 @@
 
 shopt -q progcomp && [[ ${_BASHLIB_ROOT-} ]] || return 0
 
-sourcepath /etc/profile.d/bash_completion.sh
-
-! type -P aws aws_completer &> /dev/null || complete -C aws_completer aws
-
-! type -P viewpane &> /dev/null || complete -F _command viewpane
-
-pathmungex BASH_COMPLETION_LOAD_PATH \
-    "${BASH_COMPLETION_USER_DIR-$HOME/.bash_completion.d}" \
-    ~/.local/share/bash-completion/completions \
-    /usr/local/share/bash-completion/completions \
-    /usr/share/bash-completion/completions
-
-__load_completion() {
-    local cmd="${1##*/}"
-    [[ -n $cmd ]] || return 1
-
-    local backslash
-    if [[ $cmd == \\* ]]; then
-        cmd="${cmd:1}"
-        # If we already have a completion for the "real" command, use it
-        $(complete -p "$cmd" 2> /dev/null || echo false) "\\$cmd" && return 0
-        backslash=\\
+if [[ ! ${BASH_COMPLETION_ROOT-} ]]; then
+    if [[ -d /usr/local/share/bash-completion ]]; then
+        BASH_COMPLETION_ROOT=/usr/local/share/bash-completion
+    else
+        BASH_COMPLETION_ROOT=/usr/share/bash-completion
     fi
+fi
 
-    local -a dirs
-    from_list dirs "$BASH_COMPLETION_LOAD_PATH"
+setpath BASH_COMPLETION_USER_DIR ~/.bash_completion.d
 
-    local dir compfile
-    for dir in "${dirs[@]}"; do
-        [[ -d $dir ]] || continue
-        for compfile in "$cmd" "$cmd.bash" "_$cmd"; do
-            compfile="$dir/$compfile"
-            # Avoid trying to source dirs; https://bugzilla.redhat.com/903540
-            if [[ -f $compfile ]] && . "$compfile" &> /dev/null; then
-                [[ $backslash ]] && $(complete -p "$cmd") "\\$cmd"
-                return 0
-            fi
-        done
-    done
+sourcepath "$BASH_COMPLETION_ROOT/bash_completion"
 
-    # Look up simple "xspec" completions
-    [[ -v _xspecs[$cmd] ]] &&
-        complete -F _filedir_xspec "$cmd" "$backslash$cmd" && return 0
-
-    return 1
-}
+# ! type -P aws aws_completer &> /dev/null || complete -C aws_completer aws
+#
+# ! type -P viewpane &> /dev/null || complete -F _command viewpane
+#
+# pathmungex BASH_COMPLETION_LOAD_PATH \
+#     "${BASH_COMPLETION_USER_DIR-$HOME/.bash_completion.d}" \
+#     ~/.local/share/bash-completion/completions \
+#     /usr/local/share/bash-completion/completions \
+#     /usr/share/bash-completion/completions
+#
+# __load_completion() {
+#     local cmd="${1##*/}"
+#     [[ -n $cmd ]] || return 1
+#
+#     local backslash
+#     if [[ $cmd == \\* ]]; then
+#         cmd="${cmd:1}"
+#         # If we already have a completion for the "real" command, use it
+#         $(complete -p "$cmd" 2> /dev/null || echo false) "\\$cmd" && return 0
+#         backslash=\\
+#     fi
+#
+#     local -a dirs
+#     from_list dirs "$BASH_COMPLETION_LOAD_PATH"
+#
+#     local dir compfile
+#     for dir in "${dirs[@]}"; do
+#         [[ -d $dir ]] || continue
+#         for compfile in "$cmd" "$cmd.bash" "_$cmd"; do
+#             compfile="$dir/$compfile"
+#             # Avoid trying to source dirs; https://bugzilla.redhat.com/903540
+#             if [[ -f $compfile ]] && . "$compfile" &> /dev/null; then
+#                 [[ $backslash ]] && $(complete -p "$cmd") "\\$cmd"
+#                 return 0
+#             fi
+#         done
+#     done
+#
+#     # Look up simple "xspec" completions
+#     [[ -v _xspecs[$cmd] ]] &&
+#         complete -F _filedir_xspec "$cmd" "$backslash$cmd" && return 0
+#
+#     return 1
+# }

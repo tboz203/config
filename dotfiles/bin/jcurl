@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+
+curl --fail-with-body -sD /dev/stderr "$@" | jq -Rsr '. as $o | try fromjson catch ($o + "\n" | stderr | empty)'

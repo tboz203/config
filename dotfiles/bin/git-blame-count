@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# count number of lines per author across a repository
+
+set -euo pipefail
+
+# list all files known to git
+git ls-files |
+    # call git blame for each, outputting machine readable output for each line of source code
+    xargs -l git blame --line-porcelain -- |
+    # select & isolate authorship information
+    sed -n 's/^author //p' |
+    # count & sort
+    sort | uniq -c | sort -rn
