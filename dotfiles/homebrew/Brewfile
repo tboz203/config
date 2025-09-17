@@ -1,5 +1,6 @@
 brew "bash"
 brew "zstd"
+brew "btop"
 brew "openssl@3"
 brew "cmake"
 brew "fd"

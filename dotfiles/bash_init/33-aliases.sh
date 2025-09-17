@@ -100,6 +100,7 @@ alias s=ls
 alias fl=lf
 alias ivm=vim
 alias vmi=vim
+alias dc=cd
 alias cdd=cd
 alias dfn=dnf
 alias qgit=git
@@ -113,6 +114,8 @@ alias vn=nv
 alias py='python'
 alias ipy='ipython'
 alias hd='hexdump -C'
+# more complicated git aliases live in gitconfig
+alias gits='git s'
 alias upr='update-repos -tvl'
 
 alias cloc=tokei
