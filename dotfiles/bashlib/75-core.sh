@@ -910,8 +910,10 @@ if type -P cygpath &> /dev/null; then
         local help arg
         local -a names options
         for arg in "$@"; do
-            case $name in
-                -h | --help) help=1 && break ;;
+            shift
+            case $arg in
+                --) names+=("$@") && break ;;
+                -h | --help) help=1 ;;
                 -*) options+=("$arg") ;;
                 *) names+=("$arg") ;;
             esac

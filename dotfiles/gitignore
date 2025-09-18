@@ -1,9 +1,8 @@
 # global gitignore file
 
-# /untracked
-# /gems
-#
-# !lib/
-# !venv/
+/untracked/
+/_untracked/
 
-__pycache__
+__pycache__/
+*.pyc
+*.pyo

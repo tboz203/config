@@ -90,8 +90,7 @@ alias bashrc='nv --cmd "cd ~/config/dotfiles" ~/config/dotfiles/{bashrc,bash_ini
 alias aliases='nv --cmd "cd ~/config/dotfiles" ~/config/dotfiles/bash_init/??-aliases.sh'
 alias nvbashlib='nv --cmd "cd ~/config/dotfiles/bashlib" ~/config/dotfiles/bashlib{,/??-*}.sh'
 alias nvbash_init='nv --cmd "cd ~/config/dotfiles/bash_init" ~/config/dotfiles/{bashrc,bash_init/??-*.sh}'
-alias nvrc='nv --cmd "cd ~/config/configfiles/nvim" ~/config/configfiles/nvim/lua/{plugins/{editor,language},config/{autocmds,keymaps,options}}.lua'
-alias nvconfig='nv --cmd "cd ~/config/configfiles/nvim" ~/config/configfiles/nvim/lua/{plugins,config}/*.lua'
+alias nvrc='nv --cmd "cd ~/config/configfiles/nvim" ~/config/configfiles/nvim/lua/plugins/{editor,language}.lua'
 
 # misspellings
 # --------------------
@@ -117,6 +116,7 @@ alias ipy='ipython'
 alias hd='hexdump -C'
 # more complicated git aliases live in gitconfig
 alias gits='git s'
+alias upr='update-repos -tvl'
 
 alias cloc=tokei
 
