@@ -48,9 +48,9 @@ class Installer:
     def __init__(
         self,
         config_root: Path = Path(ROOT),
-        home_dir: Path = Path.home(),
-        config_dir: Path = Path.home() / ".config",
-        ssh_dir: Path = Path.home() / ".ssh",
+        home_dir: Path | None = None,
+        config_dir: Path | None = None,
+        ssh_dir: Path | None = None,
         dry_run: bool = False,
         symbolic_links: bool | None = None,
         relative_links: bool | None = None,
@@ -70,13 +70,31 @@ class Installer:
         `preserve` determines whether existing files are removed or preserved (renamed)
         """
 
+        # home_dir: Path = Path.home()
+        # config_dir: Path = Path.home() / ".config"
+        # ssh_dir: Path = Path.home() / ".ssh"
+
+        # what are the possibilities?
+        # standard linux (or wsl) setup
+        # ... standard windows setup? most of this is worthless for a "standard" windows environment
+        # git bash ("HOME" and "USERPROFILE" are the same)
+        # msys ("HOME" is elsewhere)
+        # ... cygwin?
+        # mingw doesn't have its own environment; that's an `msys` environment
+
         if symbolic_links is None:
             symbolic_links = os.name != "nt"
 
+        if home_dir is None:
+            if os.name == "nt" and "MSYSTEM" in os.environ:
+                home_dir = Path(os.getenv('HOME')).resolve()
+            else:
+                home_dir = Path.home()
+
         self.config_root = config_root
         self.home_dir = home_dir
-        self.config_dir = config_dir
-        self.ssh_dir = ssh_dir
+        self.config_dir = config_dir or home_dir / ".config"
+        self.ssh_dir = ssh_dir or home_dir / ".ssh"
 
         self.dry_run = dry_run
         self.symbolic_links = symbolic_links
@@ -229,6 +247,7 @@ def get_installer(argv: list[str] | None = None) -> Installer:
     parser.add_argument(
         "-D",
         "--dry-run",
+        "--dryrun",
         action="store_true",
         help="make no changes; describe what actions would be taken",
     )

@@ -72,7 +72,6 @@ fi
 # alias astyle='astyle -sajcn'
 alias nl='nl -ba'
 alias figlet='figlet -t'
-alias ps='ps -H'
 alias df='df -h'
 alias xclip='xclip -selection clipboard'
 alias http='http --ignore-stdin'

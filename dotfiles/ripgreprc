@@ -1,0 +1,3 @@
+# ripgrep config file
+--smart-case
+--path-separator=//
