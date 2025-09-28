@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+case ${1-} in
+    -h | --help)
+        SELF=$(basename "$0")
+        echo >&2 "$SELF: print information for each certificate seen on STDIN"
+        echo >&2 "Usage: $SELF [openssl x509 options...]"
+        exit 1
+        ;;
+    *) ;;
+esac
+
+if (($#)); then
+    opts=("$@")
+else
+    opts=("--subject")
+fi
+
+# search STDIN for 'END' lines & add a null character
+sed 's/^-----END .*$/\0\x00/' |
+    # read certs delimited by null into '$cert'
+    while read -d $'\0' -r cert; do
+        # feed each cert into openssl
+        openssl x509 --noout "${opts[@]}" <<< "$cert"
+    done

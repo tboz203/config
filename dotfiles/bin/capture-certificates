@@ -10,4 +10,4 @@ if [[ $# -ne 1 || ! $1 =~ ^[^:/]+:[0-9]+$ ]]; then
     exit 1
 fi
 
-openssl s_client --no-interactive --showcerts --connect "$1" < /dev/null | extract-certificates
+openssl s_client --no-interactive --showcerts --connect "$1" < /dev/null |& extract-certificates

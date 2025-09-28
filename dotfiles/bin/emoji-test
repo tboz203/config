@@ -1,0 +1,31 @@
+#!/bin/bash
+
+echo "Testing emoji display in your terminal:"
+echo "--------------------------------------"
+
+# Basic Emojis
+echo "Smileys & People:"
+echo "😀😃😄😁😆😅😂🤣😊😇🙂🙃😉😌😍🥰😘😗😙😚😋😛😝😜🤪🤨🧐🤓😎🤩🥳😏😒😞😔😟😠😡🤬🤯😳🥵🥶😱😨😰😥😓🤗🤔🤭🤫🤥😶😐😑😬🙄😤😩😫🤤😴😪😮🤐🥴🤢🤮🤧😷🤒🤕🤑🤠🥳🥸😎🤓🧐🤨"
+
+# Animals & Nature
+echo "Animals & Nature:"
+echo "🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐽🐸🐵🙈🙉🙊🐒🐔🐧🐦🐤🐣🐥🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🕷🕸🦂🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐠🐟🐬  🐈🐈‍⬛🐓🦃🕊🐇🐁🐀🐿🦨🦡🦦🦥🦔🦩🦜🦢🦚🦉🌲🌳🌴🌵🌱🌿☘️🍀🍁🍂🍃🌸🌼🌻🌺🌍🌎🌏🌕🌖🌗🌘🌑🌒🌓🌔🌚🌝🌞🌟✨💫💥🔥🌪🌈☀️🌤⛅🌥🌦🌧⛈🌩⚡️❄️☃️⛄️🌬💨💧💦🌊"
+
+# Food & Drink
+echo "Food & Drink:"
+echo "🍇🍈🍉🍊🍋🍌🍍🥭🍎🍏🍐🍑🍒🍓🥝🍅🥥🥑🍆🥔🥕🌽🌶🥒🥬🥦🍄🥜🌰🍞🥐🥖🥨🥯🥞🧇🧀🍖🍗🥩🥓🍔🍟🍕 🌭🥪🌮🌯🥙🥚🍳🥘🍲🥣🥗🍿🧂🥫🍝🍜🍲🍣🥟🍘🍙🍚🍛🍜🍥🍢🍡🍧🍨🍦🥧🍰🎂🍮🍭🍬🍫🍿🍩🍪🌰🥜🍯🥛🍼☕️🍵🍶🍾🍷🍸🍹🍺🍻🥂🥃🥤🧃🧉🧊"
+
+# Travel & Places
+echo "Travel & Places"
+echo "🚗🚕🚙🚌🚎🏎🚓🚑🚒🚐🚚🚛🚜🛴🚲🛵🏍🛺🚨🚔🚍🚘🚖🚡🚠🚟🚃🚋🚞🚝🚄🚅🚈🚂🚆🚇🚊🚉✈️🛫🛬🛩🚁💺🛰🚀🛸⛵️🛶🚤🛥🛳⛴🚢⚓️🚧⛽️🚨🚥🚦🛑🚧🗼🗽🌉⛰🏔🌋🏕🏖🏜🏝🏞🏟🏛🏗🧱🏘🏡🏠🏚🏢🏬🏭🏣🏤🏥🏦🏨🏩🏪🏫百貨店 🏬🏥🏭🏦🏨🏩🏪🏫⛪️ 🕋⛲️"
+
+# Objects
+echo "Objects:"
+echo "⌚️📱📲💻⌨️🖥🖨🖱🖲🕹🎮💿📀💾💽📼📷📸📹🎥📽🎞📞☎️📟📠📺📻🎤🎧🎼🥁🎷🎺🎸🎻🎹"
+
+# Symbols
+echo "Symbols:"
+echo "❤️🧡💛💚💙💜🖤🤍🤎💔❣️💕💞💓💗💖💘💝"
+
+echo "--------------------------------------"
+echo "If you see squares or missing characters, you may need to install or configure an emoji font."
