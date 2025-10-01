@@ -15,10 +15,9 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
-if type -P tree &> /dev/null; then
-    BASH_ALIASES['tree']='tree -C --dirsfirst --noreport --filelimit=50'
-    if [[ $(\tree --version) > "tree v2.0.0" ]]; then
-        # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
+if havebin tree ; then
+    alias tree='tree -C --dirsfirst --noreport --filelimit=50'
+    if [[ $(command tree --version) > "tree v2.0.0" ]]; then
         BASH_ALIASES['tree']+=' --metafirst --sort=version'
     fi
     # alias lt='tree -pugDF --si --du'
@@ -64,7 +63,7 @@ alias fgrep='grep -F'
 alias egrep='grep -E'
 alias rgrep='grep -r'
 
-if [[ $(diff --help 2>&1) == *'--color'* ]]; then
+if havebin diff && [[ $(diff --help 2>&1) == *'--color'* ]]; then
     alias diff='diff --color=auto'
 fi
 

@@ -278,9 +278,9 @@ if ((BASH_VERSINFO[0] >= 5)); then
             "") arrayref=() ;;
             :) arrayref=('') ;;
             *)
-                # read into arrayref, splitting on `:`
-                # (seems to use terminator semantics, so add an extra final separator)
-                IFS=: read -r -d '' -a arrayref < <(print "${list}:") || true
+                # read into arrayref, splitting on `:`, stopping at the first newline
+                # (of which there *should* be only one!)
+                IFS=: read -r -a arrayref <<< "${list}"
                 ;;
         esac
     }
@@ -303,9 +303,9 @@ else
             "") eval "$arrayref=()" ;;
             :) eval "$arrayref=('')" ;;
             *)
-                # read into arrayref, splitting on `:`
-                # (seems to use terminator semantics, so add an extra final separator)
-                IFS=: read -r -d '' -a "$arrayref" < <(print "${list}:") || true
+                # read into arrayref, splitting on `:`, stopping at the first newline
+                # (of which there *should* be only one!)
+                IFS=: read -r -a arrayref <<< "${list}"
                 ;;
         esac
     }

@@ -1,6 +1,8 @@
 # golang environment setup
 
-type -P go &> /dev/null || return 0
+return 0
+
+havebin go || return 0
 
 export GOPATH="$HOME/.local/opt/go"
 mkdir -p "$GOPATH"
@@ -12,13 +14,13 @@ function _add_go_to_path {
 
     gobin=$(go env GOBIN)
     if [[ -z $gobin ]]; then
-        gobin=$(go env GOPATH)/bin
+        gobin=$GOPATH/bin
     fi
     mkdir -p "$gobin"
     pathmungex PATH "$gobin"
 
     goroot=$(go env GOROOT)
-    if [[ $goroot && -d $goroot/bin ]]; then
+    if [[ $goroot ]]; then
         pathmungex PATH "$goroot/bin"
     fi
 }

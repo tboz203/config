@@ -13,7 +13,9 @@ export DOCKER_BUILDKIT=1
 export NODE_NO_WARNINGS=1
 
 export LESS="-SRi"
-(less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
+if havebin less && [[ $(less --help 2>&1) == "*mouse*" ]]; then
+    LESS+=" --mouse --wheel-lines=3"
+fi
 export LESSCHARSET=utf-8
 
 setpath -e PYTHONSTARTUP ~/.pythonrc.py

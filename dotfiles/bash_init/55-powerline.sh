@@ -1,6 +1,8 @@
 # setup powerline
 # shellcheck disable=2034
 
+return 0
+
 function find-powerline-root {
     if [[ -d ${POWERLINE_ROOT-} && $POWERLINE_ROOT == */powerline ]]; then
         _warn "POWERLINE_ROOT already set"

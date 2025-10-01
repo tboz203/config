@@ -40,9 +40,9 @@ shopt -q progcomp && [[ ${_BASHLIB_ROOT-} ]] || return 0
 
 sourcepath /etc/profile.d/bash_completion.sh
 
-! type -P aws aws_completer &> /dev/null || complete -C aws_completer aws
+! havebin aws aws_completer || complete -C aws_completer aws
 
-! type -P viewpane || complete -F _command viewpane
+! havebin viewpane || complete -F _command viewpane
 
 pathmungex BASH_COMPLETION_LOAD_PATH \
     "${BASH_COMPLETION_USER_DIR-$HOME/.bash_completion.d}" \
