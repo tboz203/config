@@ -14,10 +14,11 @@ from pathlib import Path
 from typing import Literal
 
 try:
-    from _winapi import CreateJunction
+    from _winapi import CreateJunction  # type: ignore[reportAttributeAccessIssue]
 except ImportError:
 
     def CreateJunction(*args, **kwargs):
+        del args, kwargs
         raise NotImplementedError("CreateJunction not available")
 
 
@@ -147,7 +148,7 @@ class Installer:
 
     def _rename_path(self, path: Path) -> None:
         replacement = self._tr_backup(path)
-        if self.dryrun:
+        if self.dry_run:
             logger.info("would preserve %s as %s", path, replacement)
             return
 

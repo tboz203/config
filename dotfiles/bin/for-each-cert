@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
 
+case "${1-unset}" in
+--) shift ;;
+unset | -*)
+    SELF=$(basename "$0")
+    echo >&2 "$SELF: Execute a command for each certificate seen on stdin"
+    echo >&2 "Usage: $SELF -- COMMAND"
+    exit 1
+    ;;
+esac
+
 # search STDIN for 'END' lines & add a null character
 sed 's/^-----END .*$/\0\x00/' |
     # read certs delimited by null into '$item'
     while read -d $'\0' -r item; do
-        # feed each cert into openssl
-        openssl x509 --noout --alias <<< "$item"
+        # feed each cert into the supplied command
+        "$@" <<<"$item"
     done

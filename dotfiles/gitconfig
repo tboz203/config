@@ -98,14 +98,13 @@
 	ls = la --simplify-by-decoration
 	logpath = l --boundary --ancestry-path
 	lp = logpath
-	ld = log --pretty=contrast --no-graph --reverse --ancestry-path --stat
+	ld = log --pretty=contrast --no-graph --reverse --stat
 	logdiff = ld --patch
 	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
 	lw = watch l
 	lwa = watch la
 	logwatch = lwa
 	logtab = !git l --pretty=tableable | column -t -s '&'
-
 	; refs = for-each-ref --format='%(refname:short)'
 	; longrefs = for-each-ref --format='%(refname)'
 	rs = for-each-ref --format='%(refname:short)'

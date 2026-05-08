@@ -1,0 +1,61 @@
+#                                                      
+# package              version                          description
+#                                                      
+# aptitude             0.8.13-5                         terminal-based package manager
+# bazel-bootstrap      4.2.3+ds-9                       Tool to automate software builds and tests
+# cmake                3.25.1-1                         cross-platform, open-source make system
+# cmake-doc            3.25.1-1                         extended documentation in various formats for CMake
+# curl                 7.88.1-10+deb12u14               command line tool for transferring data with URL syntax
+# dos2unix             7.4.3-1                          convert text file line endings between CRLF and LF
+# fd-find              8.6.0-3                          Simple, fast and user-friendly alternative to find
+# figlet               2.2.5-3+b1                       Make large character ASCII banners out of ordinary text
+# gettext-doc          0.21-12                          Documentation for GNU gettext
+# git                  1:2.39.5-0+deb12u3               fast, scalable, distributed revision control system
+# golang               2:1.19~1                         Go programming language compiler - metapackage
+# graphviz             2.42.2-7+deb12u1                 rich set of graph drawing tools
+# htop                 3.2.2-2                          interactive processes viewer
+# imagemagick          8:6.9.11.60+dfsg-1.6+deb12u9     image manipulation programs -- binaries
+# img2pdf              0.4.4-3                          Lossless conversion of raster images to PDF
+# info                 6.8-6+b1                         Standalone GNU Info documentation browser
+# info2man             1.1-11                           Convert GNU info files to POD or man pages
+# jq                   1.6-2.1+deb12u1                  lightweight and flexible command-line JSON processor
+# libbz2-dev           1.0.8-5+b1                       high-quality block-sorting file compressor library - development
+# libgtk-3-dev         3.24.38-2~deb12u3                development files for the GTK library
+# libgtk-4-dev         4.8.3+ds-2+deb12u1               development files for the GTK library
+# libgtk2.0-dev        2.24.33-2+deb12u1                development files for the GTK library
+# libreadline-dev      8.2-1.3                          GNU readline and history libraries, development files
+# libsqlite3-dev       3.40.1-2+deb12u2                 SQLite 3 development files
+# libssl-dev           3.0.19-1~deb12u2                 Secure Sockets Layer toolkit - development files
+# libvterm-dev         0.1.4-1                          abstract terminal library (development files)
+# libyaml-dev          0.2.5-1                          Fast YAML 1.1 parser and emitter library (development)
+# lua-luv-dev          1.44.2-0-1                       libuv bindings for Lua (development files)
+# lua5.1               5.1.5-9                          Simple, extensible, embeddable programming language
+# lua5.1-doc           5.1.5-9                          Documentation for the Lua language version 5.1
+# moreutils            0.67-1                           additional Unix utilities
+# ncdu                 1.18-0.2                         ncurses disk usage viewer
+# netcat-openbsd       1.219-1                          TCP/IP swiss army knife
+# ninja-build          1.11.1-2~deb12u1                 small build system closest in spirit to Make
+# nmap                 7.93+dfsg1-1                     The Network Mapper
+# p7zip-full           16.02+dfsg-8                     7z and 7za file archivers with high compression ratio
+# poppler-utils        22.12.0-2+deb12u1                PDF utilities (based on Poppler)
+# postgresql-client    15+248+deb12u1                   front-end programs for PostgreSQL (supported version)
+# psmisc               23.6-1                           utilities that use the proc file system
+# python3-cairo-dev    1.20.1-5                         Python3 cairo bindings: development files
+# python3-dev          3.11.2-1+b1                      header files and a static library for Python (default)
+# python3-full         3.11.2-1+b1                      Default Python Interpreter with complete class library
+# python3-pip          23.0.1+dfsg-1                    Python package installer
+# python3-wxgtk4.0     4.2.0+dfsg-3                     Python 3 interface to the wxWidgets Cross-platform C++ GUI toolkit
+# ripgrep              13.0.0-4+b2                      Recursively searches directories for a regex pattern
+# socat                1.7.4.4-2                        multipurpose relay for bidirectional data transfer
+# sqlite3              3.40.1-2+deb12u2                 Command line interface for SQLite 3
+# sqlite3-doc          3.40.1-2+deb12u2                 SQLite 3 documentation
+# sqlite3-pcre         0~git20070120091816+4229ecc-2    Perl-compatible regular expression support for SQLite
+# sqlite3-tools        3.40.1-2+deb12u2                 Command line interface for SQLite 3 (tools)
+# sudo                 1.9.13p3-1+deb12u3               Provide limited super user privileges to specific users
+# tk-dev               8.6.13                           Toolkit for Tcl and X11 (default version) - development files
+# tmux                 3.3a-3                           terminal multiplexer
+# tree                 2.1.0-1                          displays an indented directory tree, in color
+# vim                  2:9.0.1378-2+deb12u2             Vi IMproved - enhanced vi editor
+# vim-youcompleteme    0+20230109+git7620d87+ds-3       fast, as-you-type, fuzzy-search code completion engine for Vim
+# zip                  3.0-13                           Archiver for .zip files
+# zstd                 1.5.4+dfsg2-5                    fast lossless compression algorithm -- CLI tool
