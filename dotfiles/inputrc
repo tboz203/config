@@ -4,6 +4,13 @@ $include /etc/inputrc
 
 set editing-mode vi
 
+# Change cursor shape for different modes
+set show-mode-in-prompt
+# 1. Block cursor for Command mode
+set vi-cmd-mode-string \1\e[2 q\2
+# 2. Beam/Vertical bar cursor for Insert mode
+set vi-ins-mode-string \1\e[6 q\2
+
 set keymap vi-move
 "gg": end-of-history
 

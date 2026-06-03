@@ -3,4 +3,4 @@
 # a wrapper scriptlet for uv project python script shebang lines,
 # eg. `#!/usr/bin/env uv-run-in-project`
 
-exec uv run --project "$(realpath "$1")" --script "$@"
+exec uv run --project "$(dirname "$(realpath "$1")")" --script "$@"

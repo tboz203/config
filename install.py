@@ -147,7 +147,7 @@ class Installer:
 
     def _rename_path(self, path: Path) -> None:
         replacement = self._tr_backup(path)
-        if self.dryrun:
+        if self.dry_run:
             logger.info("would preserve %s as %s", path, replacement)
             return
 

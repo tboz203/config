@@ -58,7 +58,7 @@ fi
 
 [[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
-if [[ -d ${POWERLINE_ROOT-} ]]; then
+if [[ -d ${POWERLINE_ROOT-} && ${HAS_POWERLINE_FONTS-} ]]; then
     # if `ss` is unavailable, or no matching powerline daemon socket exists
     if ! havebin ss || [[ -z $(ss -Hax src @powerline-ipc-$UID) ]]; then
         # start powerline daemon
@@ -71,8 +71,8 @@ if [[ -d ${POWERLINE_ROOT-} ]]; then
     # gross hack to skip slow, redundant checks
     POWERLINE_COMMAND=powerline
     POWERLINE_CONFIG_COMMAND=powerline-config
+    # shellcheck disable=2329
     function powerline-config {
-        # shellcheck disable=2317
         return 0
     }
 

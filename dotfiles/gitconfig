@@ -111,7 +111,7 @@
 	rs = for-each-ref --format='%(refname:short)'
 	rsf = for-each-ref --format='%(refname)'
 	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
-	purge = !git clean -fqdx && git reset --hard
+	purge = !git clean -ffqdx && git reset --hard
 	; lprune = !git checkout develop && git branch --merged develop | grep -v '^. develop$' | xargs git branch -d
 	; pruneable !git for-each-ref --format="%(refname:short) %(upstream)" refs/heads | grep -E " (.+)$" | while read here there; do [[ -z $(git for-each-ref $there) ]] && echo $here; done
 	pruneable = !git branch --format='%(refname:short)%%%(upstream:track)' | grep -F '[gone]' | cut -d% -f1

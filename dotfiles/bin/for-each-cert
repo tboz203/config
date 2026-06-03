@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 
+echo >&2 "[X] use 'openssl x509 -multi'"
+exit 1
+
+set -eu
+
+if [[ ${1-} == -- && $# -gt 1 ]]; then
+    shift
+else
+    echo "$(basename "$0"): execute a command for each PEM certificate read on stdin"
+    echo "Usage: $(basename "$0") -- COMMAND [ARGS ...]"
+    exit 1
+fi
+
 # search STDIN for 'END' lines & add a null character
 sed 's/^-----END .*$/\0\x00/' |
     # read certs delimited by null into '$item'
     while read -d $'\0' -r item; do
-        # feed each cert into openssl
-        openssl x509 --noout --alias <<< "$item"
+        # feed each cert into user command
+        "$@" <<< "$item"
     done

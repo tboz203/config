@@ -1,6 +1,6 @@
 # ensure PATH is populated
 
-[[ ! ${_BASH_INIT_PATHS_SET-} ]] || return 0
+# [[ ! ${_BASH_INIT_PATHS_SET-} ]] || return 0
 export _BASH_INIT_PATHS_SET=1
 
 pathmungex --delete-matching PATH "/mnt/*" "/Docker/*"

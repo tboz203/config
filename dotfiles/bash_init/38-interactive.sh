@@ -89,3 +89,15 @@ DOCKER_COMPLETION_SHOW_SERVICE_IDS=yes
 # have, so make sure it starts with the null entry (which indicates the
 # default MANPATH lookup algorithm)
 pathmungex -brE MANPATH ""
+
+# Set cursor shape:
+# Blinking Block: echo -ne "\e[1 q"
+# Steady Block: echo -ne "\e[2 q"
+# Blinking Underline: echo -ne "\e[3 q"
+# Steady Underline: echo -ne "\e[4 q"
+# Blinking Bar (I-beam): echo -ne "\e[5 q"
+# Steady Bar (I-beam): echo -ne "\e[6 q"
+
+# set cursor to I-beam before & after each command
+PROMPT_COMMAND="printf '\e[6 q'${PROMPT_COMMAND+;${PROMPT_COMMAND}}"
+PS0="\e[6 q${PS0}"
