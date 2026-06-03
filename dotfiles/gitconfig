@@ -98,14 +98,13 @@
 	ls = la --simplify-by-decoration
 	logpath = l --boundary --ancestry-path
 	lp = logpath
-	ld = log --pretty=contrast --no-graph --reverse --ancestry-path --stat
+	ld = log --pretty=contrast --no-graph --reverse --stat
 	logdiff = ld --patch
 	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
 	lw = watch l
 	lwa = watch la
 	logwatch = lwa
 	logtab = !git l --pretty=tableable | column -t -s '&'
-
 	; refs = for-each-ref --format='%(refname:short)'
 	; longrefs = for-each-ref --format='%(refname)'
 	rs = for-each-ref --format='%(refname:short)'
@@ -122,6 +121,7 @@
 	;; this is a script now
 	; fixlast = git commit --amend --no-edit
 	report = log --first-parent --format=report --abbrev=8 --date='format-local:%c'
+	checkpoint = !git commit -m \"checkpoint `date +%Y-%m-%d`\"
 ; [color "diff"]
 ; 	meta = "bold #000000 brightblue"
 ; 	frag = "bold #000000 yellow"

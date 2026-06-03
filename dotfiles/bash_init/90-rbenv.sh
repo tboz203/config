@@ -1,5 +1,7 @@
 #!/bin/bash
 
+return 0
+
 if ! setpath -er RBENV_ROOT ~/.rbenv; then
     if [[ -f ~/.skip-rbenv ]]; then
         return 0

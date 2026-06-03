@@ -1,10 +1,9 @@
 # homebrew configuration
+# see ~/.homebrew/brew.env for other configuration
 
 # [[ ${_SHELL_LOGIN-} ]] || return 0
 
 # eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
-# see ~/.homebrew/brew.env for other configuration
 
 setpath -er HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew" || return 0
 

@@ -1,7 +1,0 @@
-pip
-setuptools
-wheel
-build
-requests
-uv
-GitPython

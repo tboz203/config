@@ -1,5 +1,7 @@
 #!/bin/bash
 
+return 0
+
 if ! setpath -er NODENV_ROOT ~/.nodenv; then
     if [[ -f ~/.skip-nodenv ]]; then
         return 0

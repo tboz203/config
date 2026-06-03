@@ -5,13 +5,15 @@ exit 1
 
 set -eu
 
-if [[ ${1-} == -- && $# -gt 1 ]]; then
-    shift
-else
-    echo "$(basename "$0"): execute a command for each PEM certificate read on stdin"
-    echo "Usage: $(basename "$0") -- COMMAND [ARGS ...]"
-    exit 1
-fi
+case "${1-unset}" in
+    --) shift ;;
+    unset | -*)
+        SELF=$(basename "$0")
+        echo >&2 "$SELF: Execute a command for each certificate seen on stdin"
+        echo >&2 "Usage: $SELF -- COMMAND"
+        exit 1
+        ;;
+esac
 
 # search STDIN for 'END' lines & add a null character
 sed 's/^-----END .*$/\0\x00/' |

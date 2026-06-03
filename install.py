@@ -14,10 +14,11 @@ from pathlib import Path
 from typing import Literal
 
 try:
-    from _winapi import CreateJunction
+    from _winapi import CreateJunction  # type: ignore[reportAttributeAccessIssue]
 except ImportError:
 
     def CreateJunction(*args, **kwargs):
+        del args, kwargs
         raise NotImplementedError("CreateJunction not available")
 
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+return 0
+
 if ! setpath -er PYENV_ROOT ~/.pyenv; then
     if [[ -f ~/.skip-pyenv ]]; then
         return 0
