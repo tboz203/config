@@ -12,7 +12,8 @@ export DOCKER_BUILDKIT=1
 export COMPOSE_BAKE=1
 export NODE_NO_WARNINGS=1
 
-export LESS="-SRi"
+# export LESS="-SRi"
+export LESS="-SRFi"
 (less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
 export LESSCHARSET=utf-8
 
@@ -37,3 +38,17 @@ pathmungex -e PYTHONPATH ~/.pymodules
 pathmungex -er PKG_CONFIG_PATH {~/.local,/usr/local,/usr}/{lib,lib64,share}/pkgconfig
 
 setpath -e RIPGREP_CONFIG_PATH ~/.ripgreprc
+
+# setpath -e JAVA_HOME /usr/lib/jvm/java-17-amazon-corretto
+setpath -e JAVA_HOME /usr/lib/jvm/java-21-amazon-corretto
+# setpath -e JAVA_HOME /usr/lib/jvm/java-25-amazon-corretto
+
+export AWS_DEFAULT_PROFILE=ccc-lab
+export AWS_DEFAULT_REGION=us-east-1
+
+# havebin tofu && TG_TF_PATH=$(type -P tofu)
+export TF_LOG=info
+# set a much bigger timeout for tofu/terraform provider plugin downloads
+export TF_REGISTRY_CLIENT_TIMEOUT=60
+
+havebin wslview && export BROWSER=wslview

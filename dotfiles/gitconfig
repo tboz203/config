@@ -1,7 +1,7 @@
 ; vim: ft=gitconfig sw=8 ts=8 noet
 [user]
-	name = Thomas Bozeman
-	email = tboz203@gmail.com
+	name = Bozeman, Thomas (CGI Federal)
+	email = thomas.bozeman@uspto.gov
 [credential]
 	helper = store
 [color]
@@ -55,11 +55,12 @@
 	ff = only
 [push]
 	default = current
+	recurseSubmodules = on-demand
 [rebase]
 	autoStash = true
 	autoSquash = true
 	rebaseMerges = true
-	updateRefs = false
+	updateRefs = true
 	missingCommitsCheck = error
 [rerere]
 	enabled = true

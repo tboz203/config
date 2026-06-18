@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# this appears to be a newer flag, not available in all openssl versions...
 echo >&2 "[X] use 'openssl x509 -multi'"
 exit 1
 

@@ -52,6 +52,12 @@ function nvz {
     nv "${files[@]}"
 }
 
+function nvgd {
+    local -a files
+    get_array files git diff --name-only --relative "$@" || return
+    nv "${files[@]}"
+}
+
 function catwhich {
     local -a targets
     get_array targets type -P "$@" || return

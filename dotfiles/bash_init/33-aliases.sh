@@ -15,7 +15,7 @@ alias full='date "+%Y.%m.%d-%H.%M.%S"'
 # common
 #--------------------
 
-if type -P tree &>/dev/null; then
+if type -P tree &> /dev/null; then
     BASH_ALIASES['tree']='tree -C --dirsfirst --noreport --filelimit=50'
     if [[ $(\tree --version) > "tree v2.0.0" ]]; then
         # BASH_ALIASES['tree']+=' --metafirst --gitignore --sort=version'
@@ -131,7 +131,8 @@ alias docker-purge='docker-halt && docker-scrub'
 
 alias dfx='df -h -t xfs'
 alias files='fd -t f'
-alias open='gio open'
+# alias open='gio open'
+havebin wslview && alias open='wslview'
 # alias listening='lsof -i -s TCP:Listen'
 # attempting to sort by listening address; not 100% effective
 # alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
