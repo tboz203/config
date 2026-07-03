@@ -8,6 +8,18 @@
 
 PS1='\[\e[1;33m\]\u \w \$ \[\e[0m\]'
 
+# Set cursor shape:
+# Blinking Block: echo -ne "\e[1 q"
+# Steady Block: echo -ne "\e[2 q"
+# Blinking Underline: echo -ne "\e[3 q"
+# Steady Underline: echo -ne "\e[4 q"
+# Blinking Bar (I-beam): echo -ne "\e[5 q"
+# Steady Bar (I-beam): echo -ne "\e[6 q"
+
+# set cursor to I-beam before & after each command
+PROMPT_COMMAND="printf '\e[6 q'${PROMPT_COMMAND+;${PROMPT_COMMAND}}"
+PS0="\e[6 q${PS0}"
+
 # don't save duplicate commands or commands starting with spaces in bash history
 HISTCONTROL=ignoreboth
 
@@ -90,14 +102,9 @@ DOCKER_COMPLETION_SHOW_SERVICE_IDS=yes
 # default MANPATH lookup algorithm)
 pathmungex -brE MANPATH ""
 
-# Set cursor shape:
-# Blinking Block: echo -ne "\e[1 q"
-# Steady Block: echo -ne "\e[2 q"
-# Blinking Underline: echo -ne "\e[3 q"
-# Steady Underline: echo -ne "\e[4 q"
-# Blinking Bar (I-beam): echo -ne "\e[5 q"
-# Steady Bar (I-beam): echo -ne "\e[6 q"
-
-# set cursor to I-beam before & after each command
-PROMPT_COMMAND="printf '\e[6 q'${PROMPT_COMMAND+;${PROMPT_COMMAND}}"
-PS0="\e[6 q${PS0}"
+# use a top-down layout, use a history file,
+# don't default to searching hidden files & directories
+# (not using FZF_DEFAULT_OPTS_FILE b/c it doesn't interpret env vars)
+export FZF_DEFAULT_OPTS="--layout=reverse --history=\"$HOME/.fzf.history\" --history-size=999999"
+# using fd to get gitignore & hidden file behavior
+havebin fd && export FZF_DEFAULT_COMMAND="fd --type file --type symlink"

@@ -16,31 +16,30 @@ function spinner {
     printf "\e[1K\e[G%s" "${chars:idx:1}"
 }
 
-if ((BASH_VERSINFO[0] >= 5)); then
-    function setpath {
-        local -a POSITIONAL
-        local EXPORT RETURN HELP USAGE
-        fixargs
-        while (($#)); do
-            local arg=$1 && shift
-            case $arg in
-                -h | --help) HELP=1 ;;
-                -e | --export) EXPORT=1 ;;
-                -r | --return) RETURN=1 ;;
-                -*)
-                    _err "Unknown option: \"$arg\""
-                    USAGE=1
-                    ;;
-                *) POSITIONAL+=("$arg") ;;
-            esac
-        done
+function setpath {
+    local -a POSITIONAL
+    local EXPORT RETURN HELP USAGE
+    fixargs
+    while (($#)); do
+        local arg=$1 && shift
+        case $arg in
+            -h | --help) HELP=1 ;;
+            -e | --export) EXPORT=1 ;;
+            -r | --return) RETURN=1 ;;
+            -*)
+                _err "Unknown option: \"$arg\""
+                USAGE=1
+                ;;
+            *) POSITIONAL+=("$arg") ;;
+        esac
+    done
 
-        set -- "${POSITIONAL[@]}"
+    set -- "${POSITIONAL[@]}"
 
-        USAGE_TEXT="${FUNCNAME[0]} [-e|--export] [-r|--return] VAR PATH"
+    USAGE_TEXT="${FUNCNAME[0]} [-e|--export] [-r|--return] VAR PATH"
 
-        if [[ ${HELP-} ]]; then
-            trim <<< "
+    if [[ ${HELP-} ]]; then
+        trim <<< "
                 Set a variable to a path if that path exists
                 Usage: $USAGE_TEXT
 
@@ -53,93 +52,32 @@ if ((BASH_VERSINFO[0] >= 5)); then
                 -r | --return   Return success or failure
                 -h | --help     Print this message and halt
                 "
-            return 0
+        return 0
+    fi
+
+    if (($# != 2)); then
+        _err "Wrong number of arguments"
+        USAGE=1
+    fi
+
+    if [[ ${USAGE-} ]]; then
+        _err "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
+        return 2
+    fi
+
+    local -n name=$1 && shift
+    local path=$1 && shift
+
+    if [[ -e $path ]]; then
+        declare -g "${!name}"
+        name=$path
+        if [[ ${EXPORT-} ]]; then
+            declare -xg "${!name}"
         fi
-
-        if (($# != 2)); then
-            _err "Wrong number of arguments"
-            USAGE=1
-        fi
-
-        if [[ ${USAGE-} ]]; then
-            _err "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
-            return 2
-        fi
-
-        local -n name=$1 && shift
-        local path=$1 && shift
-
-        if [[ -e $path ]]; then
-            declare -g "${!name}"
-            name=$path
-            if [[ ${EXPORT-} ]]; then
-                declare -xg "${!name}"
-            fi
-        elif [[ ${RETURN-} ]]; then
-            return 1
-        fi
-    } && alias setpath='withflags +vx -- \setpath '
-else
-    function setpath {
-        local -a POSITIONAL
-        local EXPORT RETURN HELP USAGE
-        fixargs
-        while (($#)); do
-            local arg=$1 && shift
-            case $arg in
-                -h | --help) HELP=1 && break ;;
-                -e | --export) EXPORT=1 ;;
-                -r | --return) RETURN=1 ;;
-                -*)
-                    _err "Unknown option: \"$arg\""
-                    USAGE=1
-                    ;;
-                *) POSITIONAL+=("$arg") ;;
-            esac
-        done
-
-        set -- "${POSITIONAL[@]}"
-
-        USAGE_TEXT="${FUNCNAME[0]} [-e|--export] [-r|--return] VAR PATH"
-
-        if [[ ${HELP-} ]]; then
-            trim <<< "
-                Set a variable to a path if that path exists
-                Usage: $USAGE_TEXT
-
-                Parameters:
-                VAR     A variable name
-                PATH    A file or directory path
-
-                Options:
-                -e | --export   Export the given variable
-                -r | --return   Return success or failure
-                -h | --help     Print this message and halt
-                "
-            return 0
-        fi
-
-        if (($# != 2)); then
-            _err "Wrong number of arguments"
-            USAGE=1
-        fi
-
-        if [[ ${USAGE-} ]]; then
-            _err "Usage: ${FUNCNAME[0]} [OPTIONS] VAR PATH"
-            return 2
-        fi
-
-        local name=$1 && shift
-        local path=$1 && shift
-
-        if [[ -e $path ]]; then
-            eval "$name=$path"
-            [[ ! ${EXPORT-} ]] || export "${name?}"
-        elif [[ ${RETURN-} ]]; then
-            return 1
-        fi
-    } && alias setpath='withflags +vx -- \setpath '
-fi
+    elif [[ ${RETURN-} ]]; then
+        return 1
+    fi
+} && alias setpath='withflags +vx -- \setpath '
 
 function sourcepath {
     if [[ $# -ne 1 || ${1-} == -* ]]; then
@@ -167,61 +105,25 @@ function showpath {
     done
 } && complete -v showpath
 
-if ((BASH_VERSINFO[0] >= 5)); then
-    function showarray {
-        # pretty print array variables
-        # usage: showarray ARRAYVAR...
+function showarray {
+    # pretty print array variables
+    # usage: showarray ARRAYVAR...
 
-        local -n arrayref
-        for arrayref in "$@"; do
-            if [[ ${arrayref@a} != *[aA]* ]]; then
-                _err "Not an array: ${!arrayref}"
-                continue
-            fi
+    local -n arrayref
+    for arrayref in "$@"; do
+        if [[ ${arrayref@a} != *[aA]* ]]; then
+            _err "Not an array: ${!arrayref}"
+            continue
+        fi
 
-            println "${!arrayref}=("
-            local key
-            for key in "${!arrayref[@]}"; do
-                printf "  [%s]=%s\n" "$key" "${arrayref[$key]@Q}"
-            done
-            println ")"
+        println "${!arrayref}=("
+        local key
+        for key in "${!arrayref[@]}"; do
+            printf "  [%s]=%s\n" "$key" "${arrayref[$key]@Q}"
         done
-    } && complete -A arrayvar showarray
-else
-    function showarray {
-        # pretty print array variables
-        # usage: showarray ARRAYVAR...
-
-        local arrayref_name
-        for arrayref_name in "$@"; do
-            local arrayref_attributes
-            if ! arrayref_attributes=$(attributes "$arrayref_name"); then
-                _warn "Could not determine attributes of $arrayref_name"
-                continue
-            fi
-
-            if [[ $arrayref_attributes != *[aA]* ]]; then
-                _warn "Not an array: $arrayref_name"
-                continue
-            fi
-
-            local -a arrayref_keys arrayref_values
-            eval "$(
-                printf 'arrayref_keys=( "${!%s[@]}" )\n' "$arrayref_name"
-                printf 'arrayref_values=( "${%s[@]}" )\n' "$arrayref_name"
-            )"
-
-            get_array arrayref_values quoted "${arrayref_values[@]}"
-
-            println "$arrayref_name=("
-            local idx
-            for ((idx = 0; idx < ${#arrayref_keys[@]}; idx++)); do
-                printf "  [%s]=%s\n" "${arrayref_keys[idx]}" "${arrayref_values[idx]}"
-            done
-            println ")"
-        done
-    } && complete -A arrayvar showarray
-fi
+        println ")"
+    done
+} && complete -A arrayvar showarray
 
 function searchpath {
     # find the first file in a path that matches a glob
@@ -369,55 +271,54 @@ function with_files {
     "${command[@]}" "${files[@]}"
 } && complete -c with_files
 
-if ((BASH_VERSINFO[0] >= 5)); then
-    function pathmungex {
-        # like pathmunge, but better
+function pathmungex {
+    # like pathmunge, but better
 
-        _if_verbose _log "$* # called at $(called-at 1)"
+    _if_verbose _log "$* # called at $(called-at 1)"
 
-        local HELP USAGE
-        local CHECK=silent
-        local WHERE=insert
-        local MARKER="^/usr/|^/c/windows/"
-        local -a POSITIONAL
+    local HELP USAGE
+    local CHECK=silent
+    local WHERE=insert
+    local MARKER="^/usr/|^/c/windows/"
+    local -a POSITIONAL
 
-        fixargs
-        while (($#)); do
-            local arg=$1 && shift
-            case $arg in
-                -e | --export) local EXPORT=1 ;;
-                -E | --exists) local EXISTS=1 ;;
-                -b | --before) WHERE=before ;;
-                -a | --after) WHERE=after ;;
-                -f | --fail | --fatal) CHECK=fail ;;
-                -n | --no-check | --nocheck) CHECK=nocheck ;;
-                -r | --replace) local REPLACE=1 ;;
-                -R | --replace-matching) local REPLACE=1 MATCHING=1 ;;
-                -d | --delete) local DELETE=1 ;;
-                -D | --delete-matching) local DELETE=1 MATCHING=1 ;;
-                -h | --help) HELP=1 ;;
-                -m | --marker)
-                    if [[ -v 1 && $1 != -* ]]; then
-                        MARKER=$1 && shift
-                    else
-                        _err "Argument required: \"$arg\""
-                        USAGE=1
-                    fi
-                    ;;
-                -*)
-                    _err "Unrecognized option: \"$arg\""
+    fixargs
+    while (($#)); do
+        local arg=$1 && shift
+        case $arg in
+            -e | --export) local EXPORT=1 ;;
+            -E | --exists) local EXISTS=1 ;;
+            -b | --before) WHERE=before ;;
+            -a | --after) WHERE=after ;;
+            -f | --fail | --fatal) CHECK=fail ;;
+            -n | --no-check | --nocheck) CHECK=nocheck ;;
+            -r | --replace) local REPLACE=1 ;;
+            -R | --replace-matching) local REPLACE=1 MATCHING=1 ;;
+            -d | --delete) local DELETE=1 ;;
+            -D | --delete-matching) local DELETE=1 MATCHING=1 ;;
+            -h | --help) HELP=1 ;;
+            -m | --marker)
+                if [[ -v 1 && $1 != -* ]]; then
+                    MARKER=$1 && shift
+                else
+                    _err "Argument required: \"$arg\""
                     USAGE=1
-                    ;;
-                *) POSITIONAL+=("$arg") ;;
-            esac
-        done
+                fi
+                ;;
+            -*)
+                _err "Unrecognized option: \"$arg\""
+                USAGE=1
+                ;;
+            *) POSITIONAL+=("$arg") ;;
+        esac
+    done
 
-        set -- "${POSITIONAL[@]}"
+    set -- "${POSITIONAL[@]}"
 
-        local USAGE_TEXT="${FUNCNAME[0]} [OPTIONS] PATHVAR ENTRIES..."
+    local USAGE_TEXT="${FUNCNAME[0]} [OPTIONS] PATHVAR ENTRIES..."
 
-        if [[ ${HELP-} ]]; then
-            dedent <<< "
+    if [[ ${HELP-} ]]; then
+        dedent <<< "
                 Add entries to a PATH-like list variable, for each entry that exists on disk
                 and is not already in the list. By default, entries are inserted in order into
                 PATHVAR before the first entry that begins with '/usr/'.
@@ -445,412 +346,174 @@ if ((BASH_VERSINFO[0] >= 5)); then
                 Optional Parameters:
                 -m | --marker MARKER    A pattern to use to find the entry in PATHVAR where
                                         ENTRIES should be inserted"
-            return 0
-        fi
+        return 0
+    fi
 
-        if (($# == 0)); then
-            _err "Not enough arguments"
-            USAGE=1
-        fi
+    if (($# == 0)); then
+        _err "Not enough arguments"
+        USAGE=1
+    fi
 
-        if (($# == 1)); then
-            set -- PATH "$@"
-        fi
+    if (($# == 1)); then
+        set -- PATH "$@"
+    fi
 
-        if [[ ${USAGE-} ]]; then
-            _err "Usage: $USAGE_TEXT"
-            return 2
-        fi
+    if [[ ${USAGE-} ]]; then
+        _err "Usage: $USAGE_TEXT"
+        return 2
+    fi
 
-        local -n PATHVAR=$1 && shift
-        local -a ENTRIES=("$@")
+    local -n PATHVAR=$1 && shift
+    local -a ENTRIES=("$@")
 
-        if [[ ${EXISTS-} && ! -v PATHVAR ]]; then
-            _if_verbose _log "PATHVAR ${!PATHVAR} does not exist; returning"
-            return 0
-        fi
+    if [[ ${EXISTS-} && ! -v PATHVAR ]]; then
+        _if_verbose _log "PATHVAR ${!PATHVAR} does not exist; returning"
+        return 0
+    fi
 
-        if [[ ${EXPORT-} ]]; then
-            declare -gx PATHVAR
-        fi
+    if [[ ${EXPORT-} ]]; then
+        declare -gx PATHVAR
+    fi
 
-        # if the file system is not case sensitive, make everything lowercase
-        if [[ ${PWD,,} -ef ${PWD^^} ]]; then
-            PATHVAR=${PATHVAR,,}
-            ENTRIES=("${ENTRIES[@],,}")
-            MARKER=${MARKER,,}
-        fi
+    # if the file system is not case sensitive, make everything lowercase
+    if [[ ${PWD,,} -ef ${PWD^^} ]]; then
+        PATHVAR=${PATHVAR,,}
+        ENTRIES=("${ENTRIES[@],,}")
+        MARKER=${MARKER,,}
+    fi
 
-        # In PATHVAR, `` represents an empty list, and `:` represents a list with a
-        # single null element. In PATHLIST and ADDITIONS, `:` represents an empty
-        # list, and `::` represents a list with a single null element. otherwise,
-        # PATHLIST == :PATHVAR:
+    # In PATHVAR, `` represents an empty list, and `:` represents a list with a
+    # single null element. In PATHLIST and ADDITIONS, `:` represents an empty
+    # list, and `::` represents a list with a single null element. otherwise,
+    # PATHLIST == :PATHVAR:
 
-        local PATHLIST ADDITIONS=:
-        wraplist PATHLIST "$PATHVAR"
+    local PATHLIST ADDITIONS=:
+    wraplist PATHLIST "$PATHVAR"
 
-        _if_debug inspect_var EXPORT CHECK WHERE MARKER POSITIONAL PATHVAR PATHLIST ENTRIES
+    _if_debug inspect_var EXPORT CHECK WHERE MARKER POSITIONAL PATHVAR PATHLIST ENTRIES
 
-        if [[ ${MATCHING-} ]]; then
-            local ENTRYGLOB
-            ENTRYGLOB=$(join '|' "${ENTRIES[@]}")
-            ENTRYGLOB="@($ENTRYGLOB)?(/)"
-            local -a PATHARRAY
-            IFS=: read -ra PATHARRAY <<< "$PATHVAR"
-            PATHLIST=:
-            local pathitem
-            for pathitem in "${PATHARRAY[@]}"; do
-                # shellcheck disable=2053  # the glob matching is intentional
-                if [[ $pathitem = $ENTRYGLOB ]]; then
-                    ADDITIONS+="$pathitem:"
-                else
-                    PATHLIST+="$pathitem:"
-                fi
-            done
-        else
-            local entry
-            for entry in "${ENTRIES[@]}"; do
-                # either attempt cygwin path translation, or noop
-                [[ $entry == *\\* ]] && entry=$(cygpath "$entry")
-
-                # entries with embedded colons are not allowed
-                [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
-
-                # if the list is not empty, check for our entry
-                if [[ $PATHLIST != : ]]; then
-                    # either the entry is `/`, or we should strip a trailing slash
-                    local match=$entry
-                    [[ $match == / ]] || match=${match%/}
-                    # either the entry is null, or we should match list values with trailing slashes
-                    local suffix=
-                    [[ -z $match ]] || suffix="?(/)"
-
-                    if [[ ${REPLACE-} || ${DELETE-} ]]; then
-                        # replace `:$entry:` with `:`
-                        PATHLIST=${PATHLIST//:"$match"$suffix:/:}
-                    else
-                        # skip this entry if it already exists in the list
-                        [[ ${PATHLIST} != *:"$match"$suffix:* ]] || continue
-                    fi
-                fi
-
-                if [[ ${DELETE-} ]]; then
-                    # no need to check entry or track additions
-                    continue
-                fi
-
-                # do any entry checking
-                if [[ $CHECK == nocheck ]]; then
-                    # explicitly not checking file existance
-                    true
-                elif [[ -z $entry || -e $entry ]]; then
-                    # null entry or file exists
-                    # strip a trailing slash (unless entry is `/`)
-                    [[ $entry == / ]] || entry=${entry%/}
-                elif [[ $CHECK == fail ]]; then
-                    throw "entry does not exist: $entry"
-                else
-                    continue
-                fi
-
-                # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
-                [[ $ADDITIONS != *:"$entry":* ]] || continue
-                ADDITIONS+="$entry:"
-            done
-        fi
-
-        if [[ ${DELETE-} ]]; then
-            unwraplist PATHVAR "$PATHLIST"
-        elif [[ $ADDITIONS == : ]]; then
-            _if_verbose _log "Nothing to add"
-        else
-            case $WHERE in
-                before) unwraplist PATHVAR "${ADDITIONS%:}${PATHLIST}" ;;
-                after) unwraplist PATHVAR "${PATHLIST%:}${ADDITIONS}" ;;
-                insert)
-                    # have to split PATHLIST to insert our additions
-
-                    local -a PATHARRAY FRONT BACK
-                    ADDITIONS=${ADDITIONS%:} && ADDITIONS=${ADDITIONS#:}
-                    PATHLIST=${PATHLIST%:} && PATHLIST=${PATHLIST#:}
-                    from_list PATHARRAY "$PATHLIST"
-
-                    # find the index in PATHARRAY of the first element that matches our marker
-                    local idx
-                    for ((idx = 0; idx < ${#PATHARRAY[@]}; idx++)); do
-                        [[ ${PATHARRAY[idx]} =~ $MARKER ]] && break || true
-                    done
-
-                    # split PATHARRAY before that index
-                    FRONT=("${PATHARRAY[@]::idx}")
-                    BACK=("${PATHARRAY[@]:idx}")
-
-                    # recombine our arrays, with our additions list between them
-                    to_list PATHVAR "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
-                    ;;
-                *) throw "invalid WHERE ($WHERE)" ;;
-            esac
-        fi
-
-        _if_debug inspect_var PATHLIST ADDITIONS FRONT BACK
-        _if_verbose _log "set $PATHVAR to ([${!PATHVAR//:/], [}])"
-        hash -r
-    } && alias pathmungex='withflags +vx -- \pathmungex '
-else
-    function pathmungex {
-        # like pathmunge, but better
-
-        _if_verbose _log "$* # called at $(called-at 1)"
-
-        local EXPORT EXISTS REPLACE DELETE HELP USAGE
-        local CHECK=silent
-        local WHERE=insert
-        local MARKER="^/usr/|^/c/WINDOWS/"
-        local -a POSITIONAL
-
-        fixargs
-        while (($#)); do
-            local arg=$1 && shift
-            case $arg in
-                -e | --export) EXPORT=1 ;;
-                -E | --exists) EXISTS=1 ;;
-                -b | --before) WHERE=before ;;
-                -a | --after) WHERE=after ;;
-                -f | --fail | --fatal) CHECK=fail ;;
-                -n | --no-check | --nocheck) CHECK=nocheck ;;
-                -r | --replace) REPLACE=1 ;;
-                -d | --delete) DELETE=1 ;;
-                -D | --delete-matching) DELETE=1 DELETE_MATCHING=1 ;;
-                -h | --help) HELP=1 ;;
-                -m | --marker)
-                    if [[ -v 1 && $1 != -* ]]; then
-                        MARKER=$1 && shift
-                    else
-                        _err "Argument required: \"$arg\""
-                        USAGE=1
-                    fi
-                    ;;
-                -*)
-                    _err "Unrecognized option: \"$arg\""
-                    USAGE=1
-                    ;;
-                *) POSITIONAL+=("$arg") ;;
-            esac
+    if [[ ${MATCHING-} ]]; then
+        local ENTRYGLOB
+        ENTRYGLOB=$(join '|' "${ENTRIES[@]}")
+        ENTRYGLOB="@($ENTRYGLOB)?(/)"
+        local -a PATHARRAY
+        IFS=: read -ra PATHARRAY <<< "$PATHVAR"
+        PATHLIST=:
+        local pathitem
+        for pathitem in "${PATHARRAY[@]}"; do
+            # shellcheck disable=2053  # the glob matching is intentional
+            if [[ $pathitem = $ENTRYGLOB ]]; then
+                ADDITIONS+="$pathitem:"
+            else
+                PATHLIST+="$pathitem:"
+            fi
         done
+    else
+        local entry
+        for entry in "${ENTRIES[@]}"; do
+            # either attempt cygwin path translation, or noop
+            [[ $entry == *\\* ]] && entry=$(cygpath "$entry")
 
-        local USAGE_TEXT="${FUNCNAME[0]} [OPTIONS] PATHVAR ENTRIES..."
+            # entries with embedded colons are not allowed
+            [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
 
-        if [[ ${HELP-} ]]; then
-            dedent <<< "
-                Add entries to a PATH-like list variable, for each entry that exists on disk
-                and is not already in the list. By default, entries are inserted in order into
-                PATHVAR before the first entry that begins with '/usr/'.
+            # if the list is not empty, check for our entry
+            if [[ $PATHLIST != : ]]; then
+                # either the entry is `/`, or we should strip a trailing slash
+                local match=$entry
+                [[ $match == / ]] || match=${match%/}
+                # either the entry is null, or we should match list values with trailing slashes
+                local suffix=
+                [[ -z $match ]] || suffix="?(/)"
 
-                Usage: $USAGE_TEXT
-
-                Parameters:
-                PATHVAR     The name of a PATH-like list variable
-                ENTRIES     One or more entries to add to PATHVAR
-
-                Options:
-                -e | --export       Export PATHVAR
-                -E | --exists       Only update PATHVAR if it already exists
-                -a | --after        Append entries to the end of PATHVAR
-                -b | --before       Prepend entries to the front of PATHVAR
-                -f | --fail         Fail with an error and leave PATHVAR unmodified if any
-                                    ENTRIES do not exist
-                -r | --replace      Remove and re-add existing matching entries
-                -d | --delete       Remove matching entries
-                -D | --delete-matching
-                                    Remove matching entries, respecting wildcards
-                -n | --no-check     Do not check whether entries exist on disk
-                -h | --help         Print this message and halt
-
-                Optional Parameters:
-                -m | --marker MARKER    A pattern to use to find the entry in PATHVAR where
-                                        ENTRIES should be inserted"
-            return 0
-        fi
-
-        if ((${#POSITIONAL[@]} == 0)); then
-            _err "Not enough arguments"
-            USAGE=1
-        fi
-
-        if ((${#POSITIONAL[@]} == 1)); then
-            POSITIONAL=(PATH "${POSITIONAL[@]}")
-        fi
-
-        if [[ ${USAGE-} ]]; then
-            _err "Usage: $USAGE_TEXT"
-            return 2
-        fi
-
-        local PATHVAR="${POSITIONAL[0]}"
-        local -a ENTRIES=("${POSITIONAL[@]:1}")
-
-        valid_name "${PATHVAR-}" || throw "Not a valid name: \"${PATHVAR-}\""
-
-        if [[ ${EXISTS-} && ! -v $PATHVAR ]]; then
-            _if_verbose _log "PATHVAR $PATHVAR does not exist; returning"
-            return 0
-        fi
-
-        if [[ ${EXPORT-} ]]; then
-            declare -gx "$PATHVAR"
-        fi
-
-        # In PATHVAR, `` represents an empty list, and `:` represents a list with a
-        # single null element. In PATHLIST and ADDITIONS, `:` represents an empty
-        # list, and `::` represents a list with a single null element. otherwise,
-        # PATHLIST == :PATHVAR:
-
-        local PATHLIST ADDITIONS=:
-        wraplist PATHLIST "${!PATHVAR-}"
-
-        _if_debug inspect_var EXPORT CHECK WHERE MARKER POSITIONAL PATHVAR "$PATHVAR" PATHLIST ENTRIES
-
-        if [[ ${DELETE_MATCHING-} ]]; then
-            local ENTRYGLOB
-            ENTRYGLOB=$(join '|' "${ENTRIES[@]}")
-            ENTRYGLOB="@($ENTRYGLOB)?(/)"
-            local -a PATHARRAY
-            IFS=: read -ra PATHARRAY <<< "${!PATHVAR-}"
-            PATHLIST=:
-            local pathitem
-            for pathitem in "${PATHARRAY[@]}"; do
-                # shellcheck disable=2053  # the glob matching is intentional
-                if [[ $pathitem != $ENTRYGLOB ]]; then
-                    PATHLIST+="$pathitem:"
-                fi
-            done
-        else
-            local entry match suffix
-            for entry in "${ENTRIES[@]}"; do
-                # either attempt cygwin path translation, or noop
-                [[ $entry == *\\* ]] && entry=$(cygpath "$entry")
-
-                # entries with embedded colons are not allowed
-                [[ $entry != *:* ]] || throw "invalid entry: \"$entry\""
-
-                # if the list is not empty, check for our entry
-                if [[ $PATHLIST != : ]]; then
-                    # either the entry is `/`, or we should strip a trailing slash
-                    match=$entry
-                    [[ $match == / ]] || match=${match%/}
-                    # either the entry is null, or we should match list values with trailing slashes
-                    suffix=
-                    [[ -z $match ]] || suffix="?(/)"
-
-                    if [[ ${REPLACE-} || ${DELETE-} ]]; then
-                        # replace `:$entry:` with `:`
-                        PATHLIST=${PATHLIST//:"$match"$suffix:/:}
-                    else
-                        # skip this entry if it already exists in the list
-                        [[ ${PATHLIST} != *:"$match"$suffix:* ]] || continue
-                    fi
-                fi
-
-                if [[ ${DELETE-} ]]; then
-                    # no need to check entry or track additions
-                    continue
-                fi
-
-                # do any entry checking
-                if [[ $CHECK == nocheck ]]; then
-                    # explicitly not checking file existance
-                    true
-                elif [[ -z $entry || -e $entry ]]; then
-                    # null entry or file exists
-                    # strip a trailing slash (unless entry is `/`)
-                    [[ $entry == / ]] || entry=${entry%/}
-                elif [[ $CHECK == fail ]]; then
-                    throw "entry does not exist: $entry"
+                if [[ ${REPLACE-} || ${DELETE-} ]]; then
+                    # replace `:$entry:` with `:`
+                    PATHLIST=${PATHLIST//:"$match"$suffix:/:}
                 else
-                    continue
+                    # skip this entry if it already exists in the list
+                    [[ ${PATHLIST} != *:"$match"$suffix:* ]] || continue
                 fi
+            fi
 
-                # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
-                [[ $ADDITIONS != *:"$entry":* ]] || continue
-                ADDITIONS+="$entry:"
-            done
-        fi
+            if [[ ${DELETE-} ]]; then
+                # no need to check entry or track additions
+                continue
+            fi
 
-        if [[ ${DELETE-} ]]; then
-            unwraplist "$PATHVAR" "$PATHLIST"
-        elif [[ $ADDITIONS == : ]]; then
-            _if_verbose _log "Nothing to add"
-        else
-            case $WHERE in
-                before) unwraplist "$PATHVAR" "${ADDITIONS%:}${PATHLIST}" ;;
-                after) unwraplist "$PATHVAR" "${PATHLIST%:}${ADDITIONS}" ;;
-                insert)
-                    # have to split PATHLIST to insert our additions
+            # do any entry checking
+            if [[ $CHECK == nocheck ]]; then
+                # explicitly not checking file existance
+                true
+            elif [[ -z $entry || -e $entry ]]; then
+                # null entry or file exists
+                # strip a trailing slash (unless entry is `/`)
+                [[ $entry == / ]] || entry=${entry%/}
+            elif [[ $CHECK == fail ]]; then
+                throw "entry does not exist: $entry"
+            else
+                continue
+            fi
 
-                    local -a PATHARRAY FRONT BACK
-                    ADDITIONS=${ADDITIONS%:} && ADDITIONS=${ADDITIONS#:}
-                    PATHLIST=${PATHLIST%:} && PATHLIST=${PATHLIST#:}
-                    from_list PATHARRAY "$PATHLIST"
+            # also skip if entry is already in ADDITIONS (which we've already ensured won't have trailing slashes)
+            [[ $ADDITIONS != *:"$entry":* ]] || continue
+            ADDITIONS+="$entry:"
+        done
+    fi
 
-                    # find the index in PATHARRAY of the first element that matches our marker
-                    local idx
-                    for ((idx = 0; idx < ${#PATHARRAY[@]}; idx++)); do
-                        [[ ${PATHARRAY[idx]} =~ $MARKER ]] && break || true
-                    done
+    if [[ ${DELETE-} ]]; then
+        unwraplist PATHVAR "$PATHLIST"
+    elif [[ $ADDITIONS == : ]]; then
+        _if_verbose _log "Nothing to add"
+    else
+        case $WHERE in
+            before) unwraplist PATHVAR "${ADDITIONS%:}${PATHLIST}" ;;
+            after) unwraplist PATHVAR "${PATHLIST%:}${ADDITIONS}" ;;
+            insert)
+                # have to split PATHLIST to insert our additions
 
-                    # split PATHARRAY before that index
-                    FRONT=("${PATHARRAY[@]::idx}")
-                    BACK=("${PATHARRAY[@]:idx}")
+                local -a PATHARRAY FRONT BACK
+                ADDITIONS=${ADDITIONS%:} && ADDITIONS=${ADDITIONS#:}
+                PATHLIST=${PATHLIST%:} && PATHLIST=${PATHLIST#:}
+                from_list PATHARRAY "$PATHLIST"
 
-                    # recombine our arrays, with our additions list between them
-                    to_list "$PATHVAR" "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
-                    ;;
-                *) throw "invalid WHERE ($WHERE)" ;;
-            esac
-        fi
+                # find the index in PATHARRAY of the first element that matches our marker
+                local idx
+                for ((idx = 0; idx < ${#PATHARRAY[@]}; idx++)); do
+                    [[ ${PATHARRAY[idx]} =~ $MARKER ]] && break || true
+                done
 
-        _if_debug inspect_var PATHLIST ADDITIONS FRONT BACK
-        _if_verbose _log "set $PATHVAR to ([${!PATHVAR//:/], [}])"
-        hash -r
-    } && alias pathmungex='withflags +vx -- \pathmungex '
-fi
+                # split PATHARRAY before that index
+                FRONT=("${PATHARRAY[@]::idx}")
+                BACK=("${PATHARRAY[@]:idx}")
 
-if ((BASH_VERSINFO[0] >= 5)); then
-    function cleanpath {
-        if [[ $# -gt 1 || ${1-} == -* ]]; then
-            echo "Remove repeated values from PATH, or another PATH-like variable"
-            echo "Usage: ${FUNCNAME[0]} [PATHVAR]"
-            return 1
-        fi
+                # recombine our arrays, with our additions list between them
+                to_list PATHVAR "${FRONT[@]}" "$ADDITIONS" "${BACK[@]}"
+                ;;
+            *) throw "invalid WHERE ($WHERE)" ;;
+        esac
+    fi
 
-        local -n PATHVAR=${1:-PATH}
+    _if_debug inspect_var PATHLIST ADDITIONS FRONT BACK
+    _if_verbose _log "set $PATHVAR to ([${!PATHVAR//:/], [}])"
+    hash -r
+} && alias pathmungex='withflags +vx -- \pathmungex '
 
-        local -a ENTRIES
-        from_list ENTRIES PATHVAR || return
+function cleanpath {
+    if [[ $# -gt 1 || ${1-} == -* ]]; then
+        echo "Remove repeated values from PATH, or another PATH-like variable"
+        echo "Usage: ${FUNCNAME[0]} [PATHVAR]"
+        return 1
+    fi
 
-        local CLEAN
-        pathmungex CLEAN "${ENTRIES[@]}" || return
-        PATHVAR=$CLEAN
-    } && complete -v cleanpath
-else
-    function cleanpath {
-        if [[ $# -gt 1 || ${1-} == -* ]]; then
-            echo "Remove repeated values from PATH, or another PATH-like variable"
-            echo "Usage: ${FUNCNAME[0]} [PATHVAR]"
-            return 1
-        fi
+    local -n PATHVAR=${1:-PATH}
 
-        local PATHVAR=${1:-PATH}
-        declared "$PATHVAR" || return
+    local -a ENTRIES
+    from_list ENTRIES PATHVAR || return
 
-        local -a ENTRIES
-        from_list ENTRIES "${!PATHVAR}" || return
-
-        local CLEAN
-        pathmungex CLEAN "${ENTRIES[@]}" || return
-        eval "$PATHVAR"='$CLEAN'
-    } && complete -v cleanpath
-fi
+    local CLEAN
+    pathmungex CLEAN "${ENTRIES[@]}" || return
+    PATHVAR=$CLEAN
+} && complete -v cleanpath
 
 function flash_message {
     # briefly print a message to the screen

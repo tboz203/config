@@ -15,6 +15,8 @@ pathmungex --replace PATH \
     ~/.tfenv/bin \
     ~/.local/share/nvim/mason/bin \
     ~/.local/share/apache-maven-3.9.15/bin \
+    ~/.local/share/maven-mvnd-1.0.6-linux-amd64/bin \
+    ~/.local/share/groovy-5.0.5/bin \
     /usr/lib/cargo/bin \
     /usr/local/bin \
     /usr/bin

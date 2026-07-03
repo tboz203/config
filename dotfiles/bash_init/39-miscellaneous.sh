@@ -43,8 +43,10 @@ setpath -e RIPGREP_CONFIG_PATH ~/.ripgreprc
 setpath -e JAVA_HOME /usr/lib/jvm/java-21-amazon-corretto
 # setpath -e JAVA_HOME /usr/lib/jvm/java-25-amazon-corretto
 
-export AWS_DEFAULT_PROFILE=ccc-lab
-export AWS_DEFAULT_REGION=us-east-1
+# I'm so tired of maven/java/whoever not respecting AWS_DEFAULT_PROFILE
+export AWS_PROFILE=ccc-lab
+# export AWS_DEFAULT_PROFILE=ccc-lab
+# export AWS_DEFAULT_REGION=us-east-1
 
 # havebin tofu && TG_TF_PATH=$(type -P tofu)
 export TF_LOG=info

@@ -22,7 +22,8 @@
 	file = ~/.git-mailmap
 [merge]
 	tool = nvimdiff
-	conflictstyle = diff3
+	; conflictstyle = diff3
+	conflictstyle = zdiff3
 	ff = false
 [mergetool]
 	; tool itself goes in `merge`
@@ -60,8 +61,10 @@
 	autoStash = true
 	autoSquash = true
 	rebaseMerges = true
-	updateRefs = true
 	missingCommitsCheck = error
+	# keeping this off in order to isolate changes
+	# use the cli flag when its safe to do so
+	updateRefs = false
 [rerere]
 	enabled = true
 [revert]
@@ -79,7 +82,7 @@
 	contrast = %C(black blue)COMMIT %h %aN %ad%d %s%n%B
 	; no colors here b/c `column` can't count characters correctly
 	tableable = & %h & %aN & %ad & %<(80,trunc)%s & %d
-	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %C(dim blue)[%gs] %C(auto)%s
+	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %C(blue)[%gs] %C(auto)%s
 	report = %C(auto)commit %h%d%nAuthor: %aN <%aE>%nDate: %ad%n%n%w(80,4,4)%B%n
 [alias]
 	s = status
