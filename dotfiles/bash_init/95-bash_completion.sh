@@ -38,17 +38,17 @@
 
 shopt -q progcomp && [[ ${_BASHLIB_ROOT-} ]] || return 0
 
-if [[ ! ${BASH_COMPLETION_ROOT-} ]]; then
-    if [[ -d /usr/local/share/bash-completion ]]; then
-        BASH_COMPLETION_ROOT=/usr/local/share/bash-completion
-    else
-        BASH_COMPLETION_ROOT=/usr/share/bash-completion
-    fi
-fi
+# if [[ ! ${BASH_COMPLETION_ROOT-} ]]; then
+#     if [[ -d /usr/local/share/bash-completion ]]; then
+#         BASH_COMPLETION_ROOT=/usr/local/share/bash-completion
+#     else
+#         BASH_COMPLETION_ROOT=/usr/share/bash-completion
+#     fi
+# fi
 
 setpath BASH_COMPLETION_USER_DIR ~/.bash_completion.d
 
-sourcepath "$BASH_COMPLETION_ROOT/bash_completion"
+# sourcepath "$BASH_COMPLETION_ROOT/bash_completion"
 
 # ! type -P aws aws_completer &> /dev/null || complete -C aws_completer aws
 #

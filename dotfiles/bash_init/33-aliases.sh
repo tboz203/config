@@ -136,7 +136,7 @@ alias files='fd -t f'
 # attempting to sort by listening address; not 100% effective
 # alias ports='sudo ss -tlnp | ( sed -u 1q ; sort -k 4)'
 
-alias super='sudo HOME=$HOME bash --login -i'
+alias super='sudo HOME=$HOME $BASH --login -i'
 
 # meta-commands
 # --------------------

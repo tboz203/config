@@ -5,10 +5,11 @@
 
 # eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-setpath -er HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew" || return 0
+setpath -er HOMEBREW_PREFIX /home/linuxbrew/.linuxbrew || return 0
 
-export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
-export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
+# export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
+# export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
+export HOMEBREW_BUNDLE_FILE=$HOME/.homebrew/Brewfile
 
 pathmungex -r PATH \
     "$HOMEBREW_PREFIX/bin" \
