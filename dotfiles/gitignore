@@ -1,5 +1,9 @@
 # global gitignore file
 
+.*
+!.gitignore
+!.gitlab-ci.yml
+
 /untracked/
 /_untracked/
 

@@ -2,4 +2,4 @@
 
 set -o pipefail
 
-curl --fail-with-body -sD /dev/stderr "$@" | jq -Rsr '. as $o | try fromjson catch ($o + "\n" | stderr | empty)'
+curl --fail-with-body -sSD /dev/stderr "$@" | jq -Rsr '. as $o | try fromjson catch ($o + "\n" | stderr | empty)'

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo >&2 "[X] use 'openssl x509 -multi -noout -alias'"
+exit 1
+
 # search STDIN for 'END' lines & add a null character
 sed 's/^-----END .*$/\0\x00/' |
     # read certs delimited by null into '$item'

@@ -24,6 +24,7 @@
     - e.g. puppet?
 
 4. a cron job that runs at boot?
+    - install `cronie` to get `@reboot` in crontab
 
 5. will I ever actually fix bash completion?
     - see `/home/linuxbrew/.linuxbrew/etc/bash_completion.d`

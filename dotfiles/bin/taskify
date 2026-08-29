@@ -5,7 +5,7 @@
 source ~/.bash_profile
 
 die() {
-    echo "$SELF: ${*:-Fatal Error}" | tee >&2 -a "${LOG:-/dev/null}"
+    echo "$SELF: ${*:-Fatal Error}" | tee >&2 -a "${LOGFILE:-/dev/null}"
     exit 1
 }
 
@@ -56,14 +56,15 @@ Options:
 -q | --quiet    Silence the command, unless it exits with an error (to prevent
                 useless cron emails from chatty programs). Can be given more
                 than once to also silence errors
--l | --log LOG  Append any output to LOG as well (includes timestamp & exit
-                code; path LOG is *not* relative to --directory argument)
+-l | --log LOGFILE
+                Append any output to LOGFILE as well (includes timestamp & exit
+                code; path LOGFILE is *not* relative to --directory argument)
 -s | --random-sleep SLEEP
                 Sleep for a random duration up to SLEEP seconds before
                 executing the command (to prevent load spikes at midnight,
                 etc).
 -S | --shorter-than DURATION
-                If the command executes for fewer seconds than DURATION, 
+                If the command executes for fewer seconds than DURATION,
 -d | --directory DIRECTORY
                 change to DIRECTORY before executing command
 EOF
@@ -119,6 +120,7 @@ if [[ ($VOLUME -gt 2 && ! ${empty-}) || ($VOLUME -gt 1 && $exit_code -ne 0) ]]; 
 fi
 
 if [[ ${LOGFILE-} ]]; then
+    mkdir -p "$(dirname "$LOGFILE")"
     {
         echo "[.] date: $(date +%c)"
         echo "[$] $(quoted "${COMMAND[@]}" | tr '\n' ' ')"

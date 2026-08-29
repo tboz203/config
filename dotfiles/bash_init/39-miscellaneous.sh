@@ -12,7 +12,8 @@ export DOCKER_BUILDKIT=1
 export COMPOSE_BAKE=1
 export NODE_NO_WARNINGS=1
 
-export LESS="-SRi"
+# export LESS="-SRi"
+export LESS="-SRFi"
 (less --help |& grep -q "mouse") && LESS+=" --mouse --wheel-lines=3"
 export LESSCHARSET=utf-8
 
@@ -37,3 +38,5 @@ pathmungex -e PYTHONPATH ~/.pymodules
 pathmungex -er PKG_CONFIG_PATH {~/.local,/usr/local,/usr}/{lib,lib64,share}/pkgconfig
 
 setpath -e RIPGREP_CONFIG_PATH ~/.ripgreprc
+
+havebin wslview && export BROWSER=wslview

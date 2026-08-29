@@ -1,0 +1,38 @@
+#!/bin/bash
+
+URL=http://example.com
+CURL_OPTS=()
+
+while (($# > 0)); do
+    arg=$1 && shift
+    case $arg in
+        --)
+            CURL_OPTS=("$arg" "$@")
+            break
+            ;;
+        -*)
+            HELP=1
+            break
+            ;;
+        *)
+            URL=$1
+            ;;
+    esac
+done
+
+if [[ ${HELP-} ]]; then
+    MYNAME=$(basename "$0")
+    echo "$MYNAME: quickly check network speed using cURL."
+    echo "Usage: $MYNAME [URL] [-- CURL_OPTS ...]"
+    exit 2
+fi
+
+curl -s -L -o /dev/null "${CURL_OPTS[@]}" "$URL" -w "\
+Fetched URL: %{url}
+DNS Lookup: %{time_namelookup}s
+TCP Connect: %{time_connect}s
+TLS Handshake: %{time_appconnect}s
+Pre-transfer: %{time_pretransfer}s
+Start Transfer (TTFB): %{time_starttransfer}s
+Total Time: %{time_total}s
+"
