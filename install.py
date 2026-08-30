@@ -61,10 +61,10 @@ class Installer:
         if symbolic_links is None:
             symbolic_links = os.name != "nt"
 
-        self.config_root = Path(config_root)
-        self.home_dir = Path(home_dir)
-        self.config_dir = Path(config_dir)
-        self.ssh_dir = Path(ssh_dir)
+        self.config_root = Path(config_root).expanduser()
+        self.home_dir = Path(home_dir).expanduser()
+        self.config_dir = Path(config_dir).expanduser()
+        self.ssh_dir = Path(ssh_dir).expanduser()
 
         self.dry_run = dry_run
         self.symbolic_links = symbolic_links
