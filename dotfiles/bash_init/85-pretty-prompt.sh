@@ -134,4 +134,4 @@ function pretty-prompt {
 }
 
 # [[ $PROMPT_COMMAND == *__prompt_ll_on_cd* ]] || PROMPT_COMMAND+=$'\n__prompt_ll_on_cd'
-pretty-prompt
+[[ $PROMPT_COMMAND == *powerline* ]] || pretty-prompt
