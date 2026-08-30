@@ -35,10 +35,10 @@ class Installer:
 
     def __init__(
         self,
-        config_root: Path = Path(ROOT),
-        home_dir: Path = Path.home(),
-        config_dir: Path = Path.home() / ".config",
-        ssh_dir: Path = Path.home() / ".ssh",
+        config_root: str | Path = ROOT,
+        home_dir: str | Path = "~",
+        config_dir: str | Path = "~/.config",
+        ssh_dir: str | Path = "~/.ssh",
         dry_run: bool = False,
         symbolic_links: bool | None = None,
         relative_links: bool | None = None,
@@ -47,24 +47,24 @@ class Installer:
         """
         Create a new Installer.
 
-        `config_root` should be the root of a "config" directory (such as this git repository)
-        `home_dir` should be your home directory
-        `config_dir` should be your config directory (e.g. `~/.config`)
-        `ssh_dir` should be your ssh directory (e.g `~/.ssh`)
+        `config_root` should be the root of a "config" directory (such as this git repository).
+        `home_dir` should be your home directory.
+        `config_dir` should be your config directory (e.g. `~/.config`).
+        `ssh_dir` should be your ssh directory (e.g `~/.ssh`).
 
-        `dry_run` determines whether actions are performed, or just displayed
-        `symbolic_links` determines whether to use hard links or symbolic links (default is platform specific
-        `relative_links` determines whether or not created symbolic links are relative or absolute
-        `preserve` determines whether existing files are removed or preserved (renamed)
+        `dry_run` determines whether actions are performed, or just displayed.
+        `symbolic_links` determines whether to use hard links or symbolic links (default is platform specific).
+        `relative_links` determines whether or not created symbolic links are relative or absolute.
+        `preserve` determines whether existing files are removed or preserved (renamed).
         """
 
         if symbolic_links is None:
             symbolic_links = os.name != "nt"
 
-        self.config_root = config_root
-        self.home_dir = home_dir
-        self.config_dir = config_dir
-        self.ssh_dir = ssh_dir
+        self.config_root = Path(config_root)
+        self.home_dir = Path(home_dir)
+        self.config_dir = Path(config_dir)
+        self.ssh_dir = Path(ssh_dir)
 
         self.dry_run = dry_run
         self.symbolic_links = symbolic_links

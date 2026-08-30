@@ -271,6 +271,17 @@ function with_files {
     "${command[@]}" "${files[@]}"
 } && complete -c with_files
 
+function with_env {
+    # execute a command after sourcing a `.env` file
+    local -a envfiles
+    get_array envfiles searchparents -a .env || true
+    local path
+    for path in "${envfiles[@]}"; do
+        source "$path"
+    done
+    "$@"
+} && complete -c with_env
+
 function pathmungex {
     # like pathmunge, but better
 

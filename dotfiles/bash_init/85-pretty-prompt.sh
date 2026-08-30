@@ -2,6 +2,8 @@
 # make a pretty PS1
 # shellcheck disable=2016,2034
 
+[[ ${_SHELL_INTERACTIVE-} ]] || return 0
+
 function simple-prompt {
     unset PROMPT_COMMAND
     PS1='\[\e[1;33m\]\u \w \$ \[\e[0m\]'
@@ -130,8 +132,6 @@ function pretty-prompt {
     # combine & assign to prompt
     printf -v PS1 "%s" "${parts[@]}"
 }
-
-[[ ${_SHELL_INTERACTIVE-} ]] || return 0
 
 # [[ $PROMPT_COMMAND == *__prompt_ll_on_cd* ]] || PROMPT_COMMAND+=$'\n__prompt_ll_on_cd'
 pretty-prompt

@@ -3,7 +3,7 @@
 cleanpath
 
 pathmungex PATH --replace --before \
-    ~/.bin
+    ~/.bin ~/.local/bin
 
 if [[ ${_SHELL_INTERACTIVE-} ]]; then
     if [[ ${_SHELL_LOGIN-} && -f /etc/motd ]]; then
@@ -11,9 +11,3 @@ if [[ ${_SHELL_INTERACTIVE-} ]]; then
     fi
     shopt -s failglob
 fi
-
-# -----
-# commands requiring other things to already be on the path
-
-havebin mvnd && alias mvn='mvnd '
-havebin wslview && alias open='wslview'
