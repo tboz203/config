@@ -36,7 +36,9 @@
 #   BASH_COMPLETION_USER_FILE is sourced by /usr/share/bash-completion/bash_completion
 #     unless /usr/share/bash-completion/bash_completion is being sourced by BASH_COMPLETION_USER_FILE
 
-shopt -q progcomp && [[ ${_BASHLIB_ROOT-} ]] || return 0
+# halt here unless 1) programmable completion is enabled, 2) bashlib has
+# started loading, and 3) we're in interactive mode
+shopt -q progcomp && [[ ${_BASHLIB_ROOT-} && ${_SHELL_INTERACTIVE-} ]] || return 0
 
 if [[ ! ${BASH_COMPLETION_ROOT-} ]]; then
     if [[ -d /usr/local/share/bash-completion ]]; then

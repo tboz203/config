@@ -1,35 +1,20 @@
-; vim: ft=gitconfig sw=8 ts=8 noet
+; vim: filetype=gitconfig tabstop=4 shiftwidth=0 softtabstop=-1 noexpandtab
 [user]
 	name = Bozeman, Thomas (CGI Federal)
 	email = thomas.bozeman@uspto.gov
-[credential]
-	helper = store
-[color]
-	ui = true
+
 [core]
 	editor = nvim
-	autocrlf = false
 	excludesfile = ~/.gitignore
-	pager = delta
-	; pager = less -SRFi
 	untrackedCache = true
-[pager]
-	config = less -SRFi
-[init]
-	; templatedir = ~/.git_template
-	defaultBranch = main
-[mailmap]
-	file = ~/.git-mailmap
-[merge]
-	tool = nvimdiff
-	; conflictstyle = diff3
-	conflictstyle = zdiff3
-	ff = false
-[mergetool]
-	; tool itself goes in `merge`
-	prompt = false
-	keepBackup = false
-	hideResolved = true
+
+[branch]
+	autoSetupMerge = simple
+[checkout]
+	defaultRemote = origin
+[column]
+	; ui = auto column dense
+	tag = auto column dense
 [diff]
 	tool = nvimdiff
 	algorithm = histogram
@@ -39,19 +24,29 @@
 	; tool itself goes in `diff`
 	prompt = false
 	trustExitCode = true
-[advice]
-	detachedHead = false
-[checkout]
-	defaultRemote = origin
-[column]
-	; ui = auto column dense
-	tag = auto column dense
 [fetch]
 	recursesubmodules = on-demand
 	prune = true
+[init]
+	; templatedir = ~/.git_template
+	defaultBranch = main
+[interactive]
+	diffFilter = delta --color-only
 [log]
 	date = relative
 	initialDecorationSet = all
+[mailmap]
+	file = ~/.git-mailmap
+[merge]
+	tool = nvimdiff
+	; conflictstyle = diff3
+	; conflictstyle = zdiff3
+	ff = false
+[mergetool]
+	; tool itself goes in `merge`
+	prompt = false
+	keepBackup = false
+	hideResolved = true
 [pull]
 	ff = only
 [push]
@@ -71,82 +66,72 @@
 	reference = true
 [tag]
 	sort = version:refname
+
+[core]
+	pager = add-this-command-to-the-gitconfig-pager-list
+[pager]
+	branch = less
+	config = less
+	diff = delta
+	log = less
+	shortlog = less
+	show = delta
+
 [pretty]
 	myline = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %s
 	myshort = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s
-	long = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%B
+	long = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s%n%n%-b
 	; long = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s%n%n%w(0,4,4)%b
 	loud = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %C(black brightyellow)%s%C(reset)
 	myshort = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s
 	committer = %C(auto)%h %C(cyan)%aN %C(green)%ad %C(reset)(%C(blue)%cN %C(red)%cd%C(reset))%C(auto)%d %s
-	contrast = %C(black blue)COMMIT %h %aN %ad%d %s%n%B
+	contrast = %C(black blue)commit %h %aN %ad%d %s%n%B
 	; no colors here b/c `column` can't count characters correctly
 	tableable = & %h & %aN & %ad & %<(80,trunc)%s & %d
 	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %C(blue)[%gs] %C(auto)%s
 	report = %C(auto)commit %h%d%nAuthor: %aN <%aE>%nDate: %ad%n%n%w(80,4,4)%B%n
+	delta = %C(auto)commit %h %C(cyan)%aN %C(green)%ad%C(auto)%d %s
+
 [alias]
 	s = status
 	si = status --ignored
 	d = diff --stat
 	ds = diff --staged
 	l = log --graph --date-order --date=relative --pretty=myline
-	;; "almost all"
 	la = l --branches --tags --remotes=origin HEAD
-	;; "really all"
 	laa = l --all
 	ll = l --date=human --format=long
 	lla = ll --branches --remotes=origin
 	llaa = ll --all
+	lr = l --remotes=origin
 	lg = log --walk-reflogs --format=reflog
 	lgd = lg --date=relative
 	ls = la --simplify-by-decoration
 	logpath = l --boundary --ancestry-path
 	lp = logpath
-	ld = log --pretty=contrast --no-graph --reverse --stat
+	ld = log --pretty=delta --no-graph --reverse --stat
 	logdiff = ld --patch
-	; logwatch = "!while true; do clear ; git la --color | cut -c -$(tput cols) | head -n $[ $(tput lines) - 1]; sleep 5; done"
 	lw = watch l
 	lwa = watch la
 	logwatch = lwa
-	logtab = !git l --pretty=tableable | column -t -s '&'
-	; refs = for-each-ref --format='%(refname:short)'
-	; longrefs = for-each-ref --format='%(refname)'
 	rs = for-each-ref --format='%(refname:short)'
 	rsf = for-each-ref --format='%(refname)'
+	; clean up local repository metadata
 	scrub = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
-	purge = !git clean -ffqdx && git reset --hard
-	; lprune = !git checkout develop && git branch --merged develop | grep -v '^. develop$' | xargs git branch -d
-	; pruneable !git for-each-ref --format="%(refname:short) %(upstream)" refs/heads | grep -E " (.+)$" | while read here there; do [[ -z $(git for-each-ref $there) ]] && echo $here; done
-	pruneable = !git branch --format='%(refname:short)%%%(upstream:track)' | grep -F '[gone]' | cut -d% -f1
-	lprune = !git pruneable | xargs -r git branch -D
-	unwatch = update-index --assume-unchanged
-	rewatch = update-index --no-assume-unchanged
-	; ctags = !.git/hooks/ctags
-	;; this is a script now
-	; fixlast = git commit --amend --no-edit
-	report = log --first-parent --format=report --abbrev=8 --date='format-local:%c'
-	checkpoint = !git commit -m \"checkpoint `date +%Y-%m-%d`\"
+	; clean up local workspace
+	purge = !git reset --hard && git clean -ffqdx 
+	; create a "checkpoint" commit
+	checkpoint = !git commit -am \"checkpoint `date +%Y-%m-%d`\"
+
 ; [color "diff"]
 ; 	meta = "bold #000000 brightblue"
 ; 	frag = "bold #000000 yellow"
-[interactive]
-	; diffFilter = delta --features=interactive
-	; diffFilter = delta --color-only
 [delta]
-	features = decorations
 	dark = true
-	syntax-theme = Coldark-Dark
-	true-color = always
-; [delta "interactive"]
-; 	color-only = true
-; 	keep-plus-minus-markers = false
-[delta "decorations"]
-	diff-so-fancy = true
-	; side-by-side = true
-	; commit-decoration-style = blue ol
-	; commit-style = raw
-	; file-style = omit
-	; hunk-header-decoration-style = blue box
-	; hunk-header-file-style = red
-	; hunk-header-line-number-style = "#067a00"
-	; hunk-header-style = file line-number syntax
+	syntax-theme = Catppuccin Macchiato
+	line-numbers = true
+	commit-decoration-style = white blue ol
+	hunk-header-style = file line-number syntax
+
+[include]
+	path = ~/.gitconfig.site

@@ -54,7 +54,7 @@ function nvz {
 
 function nvgd {
     local -a files
-    get_array files git diff --name-only --relative "$@" || return
+    get_array files git diff --name-only --relative --diff-filter=AMd "$@" || return
     nv "${files[@]}"
 }
 

@@ -14,10 +14,17 @@
         }
       },
       {
+        "function": "powerline.segments.common.net.hostname",
+        "priority": 10,
+        "args": {
+          "only_if_ssh": true
+        }
+      },
+      {
         "function": "powerline.segments.common.env.user",
         "priority": 10,
         "args": {
-          "hide_user": "th026106"
+          "hide_user": "tbozeman"
         }
       },
       {
