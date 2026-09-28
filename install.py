@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Install configuration files.
-"""
+"""Install configuration files."""
 
 from __future__ import annotations
 
@@ -10,11 +8,12 @@ import logging
 import os
 import shutil
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 try:
-    from _winapi import CreateJunction  # type: ignore
+    from _winapi import CreateJunction  # type: ignore[reportAttributeAccessIssue]
 except ImportError:
 
     def CreateJunction(*args, **kwargs):
@@ -22,7 +21,8 @@ except ImportError:
         raise NotImplementedError("CreateJunction not available")
 
 
-def is_junction(path: Path | str) -> bool:
+def is_junction(path: str | Path) -> bool:
+    """Determine whether a path is a Windows Directory Junction."""
     if os.path.islink(path) or not os.path.isdir(path):
         # junctions return `False` for `islink` and `True` for `isdir`
         return False
@@ -38,50 +38,40 @@ ROOT = Path(__file__).absolute().parent
 DESCRIPTION = __doc__
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+UNSET: Any = object()
 
 
+@dataclass
 class Installer:
     """
     A class to manage installing my config.
     """
 
-    def __init__(
-        self,
-        config_root: Path = Path(ROOT),
-        home_dir: Path = Path.home(),
-        config_dir: Path = Path.home() / ".config",
-        ssh_dir: Path = Path.home() / ".ssh",
-        dry_run: bool = False,
-        symbolic_links: bool | None = None,
-        relative_links: bool | None = None,
-        on_conflict: Literal["skip", "rename", "overwrite"] = "skip",
-    ):
-        """
-        Create a new Installer.
+    source: Path = ROOT
+    dest: Path = field(default_factory=Path.home)
+    dry_run: bool = False
+    os_name: Literal["posix", "nt"] = UNSET
+    symbolic_links: bool = UNSET
+    relative_links: bool = UNSET
+    on_conflict: Literal["skip", "rename", "overwrite"] = "skip"
 
-        `config_root` should be the root of a "config" directory (such as this git repository)
-        `home_dir` should be your home directory
-        `config_dir` should be your config directory (e.g. `~/.config`)
-        `ssh_dir` should be your ssh directory (e.g `~/.ssh`)
+    def __post_init__(self):
+        if self.os_name is UNSET:
+            if os.name == "posix":
+                self.os_name = "posix"
+            elif os.name == "nt":
+                self.os_name = "nt"
+            else:
+                raise RuntimeError("Unrecognized os.name", os.name)
 
-        `dry_run` determines whether actions are performed, or just displayed
-        `symbolic_links` determines whether to use hard links or symbolic links (default is platform specific
-        `relative_links` determines whether or not created symbolic links are relative or absolute
-        `preserve` determines whether existing files are removed or preserved (renamed)
-        """
+        if self.symbolic_links is UNSET:
+            self.symbolic_links = self.os_name == "posix"
 
-        if symbolic_links is None:
-            symbolic_links = os.name != "nt"
+        if self.relative_links is UNSET:
+            self.relative_links = self.symbolic_links
 
-        self.config_root = config_root
-        self.home_dir = home_dir
-        self.config_dir = config_dir
-        self.ssh_dir = ssh_dir
-
-        self.dry_run = dry_run
-        self.symbolic_links = symbolic_links
-        self.relative_links = relative_links
-        self.on_conflict = on_conflict
+        if self.relative_links and not self.symbolic_links:
+            raise ValueError("relative_links depends on symbolic_links")
 
     def install(self):
         """Install links from each managed directory."""
@@ -223,19 +213,19 @@ def get_installer(argv: list[str] | None = None) -> Installer:
     parser.add_argument(
         "-R",
         "--relative-links",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         help="make relative symbolic links (implies `--symbolic-links`)",
     )
     parser.add_argument(
         "-D",
         "--dry-run",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         help="make no changes; describe what actions would be taken",
     )
     parser.add_argument(
         "-S",
         "--symbolic-links",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         help="Create symbolic links",
     )
 

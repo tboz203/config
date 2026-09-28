@@ -1,3 +1,6 @@
 [submodule "configfiles/nvim"]
 	path = configfiles/nvim
 	url = git@github.com:tboz203/nvconfig.git
+[submodule "bashfiles"]
+	path = bashfiles
+	url = git@github.com:tboz203/bashfiles.git

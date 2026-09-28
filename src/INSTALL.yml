@@ -1,0 +1,25 @@
+# I think I've finally gone off the deep end...
+
+bashfiles:
+  # e.g. "bashfiles/*"
+  src: $NAME/*
+  # this one's pretty intuitive
+  dest: $HOME/
+  # a rename object with a match pattern and a replacement text
+  rename:
+    match: ^
+    replace: .
+
+sshconfig:
+  # src is implicitly the name of the block
+  # if dest doesn't exist, it should be created
+  # (need some consistent rules about src & dest being files vs directories)
+  dest: $HOME/.ssh/
+  # a rename string:
+  rename: config
+
+config:
+  # e.g. "config/*"
+  src: $NAME/*
+  # on windows, should these go to $LOCALAPPDATA instead? how much of that can be handled here?
+  dest: $HOME/.config/
