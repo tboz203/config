@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Clean extracted packages.
 
@@ -10,14 +10,13 @@ from __future__ import annotations
 
 import argparse
 import logging
+import sys
 import tarfile
 import zipfile
+from collections.abc import Iterator
 from itertools import islice
 from pathlib import Path
 from shutil import rmtree
-from typing import Iterator, Optional
-
-Pathlike = Path | str
 
 PACKAGE_SUFFIXES = [
     ".tar",
@@ -37,7 +36,7 @@ logging.basicConfig(format="[%(levelname)-8s] %(message)s")
 logger = logging.getLogger("clean_extracted_packages")
 
 
-def list_packages(directory: Pathlike) -> Iterator[Path]:
+def list_packages(directory: Path | str) -> Iterator[Path]:
     """find all package files in `directory`"""
     logger.debug("Finding packages in directory: %s", directory)
     directory = Path(directory)
@@ -45,9 +44,7 @@ def list_packages(directory: Pathlike) -> Iterator[Path]:
         yield from directory.glob(f"*{suffix}")
 
 
-def determine_package_root(
-    package_file: Pathlike, strict: bool = False
-) -> Optional[str]:
+def determine_package_root(package_file: Path | str, strict: bool = False) -> str | None:
     """Given a package filename, examine it and pick its contained root file.
 
     If the given package has more than one root member, return None. If `strict`,
@@ -83,7 +80,7 @@ def determine_package_root(
     return root
 
 
-def guess_package_root(package_file: Pathlike) -> Optional[str]:
+def guess_package_root(package_file: Path | str) -> str | None:
     """Given a package name, guess what it may be extracted to based on name alone.
 
     This method is much faster than `determine_package_root`, but also less reliable.
@@ -101,9 +98,7 @@ def guess_package_root(package_file: Pathlike) -> Optional[str]:
     logger.log(NOTICE, "no guesses for package??: %s", package_file)
 
 
-def find_package_extraction(
-    package_file: Pathlike, directory: Pathlike, strict: bool = False
-) -> Optional[Path]:
+def find_package_extraction(package_file: Path | str, directory: Path | str, strict: bool = False) -> Path | None:
     """Determine where a package has been extracted to.
 
     May guess based on package name; may read package to determine contents.
@@ -112,9 +107,7 @@ def find_package_extraction(
     package_file = Path(package_file)
     directory = Path(directory)
     if package_file.is_dir():
-        raise ValueError(
-            "cannot find extraction: package_file is a directory", package_file
-        )
+        raise ValueError("cannot find extraction: package_file is a directory", package_file)
 
     maybe_root_guess = guess_package_root(package_file)
     if maybe_root_guess:
@@ -141,9 +134,7 @@ def find_package_extraction(
     return None
 
 
-def clean_extracted_packages(
-    directory: Pathlike, dryrun: bool = False, strict: bool = False
-) -> list[str]:
+def clean_extracted_packages(directory: Path | str, dryrun: bool = False, strict: bool = False) -> list[str]:
     """Clean extracted packages in a directory.
 
     returns any exceptions encountered as strings."""
@@ -169,12 +160,10 @@ def clean_extracted_packages(
     return problems
 
 
-def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
+def parse_args(args: list[str] | None = None) -> argparse.Namespace:
     """Parse arguments for this script."""
     # use module docstring as description
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "-n",
         "--dryrun",
@@ -255,7 +244,7 @@ def main():
                 logger.log(NOTICE, "problem in %s: %s", directory, problem)
 
     logger.log(NOTICE, "All done! remember to also clean git repositories!")
-    exit(bool(all_problems))
+    sys.exit(bool(all_problems))
 
 
 if __name__ == "__main__":

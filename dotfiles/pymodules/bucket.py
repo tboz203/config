@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # 2013-05-15
 # Tommy Bozeman (tboz203)
 # refactor of an earlier script
@@ -24,7 +24,7 @@ Put input lines into buckets.
 By default, simply copy lines from each input to stdout.
 """
 
-from __future__ import annotations, print_function
+from __future__ import annotations
 
 import argparse
 import fileinput
@@ -37,9 +37,7 @@ from operator import itemgetter
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument(
-        "-c", "--count", action="store_true", help="prefix each item with its count"
-    )
+    parser.add_argument("-c", "--count", action="store_true", help="prefix each item with its count")
     parser.add_argument("-r", "--reverse", action="store_true", help="reverse order")
     parser.add_argument(
         "files",
@@ -49,9 +47,7 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     sort_group = parser.add_mutually_exclusive_group()
-    sort_group.add_argument(
-        "-a", "--alphabetical", action="store_true", help="sort output alphabetically"
-    )
+    sort_group.add_argument("-a", "--alphabetical", action="store_true", help="sort output alphabetically")
     sort_group.add_argument(
         "-n",
         "--numeric",
@@ -60,12 +56,8 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     show_group = parser.add_mutually_exclusive_group()
-    show_group.add_argument(
-        "-d", "--duplicated", action="store_true", help="show only duplicated items"
-    )
-    show_group.add_argument(
-        "-u", "--unique", action="store_true", help="show only unique items"
-    )
+    show_group.add_argument("-d", "--duplicated", action="store_true", help="show only duplicated items")
+    show_group.add_argument("-u", "--unique", action="store_true", help="show only unique items")
 
     parser.add_argument("-j", "--json", action="store_true", help="output json")
 
@@ -73,9 +65,9 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def get_counts(files: list[str]) -> list[tuple[str, int]]:
-    lines = list(fileinput.input(files))
-    counter = Counter([line.strip("\n") for line in lines])
-    return list(counter.items())
+    with fileinput.input(files) as lines:
+        counter = Counter([line.strip("\n") for line in lines])
+        return list(counter.items())
 
 
 def output(args, counts: list[tuple[str, int]]) -> None:
@@ -120,35 +112,34 @@ def stream_output(files: list[str], unique: bool, duplicated: bool) -> None:
     """Stream our output as we receive it."""
 
     if unique and duplicated:
-        raise ValueError(
-            "Cannout output only unique lines and only duplicated lines simultaneously"
-        )
+        raise ValueError("Cannout output only unique lines and only duplicated lines simultaneously")
 
-    if unique:
-        seen = set()
-        for line in fileinput.input(files):
-            line = line.removesuffix("\n")
-            linehash = hash(line)
-            if linehash in seen:
-                continue
-            seen.add(linehash)
-            print(line)
-    elif duplicated:
-        once = set()
-        twice = set()
-        for line in fileinput.input(files):
-            line = line.removesuffix("\n")
-            linehash = hash(line)
-            if linehash in twice:
-                continue
-            if linehash in once:
+    with fileinput.input(files) as lines:
+        if unique:
+            seen = set()
+            for line in lines:
+                line = line.removesuffix("\n")
+                linehash = hash(line)
+                if linehash in seen:
+                    continue
+                seen.add(linehash)
                 print(line)
-                twice.add(linehash)
-                continue
-            once.add(linehash)
-    else:
-        for line in fileinput.input(files):
-            print(line.removesuffix("\n"))
+        elif duplicated:
+            once = set()
+            twice = set()
+            for line in lines:
+                line = line.removesuffix("\n")
+                linehash = hash(line)
+                if linehash in twice:
+                    continue
+                if linehash in once:
+                    print(line)
+                    twice.add(linehash)
+                    continue
+                once.add(linehash)
+        else:
+            for line in lines:
+                print(line.removesuffix("\n"))
 
 
 def main() -> KeyboardInterrupt | None:

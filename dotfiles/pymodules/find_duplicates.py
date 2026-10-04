@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Find (and optionally remove) duplicate files."""
 
 from __future__ import annotations
@@ -6,10 +6,7 @@ from __future__ import annotations
 import argparse
 import logging
 import zlib
-from contextlib import contextmanager
 from pathlib import Path
-from pprint import pformat
-from shutil import get_terminal_size
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)-8s %(name)s]: %(message)s")
 
@@ -20,9 +17,10 @@ logger = logging.getLogger(my_name)
 
 class Spinner:
     """A 'spinner' tui element."""
+
     # not clear why its a generator, but w/e
 
-    spinner_chars = ['/', '-', '\\', '|']
+    spinner_chars = ("/", "-", "\\", "|")
 
     def __init__(self, count: int, increment: int = 1, width: int = 40):
         self.count = count
@@ -30,11 +28,11 @@ class Spinner:
         self.increment = increment
         self.index = 0
 
-    def spin(self, increment: Optional[int] = None):
-        self.index += (increment or self.increment)
+    def spin(self, increment: int | None = None):
+        self.index += increment or self.increment
         spin = self.spinner_chars[self.index % len(self.spinner_chars)]
-        progress = '#' * ( self.width * self.index // max(self.count - 1, 1))
-        print(f'\x1b[0G\x1b[0K{spin} [{progress:{self.width}s}]', end='')
+        progress = "#" * (self.width * self.index // max(self.count - 1, 1))
+        print(f"\x1b[0G\x1b[0K{spin} [{progress:{self.width}s}]", end="")
 
     def __enter__(self):
         self.index = 0
@@ -66,7 +64,7 @@ def main():
             file_list.append(path)
         elif path.is_dir():
             if args.recurse:
-                file_list += [p for p in path.rglob('*') if p.is_file()]
+                file_list += [p for p in path.rglob("*") if p.is_file()]
             else:
                 logger.warning("Skipping directory (not in recursive mode): %s", path)
         else:
@@ -93,11 +91,9 @@ def main():
         else:
             duplicates[file_hash] = file_list
 
-    logger._log(
-        logging.INFO,
-        f"Found {len(unique)} unique and {sum(map(len, duplicates.values()))} duplicated files",
-        ()
-    )
+    if logger.isEnabledFor(logging.INFO):
+        duplicated_count = sum(map(len, duplicates.values()))
+        logger.info(f"Found {len(unique)} unique and {duplicated_count} duplicated files")
 
     if args.rm:
         for group in duplicates.values():

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Translate a Kibana search export CSV to a JSON file."""
 
 import argparse

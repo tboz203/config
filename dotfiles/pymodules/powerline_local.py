@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from powerline.segments import Segment, with_docstring
 from powerline.theme import requires_segment_info
 
 

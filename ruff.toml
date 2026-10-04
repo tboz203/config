@@ -1,0 +1,3 @@
+# Ruff (python formatter) configuration
+
+line-length = 119

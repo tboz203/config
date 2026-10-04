@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """List and clean up Neovim swap files."""
 
 import argparse
@@ -8,7 +8,6 @@ import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 SHORT_HEADERS = [
     "number",
@@ -128,7 +127,7 @@ def get_swapfile_listing():
 def parse_swapfile_listing(text):
     """Parse a plaintext swapfile listing into a list of SwapEntries."""
     chunks = SPLIT_PAT.split(text)
-    directory: Optional[Path] = None
+    directory: Path | None = None
     swap_entries: list[SwapEntry] = []
     for chunk in chunks:
         chunk = chunk.strip()
@@ -148,7 +147,7 @@ def parse_swapfile_listing(text):
                 number=int(groups["number"]),
                 swap_filepath=directory.joinpath(groups["swap_filename"]),
                 owner=groups["owner"],
-                date=datetime.strptime(groups["date"], "%c"),
+                date=datetime.strptime(groups["date"], "%c").astimezone(),
                 filepath=filepath,
                 exists=filepath.expanduser().exists(),
                 modified=(groups["modified"] == "YES"),
@@ -168,9 +167,9 @@ def filter_swap_entries(
     swap_entries: list[SwapEntry],
     /,
     *,
-    exists: Optional[NotABool] = None,
-    modified: Optional[NotABool] = None,
-    running: Optional[NotABool] = None,
+    exists: NotABool | None = None,
+    modified: NotABool | None = None,
+    running: NotABool | None = None,
 ) -> list[SwapEntry]:
     """
     Filter a list of swap entries based on certain criteria.
@@ -178,19 +177,14 @@ def filter_swap_entries(
     """
     output: list[SwapEntry] = []
     for entry in swap_entries:
-        if exists is YES and not entry.exists:
-            continue
-        elif exists is NO and entry.exists:
-            continue
-
-        if modified is YES and not entry.modified:
-            continue
-        elif modified is NO and entry.modified:
-            continue
-
-        if running is YES and not entry.running:
-            continue
-        elif running is NO and entry.running:
+        if (
+            (exists is YES and not entry.exists)
+            or (exists is NO and entry.exists)
+            or (modified is YES and not entry.modified)
+            or (modified is NO and entry.modified)
+            or (running is YES and not entry.running)
+            or (running is NO and entry.running)
+        ):
             continue
 
         output.append(entry)
@@ -231,7 +225,7 @@ def _encode_more_types(obj):
     raise TypeError(f"Can't encode {obj!r} ({type(obj)})")
 
 
-def get_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
+def get_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
 
     exists_group = parser.add_mutually_exclusive_group()

@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """sort logs by timestamp (as long as its the first field)"""
 
 import argparse
 import fileinput
 import re
+from collections.abc import Iterator
 from textwrap import dedent, fill
-from typing import Iterator
 
 
 def _strclean(text: str) -> str:
@@ -26,8 +26,8 @@ def main() -> None:
     )
     parser.add_argument("files", nargs="*", help='files to be read from. "-" means stdin; defaults to "-"')
     args = parser.parse_args()
-    lines = fileinput.input(args.files)
-    lines = sort_logs(lines)
+    with fileinput.input(args.files) as lines:
+        lines = sort_logs(lines)
     print("".join(lines))
 
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 def install_interactivehook():
@@ -18,10 +18,16 @@ def install_interactivehook():
                 return shutil.get_terminal_size().columns
             return 80
 
+        def set_underscore(obj: object):
+            if isinstance(__builtins__, dict):
+                __builtins__["_"] = obj
+            else:
+                __builtins__._ = obj
+
         def new_displayhook(value):
             if value is None:
                 return
-            __builtins__._ = None
+            set_underscore(None)
             text = pformat(value, width=get_columns())
             try:
                 sys.stdout.write(text)
@@ -33,13 +39,11 @@ def install_interactivehook():
                     text = bytes_.decode(sys.stdout.encoding, "strict")
                     sys.stdout.write(text)
             sys.stdout.write("\n")
-            __builtins__._ = value
+            set_underscore(value)
 
         def new_excepthook(exc_type, exc_value, exc_traceback):
-            __builtins__._ = None
-            text = str.join(
-                "", traceback.format_exception(exc_type, exc_value, exc_traceback)
-            )
+            set_underscore(None)
+            text = str.join("", traceback.format_exception(exc_type, exc_value, exc_traceback))
             try:
                 sys.stderr.write(text)
             except UnicodeEncodeError:
@@ -47,13 +51,13 @@ def install_interactivehook():
                 if hasattr(sys.stderr, "buffer"):
                     text = bytes_.decode(sys.stderr.encoding, "strict")
                     sys.stderr.write(text)
-            __builtins__._ = exc_value
+            set_underscore(exc_value)
 
         sys.displayhook = new_displayhook
         sys.excepthook = new_excepthook
         old_interactivehook()
 
-    setattr(sys, "__interactivehook__", tbozeman_interactivehook)
+    sys.__interactivehook__ = tbozeman_interactivehook
 
 
 install_interactivehook()

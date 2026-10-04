@@ -1,17 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Parse and format datetimes"""
 
+import _strptime
 import argparse
 import sys
+from collections.abc import Callable, Iterable
 from datetime import datetime
-from typing import Callable, Iterable
-
-import _strptime
 
 try:
-    import dateutil.parser as du_parser
-    from dateutil.tz import gettz
+    import dateutil.parser as du_parser  # type: ignore[reportMissingModuleSource]
+    from dateutil.tz import gettz  # type: ignore[reportMissingModuleSource]
 except ImportError:
     du_parser = None
     gettz = None
@@ -80,10 +79,10 @@ def main() -> None:
     args = parser.parse_args()
 
     def _parse_from_arg(item: str) -> datetime:
-        return datetime.strptime(item, args.parse)
+        return datetime.strptime(item, args.parse).astimezone()
 
     def _parse_epoch_seconds(item: str) -> datetime:
-        return datetime.fromtimestamp(int(item))
+        return datetime.fromtimestamp(int(item)).astimezone()
 
     def _format_from_arg(item: datetime) -> str:
         return item.strftime(args.format)

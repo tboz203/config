@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Find git repositories and guess tracking branches.
 """
@@ -11,7 +11,8 @@ Find git repositories and guess tracking branches.
 
 import argparse
 import logging
-from typing import Any, Callable, Optional, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import git
 from update_repos import find_git_repos
@@ -94,7 +95,7 @@ def validate_tracking_branches(repo: git.Repo) -> bool:
     return all_valid
 
 
-def parse_arguments(argv: Optional[Sequence[str]]) -> argparse.Namespace:
+def parse_arguments(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "directories",
@@ -136,7 +137,7 @@ def parse_arguments(argv: Optional[Sequence[str]]) -> argparse.Namespace:
     return args
 
 
-def main(argv: Optional[Sequence[str]] = None) -> None:
+def main(argv: Sequence[str] | None = None) -> None:
     logging.basicConfig(level=logging.DEBUG, format="[%(levelname)8s %(asctime)s] %(message)s")
     args = parse_arguments(argv)
 
