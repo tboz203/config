@@ -28,3 +28,7 @@ pathmungex --replace PATH \
 #     /usr/lib/cargo/bin \
 #     /usr/local/bin \
 #     /usr/bin
+
+pathmungex PATH \
+    ~/.local/opt/mongodb-database-tools-ubuntu2204-x86_64-100.19.1/bin \
+    ~/.local/opt/mongosh-2.13.0-linux-x64-openssl3/bin

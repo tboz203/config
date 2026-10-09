@@ -17,6 +17,8 @@
 # non-interactive shells:
 #   $BASH_ENV
 
+USER=${USER%%@*}
+
 function _bash_init {
     shopt -s checkhash
     shopt -s cdspell
