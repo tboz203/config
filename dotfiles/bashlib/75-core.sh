@@ -39,7 +39,7 @@ function setpath {
     USAGE_TEXT="${FUNCNAME[0]} [-e|--export] [-r|--return] VAR PATH"
 
     if [[ ${HELP-} ]]; then
-        trim <<< "
+        dedent <<< "
                 Set a variable to a path if that path exists
                 Usage: $USAGE_TEXT
 
@@ -126,15 +126,15 @@ function showarray {
 } && complete -A arrayvar showarray
 
 function searchpath {
-    # find the first file in a path that matches a glob
+    # find files in a path list that match a glob
     local -a GLOBS
-    local ALL HELP USAGE
+    local HELP USAGE
     local LIST=PATH
     fixargs
     while (($#)); do
         local arg=$1 && shift
         case $arg in
-            -a | --all) ALL=1 ;;
+            -a | --all) ;;
             -h | --help) HELP=1 ;;
             -l | --list)
                 if [[ ${1-} && $1 != -* ]]; then
@@ -150,25 +150,22 @@ function searchpath {
     done
 
     if [[ ${HELP-} ]]; then
+        local this=${FUNCNAME[0]}
         dedent <<< "
-            Search PATH for a file matching a pattern
-            Usage: ${FUNCNAME[0]} [--all] [--list LIST] GLOB [GLOB...]
+            Find files in a PATH-like list that match a glob pattern
+            Usage: $this [--list LIST] GLOB [GLOB...]
 
             Parameters:
-            GLOB        A shell pattern to search for in each directory.
+            GLOB            A shell (wildcard) pattern to search for in each directory.
 
             Options:
-            -a | --all      Print all matches (default is to print all matches from first
-                            successful glob, and then halt).
+            -a | --all      Print all matches (accepted for backwards compatibility;
+                            this is now the default)
             -h | --help     Print this message and halt
 
             Optional Parameters:
             -l | --list LIST    Search through LIST instead of PATH. May be a list of
                                 colon-separated directories, or a variable containing such.
-
-            Unless '--all' is specified, each glob is searched in each directory until any
-            glob matches. If you wish to exhaustively search for one glob before continuing
-            to the next, use '${FUNCNAME[0]} GLOB_1 || ${FUNCNAME[0]} GLOB_2'.
 
             Returns 2 for invalid arguments, 1 if no matches are found, and 0 otherwise.
             "
@@ -176,7 +173,7 @@ function searchpath {
     fi
 
     if [[ ${#GLOBS[@]} -lt 1 ]]; then
-        _err "Not enough arguments"
+        _err "No glob pattern specified"
         USAGE=1
     fi
 
@@ -197,9 +194,9 @@ function searchpath {
     for dir in "${DIRLIST[@]}"; do
         [[ $dir ]] || dir=$PWD
         for glob in "${GLOBS[@]}"; do
+            # print matching
             if compgen -G "$dir/$glob"; then
                 retval=0
-                [[ ${ALL-} ]] || break 2
             fi
         done
     done

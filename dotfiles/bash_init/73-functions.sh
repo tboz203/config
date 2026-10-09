@@ -31,10 +31,12 @@ function nvfd {
     nv "${files[@]}"
 }
 
+alias nvg='nvim "+=LazyVim.pick(\"grep\")()"'
 function nvrg {
     # nv $(rg ...)
     local -a files
-    get_array files rg -l "$@" || return
+    # get_array files rg -l "$@" || return
+    get_array files rg --line-number --column --no-heading --only-matching --replace "" --sort=path "$@" || return
     nv "${files[@]}"
 }
 
