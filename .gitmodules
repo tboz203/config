@@ -1,9 +1,12 @@
-[submodule "configfiles/nvim"]
-	path = configfiles/nvim
-	url = git@github.com:tboz203/nvconfig.git
+[submodule "bashfiles"]
+	path = bashfiles
+	url = ../bashfiles
 [submodule "update-repos"]
 	path = update-repos
-	url = git@github.com:tboz203/update-repos
+	url = ../update-repos.git
 [submodule "viewpane"]
 	path = viewpane
-	url = git@github.com:tboz203/viewpane
+	url = ../viewpane.git
+[submodule "src/configfiles/nvim"]
+	path = src/configfiles/nvim
+	url = ../nvconfig

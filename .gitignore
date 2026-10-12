@@ -11,4 +11,5 @@ __pycache__
 /configfiles/ipython/*/history.sqlite
 
 !.gitignore
+!.ruff.toml
 !CACHEDIR.TAG
