@@ -9,9 +9,9 @@ import argparse
 import logging
 import os
 import shutil
-from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Literal
 
 try:
     from _winapi import CreateJunction  # type: ignore[reportAttributeAccessIssue]
@@ -28,63 +28,67 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class Configuration:
+    """Configuration object as read from `INSTALL.toml`"""
+
+    link_type: LinkType
+    on_conflict: OnConflict
+    paths: list[PathEntry]
+
+
+@dataclass
+class PathEntry:
+    """A `[[paths]]` entry, as read from `INSTALL.toml`"""
+
+    src: str
+    dest: str
+    rename_rule: RenameRule | None
+
+
+@dataclass
+class RenameRule:
+    """A rule for renaming installed paths"""
+
+    match: str | None
+    """A regular expression string with optional capture groups,
+    or `None` (which acts equivalently to `^.*$`)"""
+
+    replace: str
+    """A replacement string with optional capture group references (e.g. \\1)"""
+
+
+class LinkType(Enum):
+    Hard = "hard"
+    Symbolic = "symbolic"
+    Relative = "relative"
+    # Copy = "copy"
+
+
+class OnConflict(Enum):
+    Overwrite = "overwrite"
+    Rename = "rename"
+    Skip = "skip"
+
+
 class Installer:
     """
     A class to manage installing my config.
     """
 
-    def __init__(
-        self,
-        config_root: str | Path = ROOT,
-        home_dir: str | Path = "~",
-        config_dir: str | Path = "~/.config",
-        ssh_dir: str | Path = "~/.ssh",
-        dry_run: bool = False,
-        symbolic_links: bool | None = None,
-        relative_links: bool | None = None,
-        on_conflict: Literal["skip", "rename", "overwrite"] = "skip",
-    ):
+    def __init__(self, config: Configuration, dry_run: bool = False):
         """
         Create a new Installer.
 
         `config_root` should be the root of a "config" directory (such as this git repository).
-        `home_dir` should be your home directory.
-        `config_dir` should be your config directory (e.g. `~/.config`).
-        `ssh_dir` should be your ssh directory (e.g `~/.ssh`).
-
         `dry_run` determines whether actions are performed, or just displayed.
-        `symbolic_links` determines whether to use hard links or symbolic links (default is platform specific).
-        `relative_links` determines whether or not created symbolic links are relative or absolute.
-        `preserve` determines whether existing files are removed or preserved (renamed).
         """
 
-        if symbolic_links is None:
-            symbolic_links = os.name != "nt"
-
-        self.config_root = Path(config_root).expanduser()
-        self.home_dir = Path(home_dir).expanduser()
-        self.config_dir = Path(config_dir).expanduser()
-        self.ssh_dir = Path(ssh_dir).expanduser()
-
+        # self.config_root = Path(config_root).expanduser()
+        self.config = config
         self.dry_run = dry_run
-        self.symbolic_links = symbolic_links
-        self.relative_links = relative_links
-        self.on_conflict = on_conflict
 
-    def install(self):
-        """Install links from each managed directory."""
-        self._install_links(
-            self.config_root / "dotfiles", self.home_dir, transformer=self._tr_dotfile
-        )
-        self._install_links(self.config_root / "configfiles", self.config_dir)
-        self._install_links(self.config_root / "sshfiles", self.ssh_dir)
-
-    def _install_links(
-        self,
-        source_dir: Path,
-        dest_dir: Path,
-        transformer: Callable[[Path], Path] | None = None,
-    ):
+    def _install_links(self, path_entry: PathEntry):
         """Link files from one directory to another."""
         if not source_dir.exists():
             logger.warning("Skipping missing source directory: %s", source_dir)
@@ -187,21 +191,16 @@ class Installer:
         else:
             link.hardlink_to(target)
 
-    def _tr_dotfile(self, path):
-        """Transform `Path('filename.txt')` to `Path('.filename.txt')`."""
-        return path.with_name("." + path.name)
-
-    def _tr_backup(self, path):
-        """Transform `Path('filename.txt')` to `Path('filename.txt.bak')`."""
-        new_suffix = "".join(path.suffixes + [".bak"])
-        return path.with_suffix(new_suffix)
-
 
 def relative_to(path: Path, target: Path) -> Path:
     """Return the relative path from `path` to `target`."""
     ancestor = Path(os.path.commonpath([path, target]))
     backtrack = "../" * len(path.relative_to(ancestor).parents)
     return Path(backtrack + str(target.relative_to(ancestor)))
+
+
+def read_configuration(config_file: str | Path | None = None) -> Configuration:
+    pass
 
 
 def get_installer(argv: list[str] | None = None) -> Installer:
