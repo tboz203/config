@@ -2,10 +2,9 @@
 
 # show the git last modified time of files in the current directory
 
-git ls-tree --format='%(objecttype) %(path)' HEAD "${@:-.}" |
-    sed -r -e 's:^tree .*:&/:' -e 's:^(tree|blob) ::' |
+git ls-tree --name-only HEAD "${@:-.}" |
     xargs -I{} \
-        git log -1 --color --format="%aI@%C(green)%ad@%C(cyan)%an@%C(reset){}" -- {} |
+        git log -1 --color --format="%aI@%C(green)%ad@%C(cyan)%aN@%C(reset){}" -- {} |
     sort |
     cut -d@ -f2- |
-    column -t -s@ -C right -d -o' '
+    column -t -s@ -R 1 -d -o' '
