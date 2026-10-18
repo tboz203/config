@@ -74,16 +74,17 @@
 [pretty]
 	myline = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %s
 	myshort = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s
+	since-tabbed = %at%x09%C(auto)%h%x09%C(cyan)%aN%x09%C(green)%ad%C(reset)
+	; mysince = %at %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %s
 	long = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%B
 	; long = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s%n%n%w(0,4,4)%b
 	loud = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d %C(black brightyellow)%s%C(reset)
-	myshort = %C(auto)%h %C(cyan)%aN %C(green)%ad%C(auto)%d%n%s
 	committer = %C(auto)%h %C(cyan)%aN %C(green)%ad %C(reset)(%C(blue)%cN %C(red)%cd%C(reset))%C(auto)%d %s
 	contrast = %C(black blue)COMMIT %h %aN %ad%d %s%n%B
 	; no colors here b/c `column` can't count characters correctly
 	tableable = & %h & %aN & %ad & %<(80,trunc)%s & %d
 	reflog = %C(auto)%h %C(green)%gd%C(auto)%d %C(blue)[%gs] %C(auto)%s
-	report = %C(auto)commit %h%d%nAuthor: %aN <%aE>%nDate: %ad%n%n%w(80,4,4)%B%n
+	; report = %C(auto)commit %h%d%nAuthor: %aN <%aE>%nDate: %ad%n%n%w(80,4,4)%B%n
 [alias]
 	s = status
 	si = status --ignored

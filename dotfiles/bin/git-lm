@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# pretty-print files with last-modified commit information:
+
+# format a git revision (commit, branch, etc) for pretty "last-modified" processing
+# fields (tab-delimited) are: unix timestamp, short commit hash, author name, author date
+# pretty.since-tabbed = %at%x09%C(auto)%h%x09%C(cyan)%aN%x09%C(green)%ad%C(reset)
+format_rev_since() {
+    git show --no-patch --color=always --format=since-tabbed "${@:-HEAD}"
+}
+
+ROOT=$(git rev-parse --show-toplevel)
+relative() {
+    for arg; do 
+        realpath "$ROOT/$arg" --relative-to .
+    done
+}
+
+
+# git's new command listing files with their last modified commit
+git last-modified "${@:-.}" |
+    # read each commit hash & path
+    while read -r hash path; do
+        path=$(relative "$path")
+        if [[ -e $path ]]; then
+            path=$( ls -dF --color=always "$path" )
+        fi
+        # print formatted tab-delimited commit and formatted path
+        printf '%s\t%s\n' "$(format_rev_since "$hash")" "$path"
+    done |
+    # sort by timestamp prefix
+    sort -g |
+    # remove timestamp prefix
+    cut -f2- |
+    # split on tabs and format in columns (table)
+    column -t -s$'\t'
